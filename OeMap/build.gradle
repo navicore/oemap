@@ -21,4 +21,22 @@ android {
         minSdkVersion 14
         targetSdkVersion 16
     }
+
+    signingConfigs {
+        debug {
+            storeFile file("oemap-debug-key.keystore")
+            storePassword "200000"
+            keyAlias "oemap_dbg"
+            keyPassword "200000"
+        }
+
+        release {
+            storeFile file("oemap-release-key.keystore")
+            storePassword "200000"
+            keyAlias "oemap_rel"
+            keyPassword "200000"
+        }
+    }
+
 }
+
