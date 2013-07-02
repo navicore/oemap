@@ -22,6 +22,30 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <!-- todo: debug vs release api key logic -->
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="IzaSyAB1V_WTvqZCBl8D2j1Rh-A5IloF1ZjX10"
+        />
+
+        <permission
+            android:name="com.onextent.oemap.permission.MAPS_RECEIVE"
+            android:protectionLevel="signature"/>
+        <uses-permission 
+            android:name="com.onextent.oemap.permission.MAPS_RECEIVE"/>
+        <uses-permission android:name="android.permission.INTERNET"/>
+        <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+        <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+        <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+        <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+        <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
+
+        <uses-feature
+            android:glEsVersion="0x00020000"
+            android:required="true"
+        />
+
+
     </application>
 
 </manifest>

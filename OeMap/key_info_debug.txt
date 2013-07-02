@@ -1,0 +1,26 @@
+Alias name: oemap_dbg
+Creation date: Jul 2, 2013
+Entry type: PrivateKeyEntry
+Certificate chain length: 1
+Certificate[1]:
+Owner: CN=Ed Sweeney, OU=Unknown, O="OnExtent, LLC", L=Los Gatos, ST=California, C=US
+Issuer: CN=Ed Sweeney, OU=Unknown, O="OnExtent, LLC", L=Los Gatos, ST=California, C=US
+Serial number: 4114810d
+Valid from: Tue Jul 02 10:20:05 PDT 2013 until: Sat Nov 17 09:20:05 PST 2040
+Certificate fingerprints:
+	 MD5:  5D:72:42:07:B5:F2:A7:D3:A3:DA:D6:3C:F6:EE:55:25
+	 SHA1: 2D:37:DA:80:30:8C:E2:63:20:FA:85:51:F4:EF:4E:88:13:E7:AD:AB
+	 SHA256: 53:B8:69:FF:47:12:80:19:EE:85:05:58:81:1E:6B:69:1A:A2:17:EF:B9:EF:5F:44:21:B7:14:D3:9B:37:82:6C
+	 Signature algorithm name: SHA256withRSA
+	 Version: 3
+
+Extensions: 
+
+#1: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: D4 99 BB F4 53 BE DE DA   42 3E 14 2D CF 0D A4 AB  ....S...B>.-....
+0010: 51 EE 4C E4                                        Q.L.
+]
+]
+

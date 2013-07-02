@@ -1,0 +1,26 @@
+Alias name: oemap_rel
+Creation date: Jul 2, 2013
+Entry type: PrivateKeyEntry
+Certificate chain length: 1
+Certificate[1]:
+Owner: CN=Ed Sweeney, OU=Unknown, O="OnExtent, LLC", L=Los Gatos, ST=California, C=US
+Issuer: CN=Ed Sweeney, OU=Unknown, O="OnExtent, LLC", L=Los Gatos, ST=California, C=US
+Serial number: 7548e7ef
+Valid from: Tue Jul 02 10:16:25 PDT 2013 until: Sat Nov 17 09:16:25 PST 2040
+Certificate fingerprints:
+	 MD5:  55:81:C7:B4:43:A0:BF:FA:77:7A:B7:68:92:4D:E0:A5
+	 SHA1: 9F:24:51:75:9A:C4:2C:64:27:20:FB:84:3A:4F:DB:E7:19:D6:EC:17
+	 SHA256: 13:08:F6:AB:1D:FD:4B:4A:68:4B:C2:EB:0D:63:20:A7:67:69:E1:6A:81:34:4B:38:F0:BD:9E:2B:3E:DE:EF:A2
+	 Signature algorithm name: SHA256withRSA
+	 Version: 3
+
+Extensions: 
+
+#1: ObjectId: 2.5.29.14 Criticality=false
+SubjectKeyIdentifier [
+KeyIdentifier [
+0000: BA 45 4B 0F D3 26 66 85   30 0C 8C 1D 34 59 13 43  .EK..&f.0...4Y.C
+0010: 05 44 F9 BA                                        .D..
+]
+]
+
