@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">OeMap</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="drawer_open">Open!</string>
+    <string name="drawer_close">Closed!</string>
+
+    <string-array name="menu_names_array">
+        <item>New Map</item>
+        <item>Share My Location</item>
+        <item>Help</item>
+        <item>Settings</item>
+        <item>About</item>
+        <item>------</item>
+        <item>#mymap</item>
+        <item>#yourmap</item>
+    </string-array>
+    <string name="action_websearch">Web search</string>
+    <string name="app_not_available">Sorry, there\'s no web browser available</string>
+    <string name="pref_server">OeMap Server</string>
+    <string name="pref_server_summ">OeMap Server Network Address</string>
+</resources>
+
