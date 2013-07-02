@@ -28,8 +28,9 @@ public class OeMapActivity extends Activity {
     private boolean mSharingLoc;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
-    private CharSequence mTitle = "OeMap";
-    private String mDrawerTitle = "Choose";
+
+    private CharSequence mTitle =  "na";
+    private String mDrawerTitle = "na";
     private String[] mPlanetTitles;
     private ListView mDrawerList;
     private ArrayList mDrawerNamesList;
@@ -158,7 +159,8 @@ public class OeMapActivity extends Activity {
 
         mPlanetTitles = getResources().getStringArray(R.array.menu_names_array);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
-
+        mTitle =  getResources().getString(R.string.app_name);
+        mDrawerTitle =  getResources().getString(R.string.drawer_title);
 
         mDrawerNamesList = new ArrayList();
         for (String n : mPlanetTitles) {
