@@ -1,0 +1,7 @@
+.gradle/
+.metadata/
+bin/
+obj/
+gen/
+eclimd.log
+
