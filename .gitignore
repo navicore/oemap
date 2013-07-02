@@ -1,6 +1,7 @@
 .gradle/
 .metadata/
 bin/
+build/
 obj/
 gen/
 eclimd.log
