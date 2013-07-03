@@ -1,4 +1,4 @@
-package com.onexent.oemap;
+package com.onextent.oemap;
 
 import android.app.FragmentManager;
 import android.content.Context;
@@ -6,8 +6,8 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.app.Activity;
 import android.support.v4.app.ActionBarDrawerToggle;
-import android.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,13 +15,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import com.google.android.gms.maps.MapFragment;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class OeMapActivity extends Activity {
 
@@ -63,30 +63,32 @@ public class OeMapActivity extends Activity {
             selectItem(position);
         }
     }
-        /**
+
+    /**
      * Fragment that appears in the "content_frame", shows a planet
      */
-    public static class OeMapFragment extends Fragment {
-        public static final String ARG_DRAWER_ITEM_NUMBER = "menu_item_number";
+    public static class OeMapFragment extends MapFragment {
 
         public OeMapFragment() {
-            // Empty constructor required for fragment subclasses
+            super();
+        }
+
+        @Override
+        public void onActivityCreated(Bundle savedInstanceState) {
+            super.onActivityCreated(savedInstanceState);
+            //GoogleMap map = getMap();
+            //Location l = map.getMyLocation();
+            //String loc = l.toString();
+            //Log.d("ejs", loc);
+            Log.d("ejs", "hiya");
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_map, container, false);
 
-            int i = getArguments().getInt(ARG_DRAWER_ITEM_NUMBER);
-            String planet = getResources().getStringArray(R.array.menu_names_array)[i];
+            View rootView = super.onCreateView(inflater, container, savedInstanceState);
 
-            int imageId = getResources().getIdentifier(planet.toLowerCase(Locale.getDefault()),
-                            "drawable", getActivity().getPackageName());
-            ((ImageView) rootView.findViewById(R.id.image)).setImageResource(imageId);
-            getActivity().setTitle(planet);
-
-            //getActivity().setTitle("see me");
             return rootView;
         }
     }
@@ -100,14 +102,10 @@ public class OeMapActivity extends Activity {
 
     private void setMapFrag(int position) {
 
-        // Create a new fragment and specify the planet to show based on position
-        Fragment fragment = new OeMapFragment();
-        Bundle args = new Bundle();
-        args.putInt(OeMapFragment.ARG_DRAWER_ITEM_NUMBER, position);
-        fragment.setArguments(args);
-
-        // Insert the fragment by replacing any existing fragment
         FragmentManager fragmentManager = getFragmentManager();
+        //MapFragment fragment = (MapFragment) fragmentManager.findFragmentById(R.id.map);
+        MapFragment fragment = new OeMapFragment();
+        //Fragment fragment = new OeMapFragment();
         fragmentManager.beginTransaction()
                 .replace(R.id.content_frame, fragment)
                 .commit();

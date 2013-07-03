@@ -1,4 +1,4 @@
-package com.onexent.oemap;
+package com.onextent.oemap;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
