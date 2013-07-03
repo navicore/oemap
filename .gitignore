@@ -6,4 +6,5 @@ build/
 obj/
 gen/
 eclimd.log
+local.properties
 
