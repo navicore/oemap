@@ -22,5 +22,6 @@
     <string name="app_not_available">Sorry, there\'s no web browser available</string>
     <string name="pref_server">OeMap Server</string>
     <string name="pref_server_summ">OeMap Server Network Address</string>
+    <string name="latitude_longitude">%1$.8f, %2$.8f</string>
 </resources>
 
