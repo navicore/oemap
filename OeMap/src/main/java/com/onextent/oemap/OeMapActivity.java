@@ -10,11 +10,9 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
@@ -24,10 +22,10 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class OeMapActivity extends Activity implements LocationListener
@@ -88,52 +86,6 @@ public class OeMapActivity extends Activity implements LocationListener
             Log.w("ejs", "null map tag!!!");
         }
         return null;
-    }
-
-    public static class OeMapFragment extends MapFragment {
-
-        private OeMapActivity home;
-        public OeMapFragment() {
-            super();
-        }
-
-        @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-            home = (OeMapActivity) activity;
-        }
-
-        private void init() {
-            GoogleMap map = getMap();
-            if (map == null) return;
-            UiSettings settings = map.getUiSettings();
-            //settings.setAllGesturesEnabled(false);
-            settings.setMyLocationButtonEnabled(true);
-        }
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            home.setMapFragTag(getTag());
-            init();
-        }
-        @Override
-        public void onActivityCreated(Bundle savedInstanceState) {
-            super.onActivityCreated(savedInstanceState);
-            //GoogleMap map = getMap();
-            //Location l = map.getMyLocation();
-            //String loc = l.toString();
-            //Log.d("ejs", loc);
-            Log.d("ejs", "hiya");
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-
-            View rootView = super.onCreateView(inflater, container, savedInstanceState);
-
-            return rootView;
-        }
     }
 
     private void setSettingsFrag() {
@@ -337,10 +289,7 @@ public class OeMapActivity extends Activity implements LocationListener
 
     private Location mCurrLoc;
 
-    public void onLocationChanged(Location location) {
-
-        mCurrLoc = location;
-        Log.d("ejs", "Got location");
+    public void setLocation() {
 
         // Report to the UI that the location was updated
         //mConnectionStatus.setText(R.string.location_updated);
@@ -355,8 +304,18 @@ public class OeMapActivity extends Activity implements LocationListener
         }
 
         LatLng latLng = new LatLng(mCurrLoc.getLatitude(), mCurrLoc.getLongitude());
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+        //map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+        map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        map.animateCamera(CameraUpdateFactory.zoomTo(15));
+        map.setMyLocationEnabled(true);
         //map.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.common_signin_btn_icon_dark)));
+    }
+
+    public void onLocationChanged(Location location) {
+
+        mCurrLoc = location;
+
+        Log.d("ejs", "lat: " + location.getLatitude() + "lng: " + location.getLongitude());
     }
 }
 

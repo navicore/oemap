@@ -3,26 +3,14 @@ package com.onextent.oemap;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.location.Location;
 import android.os.Bundle;
-import android.support.v4.app.ActionBarDrawerToggle;
-import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -31,14 +19,6 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.LatLng;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LocationHelper implements
         LocationListener,
@@ -109,7 +89,6 @@ public class LocationHelper implements
          * handle callbacks.
          */
         mLocationClient = new LocationClient(context, this, this);
-
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -182,7 +161,9 @@ public class LocationHelper implements
     @Override
     public void onConnected(Bundle bundle) {
         Toast.makeText(context, "Connected", Toast.LENGTH_SHORT).show();
-        startUpdates(); //ejs
+        onLocationChanged(mLocationClient.getLastLocation());
+        context.setLocation();
+        startUpdates();
     }
 
     @Override
@@ -321,16 +302,16 @@ public class LocationHelper implements
         }
     }
 
-    private Location mCurrLoc;
     @Override
     public void onLocationChanged(Location location) {
 
-        mCurrLoc = location;
         context.onLocationChanged(location);
     }
 
     private void startUpdates() {
-    //public void startUpdates(View v) {
+
+        Location currentLocation = mLocationClient.getLastLocation();
+
         mUpdatesRequested = true;
 
         if (servicesConnected()) {
