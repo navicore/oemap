@@ -6,11 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -115,24 +117,28 @@ public class OeMapActivity extends Activity implements LocationListener
                 .commit();
     }
 
-    private static int NEW_MAP_POS = 0;
-    private static int SHARE_POS = 1;
-    private static int HELP_POS = 2;
-    private static int SETTINGS_POS = 3;
-    private static int ABOUT_POS = 4;
-    private static int SEPARATOR_POS = 5;
+    private static final int NEW_MAP_POS = 0;
+    private static final int SHARE_POS = 1;
+    //private static final int HELP_POS = 2;
+    //private static final int SETTINGS_POS = 3;
+    //private static final int ABOUT_POS = 4;
+    //private static final int SEPARATOR_POS = 5;
+    private static final int SEPARATOR_POS = 2;
 
     /** Swaps fragments in the main content view */
     private void selectItem(int position) {
 
         //todo: sets map overlay based on selection?
-        if (position == SETTINGS_POS) {
-
-            setSettingsFrag();
-
-        } else {
-
-            setMapFrag(position);
+        switch (position) {
+            //case SETTINGS_POS:
+            //    setSettingsFrag();
+            //    break;
+            //case HELP_POS:
+            //    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.onextent.com"));
+            //    startActivity(browserIntent);
+            //    break;
+            default:
+                setMapFrag(position);
         }
 
         // Highlight the selected item, update the title, and close the drawer
@@ -204,15 +210,20 @@ public class OeMapActivity extends Activity implements LocationListener
         getActionBar().setHomeButtonEnabled(true);
     }
 
-    /* Called whenever we call invalidateOptionsMenu() */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+        return true;
+    }
+
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         // If the nav drawer is open, hide action items related to the content view
-        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
+        //boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
         //menu.findItem(R.id.action_websearch).setVisible(!drawerOpen);
         return super.onPrepareOptionsMenu(menu);
     }
-
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -235,6 +246,17 @@ public class OeMapActivity extends Activity implements LocationListener
             return true;
         }
         // Handle your other action bar items...
+        switch (item.getItemId()) {
+            case R.id.action_help:
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.onextent.com"));
+                startActivity(browserIntent);
+                break;
+            case R.id.action_settings:
+                setSettingsFrag();
+                break;
+            case R.id.action_about:
+            default:
+        }
 
         return super.onOptionsItemSelected(item);
     }
