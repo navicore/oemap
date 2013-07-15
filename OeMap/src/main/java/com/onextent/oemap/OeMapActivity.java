@@ -66,10 +66,17 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
         @Override
         public boolean isEnabled(int pos) {
 
-            if (pos == SEPARATOR_POS) {
-                return false;
+            switch (pos) {
+                case NEW_PRIVATE_MAP:
+                case LIST_COHORTS_POS:
+                case SHARE_MAP_POS:
+                case QUIT_MAP_POS:
+                case SEPARATOR_POS:
+                    return false;
+                case NEW_PUBLIC_MAP:
+                default:
+                    return true;
             }
-            return true;
         }
 
         @Override
@@ -111,15 +118,18 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
 
     private void setMapFrag() {
 
+        mMapIsInit = false;
+
         FragmentManager fragmentManager = getFragmentManager();
         MapFragment fragment = null;
         if (mMapFragTag != null) {
             fragment = (MapFragment) fragmentManager.findFragmentByTag(mMapFragTag);
         }
+
         if (fragment == null) {
             fragment = new OeMapFragment();
         }
-        //Fragment fragment = new OeMapFragment();
+
         fragmentManager.beginTransaction()
                 .replace(R.id.content_frame, fragment, MAPFRAGTAG)
                 .commit();
@@ -354,14 +364,19 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
         map.animateCamera(CameraUpdateFactory.zoomTo(15));
         map.setMyLocationEnabled(true);
         //map.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.common_signin_btn_icon_dark)));
+        if (!mMapIsInit) {
+            mMapIsInit = true;
+        }
     }
+
+    private boolean mMapIsInit = false;
 
     public void onLocationChanged(Location location) {
 
         mCurrLoc = location;
-
-        Log.d("ejs", "lat: " + location.getLatitude() + "lng: " + location.getLongitude());
+        if (!mMapIsInit) {
+            setLocation();
+        }
     }
-
 }
 
