@@ -1,6 +1,7 @@
 package com.onextent.oemap;
 
-import android.app.Activity;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -27,10 +29,9 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-public class OeMapActivity extends Activity implements LocationListener
+public class OeMapActivity extends OeBaseActivity implements LocationListener
 {
     LocationHelper mLocHelper;
 
@@ -48,6 +49,13 @@ public class OeMapActivity extends Activity implements LocationListener
     private ArrayList mDrawerNamesList;
 
     private String mMapFragTag;
+
+    private static final int NEW_PUBLIC_MAP     = 0;
+    private static final int NEW_PRIVATE_MAP    = 1;
+    private static final int LIST_COHORTS_POS   = 2;
+    private static final int SHARE_MAP_POS      = 3;
+    private static final int QUIT_MAP_POS       = 4;
+    private static final int SEPARATOR_POS      = 5;
 
     private static class DrawerAdapter extends ArrayAdapter {
 
@@ -101,7 +109,7 @@ public class OeMapActivity extends Activity implements LocationListener
         mMapFragTag = tag;
     }
 
-    private void setMapFrag(int position) {
+    private void setMapFrag() {
 
         FragmentManager fragmentManager = getFragmentManager();
         MapFragment fragment = null;
@@ -117,40 +125,55 @@ public class OeMapActivity extends Activity implements LocationListener
                 .commit();
     }
 
-    private static final int NEW_MAP_POS = 0;
-    private static final int SHARE_POS = 1;
-    //private static final int HELP_POS = 2;
-    //private static final int SETTINGS_POS = 3;
-    //private static final int ABOUT_POS = 4;
-    //private static final int SEPARATOR_POS = 5;
-    private static final int SEPARATOR_POS = 2;
+    private void showNewPrivateMapDialog() {
+        FragmentManager fm = getFragmentManager();
+        DialogFragment d = new NewPrivateMapDialog();
+        d.show(fm, "new_priv_map_dialog");
+    }
+    private void showNewMapDialog() {
+        FragmentManager fm = getFragmentManager();
+        DialogFragment d = new NewMapDialog();
+        d.show(fm, "new_map_dialog");
+    }
+
+    public void onFinishNewMapDialog(String inputText) {
+        setMapFrag();
+        if (!mDrawerNamesList.contains(inputText)) {
+            mDrawerNamesList.add(inputText);
+            mDrawerList.deferNotifyDataSetChanged();
+        }
+        int position = mDrawerNamesList.indexOf(inputText);
+        if (position > 0) {
+            mDrawerList.setItemChecked(position, true); //ejs race?? see selectItem...
+            setTitle(inputText);
+        }
+        Toast.makeText(this, "New map '" + inputText + "' created.", Toast.LENGTH_SHORT).show();
+    }
+
 
     /** Swaps fragments in the main content view */
     private void selectItem(int position) {
 
         //todo: sets map overlay based on selection?
         switch (position) {
-            //case SETTINGS_POS:
-            //    setSettingsFrag();
-            //    break;
-            //case HELP_POS:
-            //    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.onextent.com"));
-            //    startActivity(browserIntent);
-            //    break;
+            case NEW_PUBLIC_MAP:
+                showNewMapDialog();
+                break;
+            case NEW_PRIVATE_MAP:
+                showNewPrivateMapDialog();
+                break;
+            case SHARE_MAP_POS:
+                break;
+            case QUIT_MAP_POS:
+                break;
             default:
-                setMapFrag(position);
+                setMapFrag();
+                break;
         }
 
-        // Highlight the selected item, update the title, and close the drawer
         mDrawerList.setItemChecked(position, true);
         setTitle((String) mDrawerNamesList.get(position));
         mDrawerLayout.closeDrawer(mDrawerList);
-
-        //test
-        if (!mDrawerNamesList.contains(mPlanetTitles[position])) {
-            mDrawerNamesList.add(mPlanetTitles[position]);
-            mDrawerList.deferNotifyDataSetChanged();
-        }
     }
 
     @Override
@@ -339,5 +362,6 @@ public class OeMapActivity extends Activity implements LocationListener
 
         Log.d("ejs", "lat: " + location.getLatitude() + "lng: " + location.getLongitude());
     }
+
 }
 

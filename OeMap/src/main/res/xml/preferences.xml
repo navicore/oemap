@@ -6,7 +6,13 @@
         android:key="pref_server"
         android:title="@string/pref_server"
         android:summary="@string/pref_server_summ"
-        android:defaultValue="oemap.onextent.com" />
+        android:defaultValue="cahoots.onextent.com" />
+
+    <EditTextPreference
+            android:key="pref_username"
+            android:title="@string/pref_username"
+            android:summary="Your name you want displayed on the maps"
+            android:defaultValue="nobody" />
 
 </PreferenceScreen>
 

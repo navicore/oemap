@@ -160,7 +160,7 @@ public class LocationHelper implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        Toast.makeText(context, "Connected", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(context, "Connected", Toast.LENGTH_SHORT).show();
         onLocationChanged(mLocationClient.getLastLocation());
         context.setLocation();
         startUpdates();
@@ -168,7 +168,7 @@ public class LocationHelper implements
 
     @Override
     public void onDisconnected() {
-        Toast.makeText(context, "Disconnected. Please re-connect.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "Disconnected from Location Service.", Toast.LENGTH_SHORT).show();
     }
 
     @Override
