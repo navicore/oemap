@@ -52,6 +52,7 @@ public class OeMapFragment extends MapFragment implements GoogleMap.OnMapLongCli
 
         map.setOnMapLongClickListener(this);
     }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -63,6 +64,7 @@ public class OeMapFragment extends MapFragment implements GoogleMap.OnMapLongCli
         super.onCreate(savedInstanceState);
         home.setMapFragTag(getTag());
     }
+
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);

@@ -1,6 +1,5 @@
 package com.onextent.oemap;
 
-import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Context;
@@ -35,8 +34,8 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
 {
     LocationHelper mLocHelper;
 
-    private static final String MAPFRAGTAG = "oemap";
-    private static final String SETFRAGTAG = "oeset";
+    private static final String MAP_FRAG_TAG = "oemap";
+    private static final String SETTINGS_FRAG_TAG = "oeset";
 
     private boolean mSharingLoc;
     private DrawerLayout mDrawerLayout;
@@ -108,7 +107,7 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
     private void setSettingsFrag() {
         // Display the fragment as the main content.
         getFragmentManager().beginTransaction()
-                .replace(R.id.content_frame, new OeMapSettings(), SETFRAGTAG)
+                .replace(R.id.content_frame, new OeMapSettings(), SETTINGS_FRAG_TAG)
                 .commit();
     }
 
@@ -116,23 +115,30 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
         mMapFragTag = tag;
     }
 
-    private void setMapFrag() {
+    private void updateMapFrag(String mapname) {
+        Toast.makeText(this, "Showing '" + mapname + "'.", Toast.LENGTH_SHORT).show();
+    }
 
-        mMapIsInit = false;
+    private void setMapFrag() {
 
         FragmentManager fragmentManager = getFragmentManager();
         MapFragment fragment = null;
         if (mMapFragTag != null) {
-            fragment = (MapFragment) fragmentManager.findFragmentByTag(mMapFragTag);
+            fragment = (MapFragment) fragmentManager.findFragmentByTag(MAP_FRAG_TAG);
         }
 
         if (fragment == null) {
+            Log.d("ejs", "creating new map for " + MAP_FRAG_TAG);
             fragment = new OeMapFragment();
+            //todo: move location listener to frag?
+            mMapIsInit = false;
+        } else {
+            Log.d("ejs", "found map for " + MAP_FRAG_TAG);
         }
 
-        fragmentManager.beginTransaction()
-                .replace(R.id.content_frame, fragment, MAPFRAGTAG)
-                .commit();
+        fragmentManager.beginTransaction().replace(
+                R.id.content_frame, fragment, MAP_FRAG_TAG
+        ).commit();
     }
 
     private void showNewPrivateMapDialog() {
@@ -147,7 +153,7 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
     }
 
     public void onFinishNewMapDialog(String inputText) {
-        setMapFrag();
+        updateMapFrag(inputText);
         if (!mDrawerNamesList.contains(inputText)) {
             mDrawerNamesList.add(inputText);
             mDrawerList.deferNotifyDataSetChanged();
@@ -177,7 +183,7 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
             case QUIT_MAP_POS:
                 break;
             default:
-                setMapFrag();
+                updateMapFrag((String) mDrawerNamesList.get(position));
                 break;
         }
 
@@ -339,6 +345,7 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
         @Override
     public void onResume() {
         super.onResume();
+        setMapFrag();
         mLocHelper.onResume();
     }
 
