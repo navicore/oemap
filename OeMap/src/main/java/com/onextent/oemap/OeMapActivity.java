@@ -4,10 +4,13 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -30,7 +33,8 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OeMapActivity extends OeBaseActivity implements LocationListener
+public class OeMapActivity extends OeBaseActivity
+        implements LocationListener, SharedPreferences.OnSharedPreferenceChangeListener
 {
     LocationHelper mLocHelper;
 
@@ -41,6 +45,7 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
 
+    private GoogleMap mMap;
     private CharSequence mTitle =  "na";
     private String mDrawerTitle = "na";
     private String[] mPlanetTitles;
@@ -55,6 +60,8 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
     private static final int SHARE_MAP_POS      = 3;
     private static final int QUIT_MAP_POS       = 4;
     private static final int SEPARATOR_POS      = 5;
+
+    private SharedPreferences mPrefs = null;
 
     private static class DrawerAdapter extends ArrayAdapter {
 
@@ -94,21 +101,16 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
 
     private GoogleMap getMap() {
 
+        if (mMap != null) return mMap;
         FragmentManager fragmentManager = getFragmentManager();
         MapFragment fragment = (MapFragment) fragmentManager.findFragmentByTag(mMapFragTag);
         if (fragment != null && mMapFragTag != null) {
-            return fragment.getMap();
+            mMap = fragment.getMap();
+            return mMap;
         } else {
             Log.w("ejs", "null map tag!!!");
         }
         return null;
-    }
-
-    private void setSettingsFrag() {
-        // Display the fragment as the main content.
-        getFragmentManager().beginTransaction()
-                .replace(R.id.content_frame, new OeMapSettings(), SETTINGS_FRAG_TAG)
-                .commit();
     }
 
     public void setMapFragTag(String tag) {
@@ -139,6 +141,57 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
         fragmentManager.beginTransaction().replace(
                 R.id.content_frame, fragment, MAP_FRAG_TAG
         ).commit();
+    }
+
+    private void setMapType() {
+
+        try {
+
+        int t = Integer.valueOf(mPrefs.getString(getString(R.string.pref_map_type), "0"));
+        GoogleMap m = getMap();
+        if (m != null) {
+            switch (t) {
+                case 0:
+                    m.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                    break;
+                case 1:
+                    m.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                    break;
+                case 2:
+                    m.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                    break;
+            }
+        }
+        } catch (Throwable err) {
+            Log.e("ejs", err.toString(), err);
+        }
+    }
+
+    private void setMapOptions() {
+        setTrafficEnabled();
+        setMapType();
+        setIndoorsEnabled();
+    }
+    private void setIndoorsEnabled() {
+        boolean show = mPrefs.getBoolean(getString(R.string.pref_show_indoors), false);
+        GoogleMap m = getMap();
+        if (m != null) {
+            m.setIndoorEnabled(show);
+        }
+    }
+
+    private void setTrafficEnabled() {
+        boolean showTraffic = mPrefs.getBoolean(getString(R.string.pref_show_traffic), false);
+        GoogleMap m = getMap();
+        if (m != null) {
+            m.setTrafficEnabled(showTraffic);
+        }
+    }
+
+    private void startSettingsDialog() {
+
+        Intent intent = new Intent(this, OeMapSettingsActivity.class);
+        startActivity(intent);
     }
 
     private void showNewPrivateMapDialog() {
@@ -247,6 +300,9 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
+
+        mPrefs =  PreferenceManager.getDefaultSharedPreferences(this);
+        mPrefs.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -291,7 +347,7 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
                 startActivity(browserIntent);
                 break;
             case R.id.action_settings:
-                setSettingsFrag();
+                startSettingsDialog();
                 break;
             case R.id.action_about:
             default:
@@ -373,6 +429,7 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
         //map.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.common_signin_btn_icon_dark)));
         if (!mMapIsInit) {
             mMapIsInit = true;
+            setMapOptions();
         }
     }
 
@@ -384,6 +441,11 @@ public class OeMapActivity extends OeBaseActivity implements LocationListener
         if (!mMapIsInit) {
             setLocation();
         }
+    }
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+
+        setMapOptions();
     }
 }
 

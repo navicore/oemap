@@ -17,16 +17,21 @@
     <ListPreference
         android:entries="@array/pref_map_type_entries"
         android:title="Map Types"
-        android:key="pref_map_type"
+        android:key="@string/pref_map_type"
         android:entryValues="@array/pref_map_type_values"
         android:summary="Varies types of maps, ie: terrain, satellite, normal" android:defaultValue="0" />
 
     <CheckBoxPreference
-        android:key="pref_show_traffic"
+        android:key="@string/pref_show_traffic"
         android:title="Show Traffic"
         android:summary="Show Traffic on Map"
         android:defaultValue="false"/>
 
+    <CheckBoxPreference
+            android:key="@string/pref_show_indoors"
+            android:title="Show Indoors"
+            android:summary="Show Indoors on Map"
+            android:defaultValue="false"/>
 
 </PreferenceScreen>
 
