@@ -356,11 +356,13 @@ public class OeMapActivity extends OeBaseActivity
         return super.onOptionsItemSelected(item);
     }
 
+    /*
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         mLocHelper.onActivityResult(requestCode, resultCode, data);
      }
+     */
 
     /*
      * Called when the Activity is no longer visible at all.
@@ -369,9 +371,14 @@ public class OeMapActivity extends OeBaseActivity
     @Override
     public void onStop() {
 
+        try {
+
         mLocHelper.onStop();
 
         super.onStop();
+        } catch (Throwable err) {
+            Log.e("ejs", err.toString(), err);
+        }
     }
     /*
      * Called when the Activity is going into the background.
@@ -380,12 +387,16 @@ public class OeMapActivity extends OeBaseActivity
     @Override
     public void onPause() {
 
+        try {
         mLocHelper.onPause();
         // Save the current setting for updates
         //mEditor.putBoolean(LocationUtils.KEY_UPDATES_REQUESTED, mUpdatesRequested);
         //mEditor.commit();
 
         super.onPause();
+        } catch (Throwable err) {
+            Log.e("ejs", err.toString(), err);
+        }
     }
 
     /*
@@ -423,8 +434,9 @@ public class OeMapActivity extends OeBaseActivity
 
         LatLng latLng = new LatLng(mCurrLoc.getLatitude(), mCurrLoc.getLongitude());
         //map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
-        map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        map.animateCamera(CameraUpdateFactory.zoomTo(15));
+        //map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        //map.animateCamera(CameraUpdateFactory.zoomTo(15));
+        map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
         map.setMyLocationEnabled(true);
         //map.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.common_signin_btn_icon_dark)));
         if (!mMapIsInit) {

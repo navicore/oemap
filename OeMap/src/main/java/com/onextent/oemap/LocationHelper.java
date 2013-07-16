@@ -91,27 +91,21 @@ public class LocationHelper implements
         mLocationClient = new LocationClient(context, this, this);
     }
 
+    /*
+
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
         // Decide what to do based on the original request code
         switch (requestCode) {
             //...
             case LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST :
-            /*
-             * If the result code is Activity.RESULT_OK, try
-             * to connect again
-             */
                 switch (resultCode) {
                     case Activity.RESULT_OK :
-                    /*
-                     * Try the request again
-                     */
-                    //...
                     break;
                 }
-            //...
         }
      }
+    */
 
 
     ///////////////////////////////

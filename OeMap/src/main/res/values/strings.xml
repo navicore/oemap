@@ -30,6 +30,7 @@
     <string name="pref_map_type">pref_map_type</string>
     <string name="pref_show_traffic">pref_show_traffic</string>
     <string name="pref_show_indoors">pref_show_indoors</string>
+    <string name="pref_zoom_level">zoom_level</string>
 
     <string-array name="pref_map_type_entries">
         <item>Normal</item>
