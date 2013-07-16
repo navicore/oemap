@@ -387,16 +387,8 @@ public class OeMapActivity extends OeBaseActivity
     @Override
     public void onPause() {
 
-        try {
         mLocHelper.onPause();
-        // Save the current setting for updates
-        //mEditor.putBoolean(LocationUtils.KEY_UPDATES_REQUESTED, mUpdatesRequested);
-        //mEditor.commit();
-
         super.onPause();
-        } catch (Throwable err) {
-            Log.e("ejs", err.toString(), err);
-        }
     }
 
     /*
@@ -420,11 +412,6 @@ public class OeMapActivity extends OeBaseActivity
 
     public void setLocation() {
 
-        // Report to the UI that the location was updated
-        //mConnectionStatus.setText(R.string.location_updated);
-
-        // In the UI, set the latitude and longitude to the value received
-        //mLatLng.setText(LocationUtils.getLatLng(this, location));
         GoogleMap map = getMap();
         if (map == null) {
 
@@ -433,12 +420,8 @@ public class OeMapActivity extends OeBaseActivity
         }
 
         LatLng latLng = new LatLng(mCurrLoc.getLatitude(), mCurrLoc.getLongitude());
-        //map.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
-        //map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        //map.animateCamera(CameraUpdateFactory.zoomTo(15));
         map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
         map.setMyLocationEnabled(true);
-        //map.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.common_signin_btn_icon_dark)));
         if (!mMapIsInit) {
             mMapIsInit = true;
             setMapOptions();

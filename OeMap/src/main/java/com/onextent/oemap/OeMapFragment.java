@@ -5,9 +5,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -19,7 +16,7 @@ public class OeMapFragment extends MapFragment implements GoogleMap.OnMapLongCli
 
     public static final String SHARED_PREFERENCES = "com.onextent.oemap.map.SHARED_PREFERENCES";
     SharedPreferences mPrefs;
-    SharedPreferences.Editor mZoomPref;
+    SharedPreferences.Editor mPrefEdit;
 
     private OeMapActivity home;
     public OeMapFragment() {
@@ -41,7 +38,7 @@ public class OeMapFragment extends MapFragment implements GoogleMap.OnMapLongCli
         home = (OeMapActivity) activity;
 
         mPrefs = activity.getSharedPreferences(LocationUtils.SHARED_PREFERENCES, Context.MODE_PRIVATE);
-        mZoomPref = mPrefs.edit();
+        mPrefEdit = mPrefs.edit();
     }
 
     private void init() {
@@ -63,7 +60,11 @@ public class OeMapFragment extends MapFragment implements GoogleMap.OnMapLongCli
 
         map.setOnMapLongClickListener(this);
 
-        int zoom = mPrefs.getInt(getString(R.string.pref_zoom_level), 15);
+        float zoom = mPrefs.getFloat(getString(R.string.pref_zoom_level), 15);
+        Log.d("ejs", "zoom restored as " + zoom);
+        double lat = (double) mPrefs.getFloat(getString(R.string.pref_lat), 0);
+        double lng = (double) mPrefs.getFloat(getString(R.string.pref_lng), 0);
+        map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lat, lng)));
         map.moveCamera(CameraUpdateFactory.zoomTo(zoom));
     }
 
@@ -73,8 +74,12 @@ public class OeMapFragment extends MapFragment implements GoogleMap.OnMapLongCli
         GoogleMap m = getMap();
         if (m != null) {
 
-            mZoomPref.putInt(home.getString(R.string.pref_zoom_level), (int) m.getCameraPosition().zoom);
-            mZoomPref.commit();
+            float zoom = m.getCameraPosition().zoom;
+            mPrefEdit.putFloat(home.getString(R.string.pref_zoom_level), zoom);
+            Log.d("ejs", "zoom saved as " + zoom);
+            mPrefEdit.putFloat(home.getString(R.string.pref_lat), (float) m.getCameraPosition().target.latitude);
+            mPrefEdit.putFloat(home.getString(R.string.pref_lng), (float) m.getCameraPosition().target.longitude);
+            mPrefEdit.commit();
         }
         super.onPause();
     }
