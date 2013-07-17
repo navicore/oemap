@@ -3,10 +3,7 @@ package com.onextent.oemap;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
-import android.content.Intent;
 import android.content.IntentSender;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,34 +16,30 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.maps.model.LatLng;
 
 public class LocationHelper implements
         LocationListener,
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener
 {
-    // Handle to SharedPreferences for this app
-    SharedPreferences mPrefs;
-    OeMapActivity context;
+    LHContext context;
 
-    // Handle to a SharedPreferences editor
-    SharedPreferences.Editor mEditor;
     // A request to connect to Location Services
     private LocationRequest mLocationRequest;
 
-    /*
-     * Note if updates have been turned on. Starts out as "false"; is set to "true" in the
-     * method handleRequestSuccess of LocationUpdateReceiver.
-     *
-     */
-    boolean mUpdatesRequested = false;
     // Stores the current instantiation of the location client in this object
     private LocationClient mLocationClient;
 
     private boolean mSharingLoc;
 
-    LocationHelper(OeMapActivity context) {
-        this.context = context;
+    LocationHelper(LHContext c) {
+        this.context = c;
+    }
+
+    public static interface LHContext {
+        public Activity getActivity();
+        public void updateLocation(Location l);
     }
 
 
@@ -75,20 +68,11 @@ public class LocationHelper implements
         // Set the interval ceiling to one minute
         mLocationRequest.setFastestInterval(LocationUtils.FAST_INTERVAL_CEILING_IN_MILLISECONDS);
 
-        // Note that location updates are off until the user turns them on
-        mUpdatesRequested = false;
-
-        // Open Shared Preferences
-        mPrefs = context.getSharedPreferences(LocationUtils.SHARED_PREFERENCES, Context.MODE_PRIVATE);
-
-        // Get an editor
-        mEditor = mPrefs.edit();
-
         /*
          * Create a new location client, using the enclosing class to
          * handle callbacks.
          */
-        mLocationClient = new LocationClient(context, this, this);
+        mLocationClient = new LocationClient(context.getActivity(), this, this);
     }
 
     /*
@@ -117,7 +101,7 @@ public class LocationHelper implements
         // Check that Google Play services is available
         int resultCode =
                 GooglePlayServicesUtil.
-                        isGooglePlayServicesAvailable(context);
+                        isGooglePlayServicesAvailable(context.getActivity());
         // If Google Play services is available
         if (ConnectionResult.SUCCESS == resultCode) {
             // In debug mode, log the status
@@ -133,7 +117,7 @@ public class LocationHelper implements
             // Get the error dialog from Google Play services
             Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
                     errorCode,
-                    context,
+                    context.getActivity(),
                     LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
 
             // If Google Play services can provide an error dialog
@@ -144,7 +128,7 @@ public class LocationHelper implements
                 // Set the dialog in the DialogFragment
                 errorFragment.setDialog(errorDialog);
                 // Show the error dialog in the DialogFragment
-                errorFragment.show(context.getFragmentManager(), "Location Updates");
+                errorFragment.show(context.getActivity().getFragmentManager(), "Location Updates");
                 //ejs todo set content pane?
             }
         }
@@ -154,15 +138,12 @@ public class LocationHelper implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        //Toast.makeText(context, "Connected", Toast.LENGTH_SHORT).show();
-        onLocationChanged(mLocationClient.getLastLocation());
-        context.setLocation();
         startUpdates();
     }
 
     @Override
     public void onDisconnected() {
-        Toast.makeText(context, "Disconnected from Location Service.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context.getActivity(), "Disconnected from Location Service.", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -171,7 +152,7 @@ public class LocationHelper implements
             try {
                 // Start an Activity that tries to resolve the error
                 connectionResult.startResolutionForResult(
-                        context,
+                        context.getActivity(),
                         LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
                 /*
                  * Thrown if Google Play services canceled the original
@@ -227,7 +208,7 @@ public class LocationHelper implements
         // Get the error dialog from Google Play services
         Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
             errorCode,
-            context,
+            context.getActivity(),
             LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
 
         // If Google Play services can provide an error dialog
@@ -240,7 +221,7 @@ public class LocationHelper implements
             errorFragment.setDialog(errorDialog);
 
             // Show the error dialog in the DialogFragment
-            errorFragment.show(context.getFragmentManager(), "ejs");
+            errorFragment.show(context.getActivity().getFragmentManager(), "ejs");
             //ejs todo set content pane?
         }
     }
@@ -265,9 +246,6 @@ public class LocationHelper implements
      */
     public void onPause() {
 
-        // Save the current setting for updates
-        //mEditor.putBoolean(LocationUtils.KEY_UPDATES_REQUESTED, mUpdatesRequested);
-        //mEditor.commit();
     }
 
     /*
@@ -285,42 +263,30 @@ public class LocationHelper implements
 
     public void onResume() {
 
-        // If the app already has a setting for getting location updates, get it
-        if (mPrefs.contains(LocationUtils.KEY_UPDATES_REQUESTED)) {
-            mUpdatesRequested = mPrefs.getBoolean(LocationUtils.KEY_UPDATES_REQUESTED, false);
-
-        // Otherwise, turn off location updates until requested
-        } else {
-            mEditor.putBoolean(LocationUtils.KEY_UPDATES_REQUESTED, false);
-            mEditor.commit();
-        }
     }
 
     @Override
     public void onLocationChanged(Location location) {
 
-        context.onLocationChanged(location);
+        context.updateLocation(location);
     }
 
     private void startUpdates() {
 
         Location currentLocation = mLocationClient.getLastLocation();
 
-        mUpdatesRequested = true;
-
         if (servicesConnected()) {
             startPeriodicUpdates();
         }
     }
 
-        /**
+    /**
      * In response to a request to start updates, send a request
      * to Location Services
      */
     private void startPeriodicUpdates() {
 
         mLocationClient.requestLocationUpdates(mLocationRequest, this);
-        //mConnectionState.setText(R.string.location_requested);
     }
 
     /**
@@ -329,7 +295,6 @@ public class LocationHelper implements
      */
     private void stopPeriodicUpdates() {
         mLocationClient.removeLocationUpdates(this);
-        //mConnectionState.setText(R.string.location_updates_stopped);
     }
 }
 

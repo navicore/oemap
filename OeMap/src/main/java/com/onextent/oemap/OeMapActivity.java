@@ -4,13 +4,9 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
-import android.preference.PreferenceManager;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
@@ -24,24 +20,16 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class OeMapActivity extends OeBaseActivity
-        implements LocationListener, SharedPreferences.OnSharedPreferenceChangeListener
 {
-    LocationHelper mLocHelper;
-
     private static final String MAP_FRAG_TAG = "oemap";
-    private static final String SETTINGS_FRAG_TAG = "oeset";
 
-    private boolean mSharingLoc;
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
 
@@ -60,8 +48,6 @@ public class OeMapActivity extends OeBaseActivity
     private static final int SHARE_MAP_POS      = 3;
     private static final int QUIT_MAP_POS       = 4;
     private static final int SEPARATOR_POS      = 5;
-
-    private SharedPreferences mPrefs = null;
 
     private static class DrawerAdapter extends ArrayAdapter {
 
@@ -132,8 +118,6 @@ public class OeMapActivity extends OeBaseActivity
         if (fragment == null) {
             Log.d("ejs", "creating new map for " + MAP_FRAG_TAG);
             fragment = new OeMapFragment();
-            //todo: move location listener to frag?
-            mMapIsInit = false;
         } else {
             Log.d("ejs", "found map for " + MAP_FRAG_TAG);
         }
@@ -141,51 +125,6 @@ public class OeMapActivity extends OeBaseActivity
         fragmentManager.beginTransaction().replace(
                 R.id.content_frame, fragment, MAP_FRAG_TAG
         ).commit();
-    }
-
-    private void setMapType() {
-
-        try {
-
-        int t = Integer.valueOf(mPrefs.getString(getString(R.string.pref_map_type), "0"));
-        GoogleMap m = getMap();
-        if (m != null) {
-            switch (t) {
-                case 0:
-                    m.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                    break;
-                case 1:
-                    m.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-                    break;
-                case 2:
-                    m.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-                    break;
-            }
-        }
-        } catch (Throwable err) {
-            Log.e("ejs", err.toString(), err);
-        }
-    }
-
-    private void setMapOptions() {
-        setTrafficEnabled();
-        setMapType();
-        setIndoorsEnabled();
-    }
-    private void setIndoorsEnabled() {
-        boolean show = mPrefs.getBoolean(getString(R.string.pref_show_indoors), false);
-        GoogleMap m = getMap();
-        if (m != null) {
-            m.setIndoorEnabled(show);
-        }
-    }
-
-    private void setTrafficEnabled() {
-        boolean showTraffic = mPrefs.getBoolean(getString(R.string.pref_show_traffic), false);
-        GoogleMap m = getMap();
-        if (m != null) {
-            m.setTrafficEnabled(showTraffic);
-        }
     }
 
     private void startSettingsDialog() {
@@ -257,9 +196,6 @@ public class OeMapActivity extends OeBaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.oe_map_activity);
 
-        mLocHelper = new LocationHelper(this);
-        mLocHelper.onCreate(savedInstanceState);
-
         mPlanetTitles = getResources().getStringArray(R.array.menu_names_array);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mTitle =  getResources().getString(R.string.app_name);
@@ -300,9 +236,6 @@ public class OeMapActivity extends OeBaseActivity
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
-
-        mPrefs =  PreferenceManager.getDefaultSharedPreferences(this);
-        mPrefs.registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -357,28 +290,13 @@ public class OeMapActivity extends OeBaseActivity
     }
 
     /*
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        mLocHelper.onActivityResult(requestCode, resultCode, data);
-     }
-     */
-
-    /*
      * Called when the Activity is no longer visible at all.
      * Stop updates and disconnect.
      */
     @Override
     public void onStop() {
 
-        try {
-
-        mLocHelper.onStop();
-
         super.onStop();
-        } catch (Throwable err) {
-            Log.e("ejs", err.toString(), err);
-        }
     }
     /*
      * Called when the Activity is going into the background.
@@ -387,7 +305,6 @@ public class OeMapActivity extends OeBaseActivity
     @Override
     public void onPause() {
 
-        mLocHelper.onPause();
         super.onPause();
     }
 
@@ -398,49 +315,12 @@ public class OeMapActivity extends OeBaseActivity
     public void onStart() {
 
         super.onStart();
-        mLocHelper.onStart();
     }
 
-        @Override
+    @Override
     public void onResume() {
         super.onResume();
         setMapFrag();
-        mLocHelper.onResume();
-    }
-
-    private Location mCurrLoc;
-
-    public void setLocation() {
-
-        GoogleMap map = getMap();
-        if (map == null) {
-
-            Log.w("ejs", "Got location but NO MAP!!!");
-            return;
-        }
-
-        LatLng latLng = new LatLng(mCurrLoc.getLatitude(), mCurrLoc.getLongitude());
-        map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-        map.setMyLocationEnabled(true);
-        if (!mMapIsInit) {
-            mMapIsInit = true;
-            setMapOptions();
-        }
-    }
-
-    private boolean mMapIsInit = false;
-
-    public void onLocationChanged(Location location) {
-
-        mCurrLoc = location;
-        if (!mMapIsInit) {
-            setLocation();
-        }
-    }
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-
-        setMapOptions();
     }
 }
 

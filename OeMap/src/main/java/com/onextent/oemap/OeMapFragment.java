@@ -3,6 +3,8 @@ package com.onextent.oemap;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.Location;
+import com.google.android.gms.location.LocationListener;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -10,13 +12,21 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 
-public class OeMapFragment extends MapFragment implements GoogleMap.OnMapLongClickListener {
+public class OeMapFragment extends MapFragment
+        implements  SharedPreferences.OnSharedPreferenceChangeListener, GoogleMap.OnMapLongClickListener
+{
 
-    public static final String SHARED_PREFERENCES = "com.onextent.oemap.map.SHARED_PREFERENCES";
-    SharedPreferences mPrefs;
-    SharedPreferences.Editor mPrefEdit;
+    private LocationHelper mLocHelper;
+    private boolean mMapIsInit = false;
+
+    private static final String SHARED_PREFERENCES = "com.onextent.oemap.map.SHARED_PREFERENCES";
+    private SharedPreferences mPrefs;
+    private SharedPreferences.Editor mPrefEdit;
 
     private OeMapActivity home;
     public OeMapFragment() {
@@ -26,10 +36,8 @@ public class OeMapFragment extends MapFragment implements GoogleMap.OnMapLongCli
 
     public void onMapLongClick(LatLng latLng) {
 
-        //todo: let this set the current location until some menu is clicked
-        //todo: ultimate goal is to make is easy to add a place manually
-
-        if (home != null) home.setLocation();
+        //ejs todo: get this out of here, use refresh icon on actionbar
+        setLocation();
     }
 
     @Override
@@ -71,6 +79,8 @@ public class OeMapFragment extends MapFragment implements GoogleMap.OnMapLongCli
     @Override
     public void onPause() {
 
+        mLocHelper.onPause();
+
         GoogleMap m = getMap();
         if (m != null) {
 
@@ -83,37 +93,147 @@ public class OeMapFragment extends MapFragment implements GoogleMap.OnMapLongCli
         }
         super.onPause();
     }
+
+    @Override
+    public void onStop() {
+
+        mLocHelper.onStop();
+
+        super.onStop();
+    }
+
+    @Override
+    public void onStart() {
+
+        super.onStart();
+        mLocHelper.onStart();
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         init();
+        mLocHelper.onResume();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         home.setMapFragTag(getTag());
+        mLocHelper = new LocationHelper(new LocationHelper.LHContext() {
+            @Override
+            public Activity getActivity() {
+                return home;
+            }
+            @Override
+            public void updateLocation(Location l) {
+
+                mCurrLoc = l;
+                setMyMarker();
+                if (!mMapIsInit) {
+                    setLocation();
+                }
+            }
+        });
+        mLocHelper.onCreate(savedInstanceState);
     }
 
-    /*
+    private void setMapType() {
+
+        try {
+
+            int t = Integer.valueOf(mPrefs.getString(getString(R.string.pref_map_type), "0"));
+            GoogleMap m = getMap();
+            if (m != null) {
+                switch (t) {
+                    case 0:
+                        m.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                        break;
+                    case 1:
+                        m.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                        break;
+                    case 2:
+                        m.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                        break;
+                }
+            }
+        } catch (Throwable err) {
+            Log.e("ejs", err.toString(), err);
+        }
+    }
+
+    private void setMapOptions() {
+        setTrafficEnabled();
+        setMapType();
+        setIndoorsEnabled();
+    }
+    private void setIndoorsEnabled() {
+        boolean show = mPrefs.getBoolean(getString(R.string.pref_show_indoors), false);
+        GoogleMap m = getMap();
+        if (m != null) {
+            m.setIndoorEnabled(show);
+        }
+    }
+
+    private void setTrafficEnabled() {
+        boolean showTraffic = mPrefs.getBoolean(getString(R.string.pref_show_traffic), false);
+        GoogleMap m = getMap();
+        if (m != null) {
+            m.setTrafficEnabled(showTraffic);
+        }
+    }
+
+    private Location mCurrLoc;
+
+    private Marker mMyMarker;
+
+    private void setMyMarker() {
+
+        if (mCurrLoc == null) return;
+
+        GoogleMap map = getMap();
+        if (map == null) return;
+
+        LatLng latLng = new LatLng(mCurrLoc.getLatitude(), mCurrLoc.getLongitude());
+
+        if (mMyMarker == null) {
+            mMyMarker = map.addMarker(new MarkerOptions()
+                    .position(latLng)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
+                            //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher))
+                    .title("Me")
+                    .snippet("Here I am."));
+        } else {
+            mMyMarker.setPosition(latLng);
+        }
+
+    }
+
+    public void setLocation() {
+
+        GoogleMap map = getMap();
+        if (map == null) {
+
+            Log.w("ejs", "Got location but NO MAP!!!");
+            return;
+        }
+
+        LatLng latLng = new LatLng(mCurrLoc.getLatitude(), mCurrLoc.getLongitude());
+        map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+        map.setMyLocationEnabled(true);
+
+        setMyMarker();
+
+        if (!mMapIsInit) {
+            mMapIsInit = true;
+            setMapOptions();
+        }
+    }
+
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        //GoogleMap map = getMap();
-        //Location l = map.getMyLocation();
-        //String loc = l.toString();
-        //Log.d("ejs", loc);
-        Log.d("ejs", "hiya");
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+
+        setMapOptions();
     }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
-        View rootView = super.onCreateView(inflater, container, savedInstanceState);
-
-        return rootView;
-    }
-    */
 }
 
