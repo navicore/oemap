@@ -3,9 +3,11 @@ package com.onextent.oemap;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.location.Location;
-import com.google.android.gms.location.LocationListener;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -18,13 +20,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class OeMapFragment extends MapFragment
-        implements  SharedPreferences.OnSharedPreferenceChangeListener, GoogleMap.OnMapLongClickListener
+        implements  SharedPreferences.OnSharedPreferenceChangeListener
 {
 
     private LocationHelper mLocHelper;
     private boolean mMapIsInit = false;
 
-    private static final String SHARED_PREFERENCES = "com.onextent.oemap.map.SHARED_PREFERENCES";
     private SharedPreferences mPrefs;
     private SharedPreferences.Editor mPrefEdit;
 
@@ -33,19 +34,12 @@ public class OeMapFragment extends MapFragment
         super();
     }
 
-
-    public void onMapLongClick(LatLng latLng) {
-
-        //ejs todo: get this out of here, use refresh icon on actionbar
-        setLocation();
-    }
-
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         home = (OeMapActivity) activity;
 
-        mPrefs = activity.getSharedPreferences(LocationUtils.SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
         mPrefEdit = mPrefs.edit();
     }
 
@@ -64,14 +58,12 @@ public class OeMapFragment extends MapFragment
 
         settings.setCompassEnabled(true);
 
-        settings.setMyLocationButtonEnabled(true);
+        settings.setMyLocationButtonEnabled(false);
 
-        map.setOnMapLongClickListener(this);
-
-        float zoom = mPrefs.getFloat(getString(R.string.pref_zoom_level), 15);
+        float zoom = mPrefs.getFloat(getString(R.string.state_zoom_level), 15);
         Log.d("ejs", "zoom restored as " + zoom);
-        double lat = (double) mPrefs.getFloat(getString(R.string.pref_lat), 0);
-        double lng = (double) mPrefs.getFloat(getString(R.string.pref_lng), 0);
+        double lat = (double) mPrefs.getFloat(getString(R.string.state_lat), 0);
+        double lng = (double) mPrefs.getFloat(getString(R.string.state_lng), 0);
         map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lat, lng)));
         map.moveCamera(CameraUpdateFactory.zoomTo(zoom));
     }
@@ -85,10 +77,10 @@ public class OeMapFragment extends MapFragment
         if (m != null) {
 
             float zoom = m.getCameraPosition().zoom;
-            mPrefEdit.putFloat(home.getString(R.string.pref_zoom_level), zoom);
+            mPrefEdit.putFloat(home.getString(R.string.state_zoom_level), zoom);
             Log.d("ejs", "zoom saved as " + zoom);
-            mPrefEdit.putFloat(home.getString(R.string.pref_lat), (float) m.getCameraPosition().target.latitude);
-            mPrefEdit.putFloat(home.getString(R.string.pref_lng), (float) m.getCameraPosition().target.longitude);
+            mPrefEdit.putFloat(home.getString(R.string.state_lat), (float) m.getCameraPosition().target.latitude);
+            mPrefEdit.putFloat(home.getString(R.string.state_lng), (float) m.getCameraPosition().target.longitude);
             mPrefEdit.commit();
         }
         super.onPause();
@@ -99,6 +91,7 @@ public class OeMapFragment extends MapFragment
 
         mLocHelper.onStop();
 
+        mPrefs.unregisterOnSharedPreferenceChangeListener(this);
         super.onStop();
     }
 
@@ -136,6 +129,7 @@ public class OeMapFragment extends MapFragment
             }
         });
         mLocHelper.onCreate(savedInstanceState);
+        mPrefs.registerOnSharedPreferenceChangeListener(this);
     }
 
     private void setMapType() {
@@ -195,13 +189,13 @@ public class OeMapFragment extends MapFragment
         if (map == null) return;
 
         LatLng latLng = new LatLng(mCurrLoc.getLatitude(), mCurrLoc.getLongitude());
+        String uname = mPrefs.getString(getString(R.string.pref_username), "nobody");
 
         if (mMyMarker == null) {
             mMyMarker = map.addMarker(new MarkerOptions()
                     .position(latLng)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-                            //.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher))
-                    .title("Me")
+                    .title(uname)
                     .snippet("Here I am."));
         } else {
             mMyMarker.setPosition(latLng);
@@ -209,14 +203,20 @@ public class OeMapFragment extends MapFragment
 
     }
 
-    public void setLocation() {
+    private void updateMyMarker() {
+        if (mMyMarker != null) {
+            String uname = mPrefs.getString(getString(R.string.pref_username), "nobody");
+            Log.d("ejs", "setting uname to " + uname);
+            mMyMarker.setTitle(uname);
+        }
+    }
+
+    public boolean setLocation() {
+
+        if (mCurrLoc == null) return false; //not yet
 
         GoogleMap map = getMap();
-        if (map == null) {
-
-            Log.w("ejs", "Got location but NO MAP!!!");
-            return;
-        }
+        if (map == null)  return false;
 
         LatLng latLng = new LatLng(mCurrLoc.getLatitude(), mCurrLoc.getLongitude());
         map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
@@ -228,12 +228,18 @@ public class OeMapFragment extends MapFragment
             mMapIsInit = true;
             setMapOptions();
         }
+        return true;
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
 
-        setMapOptions();
+        Log.d("ejs", s);
+        if (s.startsWith("pref_"))  {
+            Log.d("ejs", "..." + s);
+            setMapOptions();
+            updateMyMarker();
+        }
     }
 }
 

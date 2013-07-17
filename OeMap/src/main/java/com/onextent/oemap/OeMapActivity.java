@@ -107,21 +107,22 @@ public class OeMapActivity extends OeBaseActivity
         Toast.makeText(this, "Showing '" + mapname + "'.", Toast.LENGTH_SHORT).show();
     }
 
+    private OeMapFragment getMapFrag() {
+        FragmentManager fragmentManager = getFragmentManager();
+        if (mMapFragTag != null) {
+            return (OeMapFragment) fragmentManager.findFragmentByTag(MAP_FRAG_TAG);
+        }
+        return null;
+    }
     private void setMapFrag() {
 
-        FragmentManager fragmentManager = getFragmentManager();
-        MapFragment fragment = null;
-        if (mMapFragTag != null) {
-            fragment = (MapFragment) fragmentManager.findFragmentByTag(MAP_FRAG_TAG);
-        }
+        MapFragment fragment = getMapFrag();
 
         if (fragment == null) {
-            Log.d("ejs", "creating new map for " + MAP_FRAG_TAG);
             fragment = new OeMapFragment();
-        } else {
-            Log.d("ejs", "found map for " + MAP_FRAG_TAG);
         }
 
+        FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().replace(
                 R.id.content_frame, fragment, MAP_FRAG_TAG
         ).commit();
@@ -275,6 +276,14 @@ public class OeMapActivity extends OeBaseActivity
         }
         // Handle your other action bar items...
         switch (item.getItemId()) {
+            case R.id.action_refresh:
+                OeMapFragment f = getMapFrag();
+                if (f != null) {
+                    boolean success = f.setLocation();
+                    if (!success)
+                        Toast.makeText(this, getString(R.string.msg_still_looking), Toast.LENGTH_SHORT).show();
+                }
+                break;
             case R.id.action_help:
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.onextent.com"));
                 startActivity(browserIntent);
