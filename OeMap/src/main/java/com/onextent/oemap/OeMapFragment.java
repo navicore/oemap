@@ -8,6 +8,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
+import android.util.AttributeSet;
 import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -15,6 +16,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -48,7 +50,7 @@ public class OeMapFragment extends MapFragment
         GoogleMap map = getMap();
         if (map == null) {
 
-            Log.w("ejs", "no map in init");
+            OeLog.w("no map in init");
             return;
         }
 
@@ -61,7 +63,7 @@ public class OeMapFragment extends MapFragment
         settings.setMyLocationButtonEnabled(false);
 
         float zoom = mPrefs.getFloat(getString(R.string.state_zoom_level), 15);
-        Log.d("ejs", "zoom restored as " + zoom);
+        OeLog.d("zoom restored as " + zoom);
         double lat = (double) mPrefs.getFloat(getString(R.string.state_lat), 0);
         double lng = (double) mPrefs.getFloat(getString(R.string.state_lng), 0);
         map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lat, lng)));
@@ -78,7 +80,7 @@ public class OeMapFragment extends MapFragment
 
             float zoom = m.getCameraPosition().zoom;
             mPrefEdit.putFloat(home.getString(R.string.state_zoom_level), zoom);
-            Log.d("ejs", "zoom saved as " + zoom);
+            OeLog.d("zoom saved as " + zoom);
             mPrefEdit.putFloat(home.getString(R.string.state_lat), (float) m.getCameraPosition().target.latitude);
             mPrefEdit.putFloat(home.getString(R.string.state_lng), (float) m.getCameraPosition().target.longitude);
             mPrefEdit.commit();
@@ -144,15 +146,15 @@ public class OeMapFragment extends MapFragment
                         m.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                         break;
                     case 1:
-                        m.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                        m.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
                         break;
                     case 2:
-                        m.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+                        m.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
                         break;
                 }
             }
         } catch (Throwable err) {
-            Log.e("ejs", err.toString(), err);
+            OeLog.e(err.toString(), err);
         }
     }
 
@@ -206,7 +208,7 @@ public class OeMapFragment extends MapFragment
     private void updateMyMarker() {
         if (mMyMarker != null) {
             String uname = mPrefs.getString(getString(R.string.pref_username), "nobody");
-            Log.d("ejs", "setting uname to " + uname);
+            OeLog.d("setting uname to " + uname);
             mMyMarker.setTitle(uname);
         }
     }
@@ -220,6 +222,8 @@ public class OeMapFragment extends MapFragment
 
         LatLng latLng = new LatLng(mCurrLoc.getLatitude(), mCurrLoc.getLongitude());
         map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
+        //CameraPosition p = new CameraPosition(latLng,)
+        //map.animateCamera(CameraUpdateFactory.newCameraPosition(p);
         map.setMyLocationEnabled(true);
 
         setMyMarker();
@@ -234,9 +238,9 @@ public class OeMapFragment extends MapFragment
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
 
-        Log.d("ejs", s);
+        OeLog.d(s);
         if (s.startsWith("pref_"))  {
-            Log.d("ejs", "..." + s);
+            OeLog.d("..." + s);
             setMapOptions();
             updateMyMarker();
         }

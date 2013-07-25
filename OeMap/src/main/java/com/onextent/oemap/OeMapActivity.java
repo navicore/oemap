@@ -24,7 +24,10 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public class OeMapActivity extends OeBaseActivity
 {
@@ -36,9 +39,10 @@ public class OeMapActivity extends OeBaseActivity
     private GoogleMap mMap;
     private CharSequence mTitle =  "na";
     private String mDrawerTitle = "na";
-    private String[] mPlanetTitles;
+    private String[] mMenuNames;
     private ListView mDrawerList;
     private ArrayList mDrawerNamesList;
+    private ArrayList mMapHistory;
 
     private String mMapFragTag;
 
@@ -94,7 +98,7 @@ public class OeMapActivity extends OeBaseActivity
             mMap = fragment.getMap();
             return mMap;
         } else {
-            Log.w("ejs", "null map tag!!!");
+            OeLog.w("null map tag!!!");
         }
         return null;
     }
@@ -105,6 +109,8 @@ public class OeMapActivity extends OeBaseActivity
 
     private void updateMapFrag(String mapname) {
         Toast.makeText(this, "Showing '" + mapname + "'.", Toast.LENGTH_SHORT).show();
+        updateMapNames(mapname);
+        setTitle(mapname);
     }
 
     private OeMapFragment getMapFrag() {
@@ -145,20 +151,22 @@ public class OeMapActivity extends OeBaseActivity
         d.show(fm, "new_map_dialog");
     }
 
-    public void onFinishNewMapDialog(String inputText) {
-        updateMapFrag(inputText);
-        if (!mDrawerNamesList.contains(inputText)) {
-            mDrawerNamesList.add(inputText);
+    private void updateMapNames(String n) {
+        mPrefEdit.putString(getString(R.string.state_current_mapname), n);
+        mPrefEdit.commit();
+        if (!mDrawerNamesList.contains(n)) {
+            mDrawerNamesList.add(SEPARATOR_POS + 1, n);
             mDrawerList.deferNotifyDataSetChanged();
         }
-        int position = mDrawerNamesList.indexOf(inputText);
-        if (position > 0) {
-            mDrawerList.setItemChecked(position, true); //ejs race?? see selectItem...
-            setTitle(inputText);
-        }
-        Toast.makeText(this, "New map '" + inputText + "' created.", Toast.LENGTH_SHORT).show();
+        addHistory(n);
+        int position = mDrawerNamesList.indexOf(n);
+        mDrawerList.setItemChecked(position, true);
     }
 
+    public void onFinishNewMapDialog(String newMapName) {
+        updateMapFrag(newMapName);
+        Toast.makeText(this, "New map '" + newMapName + "' created.", Toast.LENGTH_SHORT).show();
+    }
 
     /** Swaps fragments in the main content view */
     private void selectItem(int position) {
@@ -191,21 +199,31 @@ public class OeMapActivity extends OeBaseActivity
         getActionBar().setTitle(mTitle);
     }
 
+    private void updateMapNamesFromHistory() {
+
+        List<String> h = getHistory();
+        for (String s : h) {
+            if (!mDrawerNamesList.contains(s)) {
+                mDrawerNamesList.add(SEPARATOR_POS + 1, s);
+            }
+        }
+    }
 
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.oe_map_activity);
 
-        mPlanetTitles = getResources().getStringArray(R.array.menu_names_array);
+        mMenuNames = getResources().getStringArray(R.array.menu_names_array);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mTitle =  getResources().getString(R.string.app_name);
         mDrawerTitle =  getResources().getString(R.string.drawer_title);
 
         mDrawerNamesList = new ArrayList();
-        for (String n : mPlanetTitles) {
+        for (String n : mMenuNames) {
             mDrawerNamesList.add(n);
         }
+        updateMapNamesFromHistory();
         ListAdapter a = new DrawerAdapter(this, R.layout.drawer_list_item, mDrawerNamesList);
         mDrawerList.setAdapter(a);
         // Set the list's click listener
@@ -330,6 +348,8 @@ public class OeMapActivity extends OeBaseActivity
     public void onResume() {
         super.onResume();
         setMapFrag();
+        String mapname = mPrefs.getString(getString(R.string.state_current_mapname), "none");
+        updateMapFrag(mapname);
     }
 }
 

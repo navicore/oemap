@@ -36,6 +36,7 @@
     <string name="state_zoom_level">state_zoom_level</string>
     <string name="state_lat">state_lat</string>
     <string name="state_lng">state_lng</string>
+    <string name="state_current_mapname">state_current_mapname</string>
 
     <string name="action_refresh">Refresh</string>
     <string name="msg_still_looking">still looking for your current location...</string>
@@ -47,11 +48,12 @@
     <string name="pref_show_traffic_summary">Show Traffic on Map</string>
     <string name="pref_show_indoors_title">Show Indoors</string>
     <string name="pref_show_indoors_summary">Show Indoors on Map</string>
+    <string name="state_history">state_history</string>
 
     <string-array name="pref_map_type_entries">
         <item>Normal</item>
-        <item>Satellite</item>
         <item>Terrain</item>
+        <item>Satellite</item>
     </string-array>
     <string-array name="pref_map_type_values">
         <item>0</item>
