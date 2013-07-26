@@ -1,5 +1,5 @@
-.vtg
-.vpw*
+*.vtg
+*.vpw*
 .idea/
 .gradle/
 .metadata/
