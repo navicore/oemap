@@ -52,6 +52,7 @@ public class OeMapActivity extends OeBaseActivity
     private static final int SHARE_MAP_POS      = 3;
     private static final int QUIT_MAP_POS       = 4;
     private static final int SEPARATOR_POS      = 5;
+    private GcmHelper mGcmHelper;
 
     private static class DrawerAdapter extends ArrayAdapter {
 
@@ -214,6 +215,9 @@ public class OeMapActivity extends OeBaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.oe_map_activity);
 
+        mGcmHelper = new GcmHelper(this);
+        mGcmHelper.onCreate();
+
         mMenuNames = getResources().getStringArray(R.array.menu_names_array);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mTitle =  getResources().getString(R.string.app_name);
@@ -332,6 +336,7 @@ public class OeMapActivity extends OeBaseActivity
     @Override
     public void onPause() {
 
+        mGcmHelper.onPause();
         super.onPause();
     }
 
@@ -347,6 +352,7 @@ public class OeMapActivity extends OeBaseActivity
     @Override
     public void onResume() {
         super.onResume();
+        mGcmHelper.onResume();
         setMapFrag();
         String mapname = mPrefs.getString(getString(R.string.state_current_mapname), "none");
         updateMapFrag(mapname);
