@@ -1,0 +1,11 @@
+.idea/
+.gradle/
+.metadata/
+bin/
+build/
+obj/
+gen/
+eclimd.log
+local.properties
+node_modules/
+
