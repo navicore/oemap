@@ -26,11 +26,11 @@ function findBySpace(spacename) {
     return ret;
 }
 
-//list spaces by geo query
+//list spaces by geo query (latitude, longitude, distance)
 app.get('/spaces/:id', function(req, res) {
  
     // todo: find spaces by location + nearness 
-    res.json("{}"); //'none' is not an error
+    res.json("[]"); //'none' is not an error
 });
 
 //get space by name
@@ -67,5 +67,5 @@ app.delete('/presence/:id', function(req, res) {
 });
 
 console.log("starting...");
-app.listen(process.env.PORT || 4730);
+app.listen(process.env.PORT || 5555);
 

@@ -10,22 +10,20 @@
 }
 
 // server to client
-{
-    [
-        {
-            "who": "1234ABCDE",
-            "lat": 123,
-            "lng": 456,
-            "label": "Ed Sweeney!",
-            "snippet": "Here I am."
-        },
-        {
-            "who": "2234ABCDE",
-            "lat": 123,
-            "lng": 456,
-            "label": "Sammy Otto",
-            "snippet": "Here I am too."
-        }
-    ]
-}
+[
+    {
+        "who": "1234ABCDE",
+        "lat": 123,
+        "lng": 456,
+        "label": "Ed Sweeney!",
+        "snippet": "Here I am."
+    },
+    {
+        "who": "2234ABCDE",
+        "lat": 123,
+        "lng": 456,
+        "label": "Sammy Otto",
+        "snippet": "Here I am too."
+    }
+]
 
