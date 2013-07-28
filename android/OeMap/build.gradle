@@ -21,6 +21,9 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 16
+        
+        testPackageName "com.onextent.test.oemap"
+        testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
 
     signingConfigs {

@@ -25,6 +25,8 @@ public class OeMapFragment extends MapFragment
         implements  SharedPreferences.OnSharedPreferenceChangeListener
 {
 
+    private String mName = null;
+
     private LocationHelper mLocHelper;
     private boolean mMapIsInit = false;
 
@@ -79,10 +81,10 @@ public class OeMapFragment extends MapFragment
         if (m != null) {
 
             float zoom = m.getCameraPosition().zoom;
-            mPrefEdit.putFloat(home.getString(R.string.state_zoom_level), zoom);
+            mPrefEdit.putFloat(getString(R.string.state_zoom_level), zoom);
             OeLog.d("zoom saved as " + zoom);
-            mPrefEdit.putFloat(home.getString(R.string.state_lat), (float) m.getCameraPosition().target.latitude);
-            mPrefEdit.putFloat(home.getString(R.string.state_lng), (float) m.getCameraPosition().target.longitude);
+            mPrefEdit.putFloat(getString(R.string.state_lat), (float) m.getCameraPosition().target.latitude);
+            mPrefEdit.putFloat(getString(R.string.state_lng), (float) m.getCameraPosition().target.longitude);
             mPrefEdit.commit();
         }
         super.onPause();
@@ -114,6 +116,8 @@ public class OeMapFragment extends MapFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (savedInstanceState != null)
+            mName = savedInstanceState.getString(getString(R.string.bundle_mapname));
         home.setMapFragTag(getTag());
         mLocHelper = new LocationHelper(new LocationHelper.LHContext() {
             @Override

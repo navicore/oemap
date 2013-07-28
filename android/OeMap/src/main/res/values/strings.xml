@@ -49,6 +49,7 @@
     <string name="pref_show_indoors_title">Show Indoors</string>
     <string name="pref_show_indoors_summary">Show Indoors on Map</string>
     <string name="state_history">state_history</string>
+    <string name="bundle_mapname">mapname</string>
 
     <string-array name="pref_map_type_entries">
         <item>Normal</item>
