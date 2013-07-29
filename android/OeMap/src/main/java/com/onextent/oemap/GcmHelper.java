@@ -16,12 +16,14 @@ import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.onextent.android.activity.OeLifeCycle;
+import com.onextent.android.util.OeLog;
 
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class GcmHelper {
+public class GcmHelper implements OeLifeCycle {
 
     public static final String EXTRA_MESSAGE = "message";
     public static final String PROPERTY_REG_ID = "registration_id";
@@ -78,10 +80,22 @@ public class GcmHelper {
         gcm = GoogleCloudMessaging.getInstance(activity);
     }
 
+    @Override
     public void onResume() {
     }
 
+    @Override
     public void onPause() {
+    }
+
+    @Override
+    public void onStart() {
+
+    }
+
+    @Override
+    public void onStop() {
+
     }
 
     /**

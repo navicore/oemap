@@ -4,12 +4,12 @@ import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -22,12 +22,13 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.onextent.android.activity.OeBaseActivity;
+import com.onextent.android.util.OeLog;
+import com.onextent.oemap.presence.PresenceBroadcaster;
+import com.onextent.oemap.presence.PresenceFactory;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public class OeMapActivity extends OeBaseActivity
 {
@@ -35,6 +36,8 @@ public class OeMapActivity extends OeBaseActivity
 
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
+
+    private PresenceBroadcaster presenceBroadcaster = null;
 
     private GoogleMap mMap;
     private CharSequence mTitle =  "na";
@@ -156,8 +159,21 @@ public class OeMapActivity extends OeBaseActivity
     }
 
     private void updateMapNames(String n) {
-        mPrefEdit.putString(getString(R.string.state_current_mapname), n);
-        mPrefEdit.commit();
+        SharedPreferences.Editor e = getEditor();
+        e.putString(getString(R.string.state_current_mapname), n);
+        //todo: maintain a list of all maps currently we are in
+        //todo: maintain a list of all maps currently we are in
+        //todo: maintain a list of all maps currently we are in
+        //todo: maintain a list of all maps currently we are in
+        //todo: maintain a list of all maps currently we are in
+        //todo: maintain a list of all maps currently we are in
+        //todo: maintain a list of all maps currently we are in
+        //todo: maintain a list of all maps currently we are in
+        //todo: maintain a list of all maps currently we are in
+        //todo: maintain a list of all maps currently we are in
+        //todo: maintain a list of all maps currently we are in
+        //todo: maintain a list of all maps currently we are in
+        e.commit();
         if (!mDrawerNamesList.contains(n)) {
             mDrawerNamesList.add(SEPARATOR_POS + 1, n);
             mDrawerList.deferNotifyDataSetChanged();
@@ -170,6 +186,7 @@ public class OeMapActivity extends OeBaseActivity
     public void onFinishNewMapDialog(String newMapName) {
         updateMapFrag(newMapName);
         Toast.makeText(this, "New map '" + newMapName + "' created.", Toast.LENGTH_SHORT).show();
+        presenceBroadcaster.getMapNames().add(newMapName);
     }
 
     /** Swaps fragments in the main content view */
@@ -213,10 +230,17 @@ public class OeMapActivity extends OeBaseActivity
         }
     }
 
+    public PresenceBroadcaster getPresenceBroadcaster() {
+        return presenceBroadcaster;
+    }
+
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.oe_map_activity);
+
+        presenceBroadcaster = PresenceFactory.createBroadcaster(this);
+        presenceBroadcaster.onCreate();
 
         //mGcmHelper = new GcmHelper(this);
         //mGcmHelper.onCreate();
@@ -323,42 +347,37 @@ public class OeMapActivity extends OeBaseActivity
         return super.onOptionsItemSelected(item);
     }
 
-    /*
-     * Called when the Activity is no longer visible at all.
-     * Stop updates and disconnect.
-     */
     @Override
     public void onStop() {
 
+        presenceBroadcaster.onStop();
         super.onStop();
     }
-    /*
-     * Called when the Activity is going into the background.
-     * Parts of the UI may be visible, but the Activity is inactive.
-     */
-    @Override
-    public void onPause() {
 
-        //mGcmHelper.onPause();
-        super.onPause();
-    }
-
-    /*
-     * Called when the Activity is restarted, even before it becomes visible.
-     */
     @Override
     public void onStart() {
 
         super.onStart();
+        presenceBroadcaster.onStart();
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        presenceBroadcaster.onResume();
         //mGcmHelper.onResume();
-        String mapname = mPrefs.getString(getString(R.string.state_current_mapname), "none");
+        SharedPreferences p = getPrefs();
+        String mapname = p.getString(getString(R.string.state_current_mapname), "none");
         setMapFrag(mapname);
         updateMapFrag(mapname);
+    }
+
+    @Override
+    public void onPause() {
+
+        //mGcmHelper.onPause();
+        presenceBroadcaster.onPause();
+        super.onPause();
     }
 }
 

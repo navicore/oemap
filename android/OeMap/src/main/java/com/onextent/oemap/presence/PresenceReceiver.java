@@ -1,20 +1,9 @@
 package com.onextent.oemap.presence;
 
-import java.util.List;
+import com.onextent.android.activity.OeLifeCycle;
 
-public interface PresenceReceiver {
+public interface PresenceReceiver extends OeLifeCycle {
 
-    public interface Listener {
-
-        public void setPresences(List<Presence> p);
-    }
-
-    public void setListener(Listener l);
-
-    public String getSpaceName();
-
-    public void start();
-
-    public void stop();
+    public void setListener(PresenceListener l);
 }
 

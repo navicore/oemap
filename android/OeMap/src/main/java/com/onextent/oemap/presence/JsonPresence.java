@@ -1,14 +1,15 @@
 package com.onextent.oemap.presence;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.onextent.oemap.OeLog;
+import com.onextent.android.util.OeLog;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class JsonPresence implements Presence {
 
-    private final String pid, label, snippet, spacename;
+    private final String pid, label, snippet;
+    private String spacename;
     private final LatLng location;
 
     JsonPresence(String json) throws JSONException {
@@ -51,6 +52,12 @@ public class JsonPresence implements Presence {
     @Override
     public String getSpaceName() {
         return spacename;
+    }
+
+    @Override
+    public void setSpaceName(String name) {
+
+        spacename = name;
     }
 
     @Override

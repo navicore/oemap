@@ -1,20 +1,16 @@
 package com.onextent.oemap.presence;
 
-import android.location.Location;
+import com.onextent.android.activity.OeLifeCycle;
 
-public interface PresenceBroadcaster {
+import java.util.Set;
 
-    public void setLocation(Location l);
+public interface PresenceBroadcaster extends OeLifeCycle {
 
-    public void setLabel(String lbl);
+    //set map names that we to be part of
+    Set<String> getMapNames();
 
-    public void setSnippet(String snip);
-
-    public String getSpaceName();
-
-    public void start();
-
-    public void stop();
-
+    //listen for changes to device user's presence, usually
+    // the map fragment is listening
+    void setListener(PresenceListener l);
 }
 

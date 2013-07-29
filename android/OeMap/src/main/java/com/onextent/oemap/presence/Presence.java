@@ -15,6 +15,7 @@ public interface Presence {
     public String getSnippet();
 
     public String getSpaceName();
+    public void setSpaceName(String name);
 
 }
 

@@ -1,25 +1,21 @@
 package com.onextent.oemap;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
-import android.util.AttributeSet;
-import android.util.Log;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.onextent.android.util.OeLog;
+import com.onextent.oemap.presence.Presence;
+import com.onextent.oemap.presence.PresenceListener;
 
 public class OeMapFragment extends MapFragment
         implements  SharedPreferences.OnSharedPreferenceChangeListener
@@ -27,7 +23,6 @@ public class OeMapFragment extends MapFragment
 
     private String mName = null;
 
-    private LocationHelper mLocHelper;
     private boolean mMapIsInit = false;
 
     private SharedPreferences mPrefs;
@@ -75,7 +70,7 @@ public class OeMapFragment extends MapFragment
     @Override
     public void onPause() {
 
-        mLocHelper.onPause();
+        home.getPresenceBroadcaster().setListener(null);
 
         GoogleMap m = getMap();
         if (m != null) {
@@ -93,8 +88,6 @@ public class OeMapFragment extends MapFragment
     @Override
     public void onStop() {
 
-        mLocHelper.onStop();
-
         mPrefs.unregisterOnSharedPreferenceChangeListener(this);
         super.onStop();
     }
@@ -103,14 +96,24 @@ public class OeMapFragment extends MapFragment
     public void onStart() {
 
         super.onStart();
-        mLocHelper.onStart();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         init();
-        mLocHelper.onResume();
+        PresenceListener l = new PresenceListener() {
+            @Override
+            public void onPresenceUpdate(Presence p) {
+
+                mCurrLoc = p.getLocation();
+                setMyMarker();
+                if (!mMapIsInit) {
+                    setLocation();
+                }
+            }
+        };
+        home.getPresenceBroadcaster().setListener(l);
     }
 
     @Override
@@ -119,22 +122,7 @@ public class OeMapFragment extends MapFragment
         if (savedInstanceState != null)
             mName = savedInstanceState.getString(getString(R.string.bundle_mapname));
         home.setMapFragTag(getTag());
-        mLocHelper = new LocationHelper(new LocationHelper.LHContext() {
-            @Override
-            public Activity getActivity() {
-                return home;
-            }
-            @Override
-            public void updateLocation(Location l) {
 
-                mCurrLoc = l;
-                setMyMarker();
-                if (!mMapIsInit) {
-                    setLocation();
-                }
-            }
-        });
-        mLocHelper.onCreate(savedInstanceState);
         mPrefs.registerOnSharedPreferenceChangeListener(this);
     }
 
@@ -183,7 +171,8 @@ public class OeMapFragment extends MapFragment
         }
     }
 
-    private Location mCurrLoc;
+    //private Location mCurrLoc;
+    private LatLng mCurrLoc;
 
     private Marker mMyMarker;
 
@@ -194,17 +183,17 @@ public class OeMapFragment extends MapFragment
         GoogleMap map = getMap();
         if (map == null) return;
 
-        LatLng latLng = new LatLng(mCurrLoc.getLatitude(), mCurrLoc.getLongitude());
+        //LatLng latLng = new LatLng(mCurrLoc.getLatitude(), mCurrLoc.getLongitude());
         String uname = mPrefs.getString(getString(R.string.pref_username), "nobody");
 
         if (mMyMarker == null) {
             mMyMarker = map.addMarker(new MarkerOptions()
-                    .position(latLng)
+                    .position(mCurrLoc)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
                     .title(uname)
                     .snippet("Here I am."));
         } else {
-            mMyMarker.setPosition(latLng);
+            mMyMarker.setPosition(mCurrLoc);
         }
 
     }
@@ -224,10 +213,7 @@ public class OeMapFragment extends MapFragment
         GoogleMap map = getMap();
         if (map == null)  return false;
 
-        LatLng latLng = new LatLng(mCurrLoc.getLatitude(), mCurrLoc.getLongitude());
-        map.animateCamera(CameraUpdateFactory.newLatLng(latLng));
-        //CameraPosition p = new CameraPosition(latLng,)
-        //map.animateCamera(CameraUpdateFactory.newCameraPosition(p);
+        map.animateCamera(CameraUpdateFactory.newLatLng(mCurrLoc));
         map.setMyLocationEnabled(true);
 
         setMyMarker();

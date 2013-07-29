@@ -9,6 +9,13 @@
         android:defaultValue="nobody"
         />
 
+    <EditTextPreference
+            android:key="@string/pref_snippit"
+            android:title="@string/pref_snippit_fld_title"
+            android:summary="@string/pref_snippit_summary"
+            android:defaultValue="nobody"
+            />
+
     <ListPreference
         android:entries="@array/pref_map_type_entries"
         android:title="@string/pref_map_types_title"
