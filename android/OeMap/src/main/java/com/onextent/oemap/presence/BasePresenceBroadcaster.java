@@ -13,15 +13,14 @@ import com.onextent.oemap.R;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Created by esweeney on 7/28/13.
- */
 public abstract class BasePresenceBroadcaster implements PresenceBroadcaster {
-    protected final OeBaseActivity activity;
-    protected final Set<String>       mapNames;
+
+    protected final OeBaseActivity  activity;
+    protected final Set<String>     mapNames;
+
     private PresenceListener        listener;
     private LocationHelper          mLocHelper;
-    private Presence currentPresence = null;
+    private Presence                currentPresence = null;
 
     public BasePresenceBroadcaster(OeBaseActivity activity) {
         this.activity = activity;
