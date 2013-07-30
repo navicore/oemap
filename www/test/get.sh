@@ -1,2 +1,2 @@
-curl -X GET -H "application/json" http://localhost:4730/presence/testid3
+curl -X GET -H "application/json" http://localhost:5555/presence/testid3
 

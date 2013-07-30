@@ -2,7 +2,8 @@
 <resources>
 
     <string name="app_name">Cahoots</string>
-    <string name="drawer_title">Choose</string>
+    <!-- string name="drawer_title">Choose</string -->
+    <string name="drawer_title"></string>
     <string name="hello_world">Hello world!</string>
     <string name="drawer_open">Open!</string>
     <string name="drawer_close">Closed!</string>
