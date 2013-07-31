@@ -161,6 +161,7 @@ public class OeMapActivity extends OeBaseActivity
     private void updateMapNames(String n) {
         SharedPreferences.Editor e = getEditor();
         e.putString(getString(R.string.state_current_mapname), n);
+        presenceBroadcaster.getMapNames().add(n);
         //todo: maintain a list of all maps currently we are in
         //todo: maintain a list of all maps currently we are in
         //todo: maintain a list of all maps currently we are in
@@ -186,7 +187,6 @@ public class OeMapActivity extends OeBaseActivity
     public void onFinishNewMapDialog(String newMapName) {
         updateMapFrag(newMapName);
         Toast.makeText(this, "New map '" + newMapName + "' created.", Toast.LENGTH_SHORT).show();
-        presenceBroadcaster.getMapNames().add(newMapName);
     }
 
     /** Swaps fragments in the main content view */

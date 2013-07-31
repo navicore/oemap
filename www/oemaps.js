@@ -54,9 +54,11 @@ app.get('/presence/:id', function(req, res) {
 
 app.put('/presence/:id', function(req, res) {
 
+  console.log("put...");
   presences[req.params.id] = req.body;
   //res.json(true);
   res.send(200);
+  //todo: return presences whose subscription is implied by this put
 });
 
 app.delete('/presence/:id', function(req, res) {

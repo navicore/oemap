@@ -17,6 +17,7 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.onextent.android.activity.OeLifeCycle;
+import com.onextent.android.util.OeLog;
 
 public class LocationHelper implements
         OeLifeCycle,
@@ -231,6 +232,7 @@ public class LocationHelper implements
     @Override
     public void onStart() {
 
+        OeLog.d("LocationHelper.onStart");
         if (mLocationClient == null) throw new NullPointerException("no loc client");
         /*
          * Connect the client. Don't re-start any requests here;
@@ -241,6 +243,8 @@ public class LocationHelper implements
 
     @Override
     public void onStop() {
+
+        OeLog.d("LocationHelper.onStop");
 
         // If the client is connected
         if (mLocationClient.isConnected()) {

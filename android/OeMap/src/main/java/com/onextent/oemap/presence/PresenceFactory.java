@@ -12,6 +12,7 @@ public class PresenceFactory {
     }
 
     public static PresenceBroadcaster createBroadcaster(OeBaseActivity a) {
+
         return new RestPresenceBroadcaster(a);
     }
 }
