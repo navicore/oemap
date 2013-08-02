@@ -24,7 +24,7 @@ public class PresenceTestCase extends TestCase {
     }
 
     public void testP1() {
-        assertEquals(PID, presence1.getPID());
+        assertEquals(PID, presence1.getUID());
         assertEquals(LABEL, presence1.getLabel());
         assertEquals(SNIPPIT, presence1.getSnippet());
         assertEquals(SPACENAME, presence1.getSpaceName());

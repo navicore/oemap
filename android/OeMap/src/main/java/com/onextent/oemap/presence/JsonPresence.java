@@ -35,7 +35,7 @@ public class JsonPresence implements Presence {
     }
 
     @Override
-    public String getPID() {
+    public String getUID() {
         return pid;
     }
 

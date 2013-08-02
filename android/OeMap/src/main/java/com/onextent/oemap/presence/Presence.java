@@ -8,7 +8,7 @@ public interface Presence {
 
     public LatLng getLocation();
 
-    public String getPID();
+    public String getUID();
 
     public String getLabel();
 

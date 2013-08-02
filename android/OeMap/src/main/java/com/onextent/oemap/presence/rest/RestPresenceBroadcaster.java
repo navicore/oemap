@@ -8,18 +8,12 @@ import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.BasePresenceBroadcaster;
 import com.onextent.oemap.presence.Presence;
 
-import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,7 +22,7 @@ import java.io.InputStreamReader;
 public class RestPresenceBroadcaster extends BasePresenceBroadcaster {
 
     private static final long THROTTLE_DELAY = 10000;
-    //HttpPost httpput = new HttpPost(HOST + "/" + p.getPID());
+    //HttpPost httpput = new HttpPost(HOST + "/" + p.getUID());
     private static final String PUTURL = "http://10.0.0.2:5555/presence";
     private long lastBCastTime = 0;
 
@@ -58,7 +52,7 @@ public class RestPresenceBroadcaster extends BasePresenceBroadcaster {
 
                 DefaultHttpClient httpclient = new DefaultHttpClient();
 
-                HttpPut httpput = new HttpPut(PUTURL + "/" + p.getPID());
+                HttpPut httpput = new HttpPut(PUTURL + "/" + p.getUID());
 
                 try {
                     StringEntity se = new StringEntity(json);
