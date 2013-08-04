@@ -3,6 +3,7 @@ package com.onextent.android.location;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.IntentSender;
 import android.location.Location;
 import android.os.Bundle;
@@ -25,7 +26,7 @@ public class LocationHelper implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener
 {
-    LHContext context;
+    final LHContext context;
 
     // A request to connect to Location Services
     private LocationRequest mLocationRequest;
@@ -40,7 +41,7 @@ public class LocationHelper implements
     }
 
     public static interface LHContext {
-        public Activity getActivity();
+        public Context getContext();
         public void updateLocation(Location l);
     }
 
@@ -75,7 +76,7 @@ public class LocationHelper implements
          * Create a new location client, using the enclosing class to
          * handle callbacks.
          */
-        mLocationClient = new LocationClient(context.getActivity(), this, this);
+        mLocationClient = new LocationClient(context.getContext(), this, this);
     }
 
     /*
@@ -101,39 +102,18 @@ public class LocationHelper implements
 
 
     private boolean servicesConnected() {
+        OeLog.d("LocationHelper.servicesConnected");
         // Check that Google Play services is available
         int resultCode =
-                GooglePlayServicesUtil.
-                        isGooglePlayServicesAvailable(context.getActivity());
-        // If Google Play services is available
+                GooglePlayServicesUtil.isGooglePlayServicesAvailable(context.getContext());
         if (ConnectionResult.SUCCESS == resultCode) {
-            // In debug mode, log the status
             Log.d("Location Updates",
                     "Google Play services is available.");
-            // Continue
             return true;
         // Google Play services was not available for some reason
         } else {
-            // Get the error code
-            //int errorCode = connectionResult.getErrorCode();
-            int errorCode = resultCode; //ejs???
-            // Get the error dialog from Google Play services
-            Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
-                    errorCode,
-                    context.getActivity(),
-                    LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
-
-            // If Google Play services can provide an error dialog
-            if (errorDialog != null) {
-                // Create a new DialogFragment for the error dialog
-                ErrorDialogFragment errorFragment =
-                        new ErrorDialogFragment();
-                // Set the dialog in the DialogFragment
-                errorFragment.setDialog(errorDialog);
-                // Show the error dialog in the DialogFragment
-                errorFragment.show(context.getActivity().getFragmentManager(), "Location Updates");
-                //ejs todo set content pane?
-            }
+            OeLog.e("location services connect error: " + resultCode);
+            //tddo: send error via intent
         }
         return false;
 
@@ -141,39 +121,21 @@ public class LocationHelper implements
 
     @Override
     public void onConnected(Bundle bundle) {
+        OeLog.d("LocationHelper.onConnected");
         startUpdates();
     }
 
     @Override
     public void onDisconnected() {
-        Toast.makeText(context.getActivity(), "Disconnected from Location Service.", Toast.LENGTH_SHORT).show();
+        OeLog.d("location services disconnected");
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        if (connectionResult.hasResolution()) {
-            try {
-                // Start an Activity that tries to resolve the error
-                connectionResult.startResolutionForResult(
-                        context.getActivity(),
-                        LocationUtils.CONNECTION_FAILURE_RESOLUTION_REQUEST);
-                /*
-                 * Thrown if Google Play services canceled the original
-                 * PendingIntent
-                 */
-            } catch (IntentSender.SendIntentException e) {
-                // Log the error
-                e.printStackTrace();
-            }
-        } else {
-            /*
-             * If no resolution is available, display a dialog to the
-             * user with the error.
-             */
-            showErrorDialog(connectionResult.getErrorCode());
-        }
+        OeLog.e("location services connect failed: " + connectionResult);
     }
 
+    /*
     // Define a DialogFragment that displays the error dialog
     public static class ErrorDialogFragment extends DialogFragment {
         // Global field to contain the error dialog
@@ -228,6 +190,7 @@ public class LocationHelper implements
             //ejs todo set content pane?
         }
     }
+     */
 
     @Override
     public void onStart() {
@@ -268,11 +231,13 @@ public class LocationHelper implements
     @Override
     public void onLocationChanged(Location location) {
 
+        OeLog.d("LocationHelper.onLocationChanged");
         context.updateLocation(location);
     }
 
     private void startUpdates() {
 
+        OeLog.d("LocationHelper.startUpdates");
         Location currentLocation = mLocationClient.getLastLocation();
 
         if (servicesConnected()) {
@@ -286,6 +251,7 @@ public class LocationHelper implements
      */
     private void startPeriodicUpdates() {
 
+        OeLog.d("LocationHelper.startPeriodicUpdates");
         mLocationClient.requestLocationUpdates(mLocationRequest, this);
     }
 
@@ -294,6 +260,7 @@ public class LocationHelper implements
      * Location Services
      */
     private void stopPeriodicUpdates() {
+        OeLog.d("LocationHelper.stopPeriodicUpdates");
         mLocationClient.removeLocationUpdates(this);
     }
 }

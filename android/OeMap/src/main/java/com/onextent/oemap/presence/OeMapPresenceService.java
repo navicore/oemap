@@ -4,11 +4,18 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 
+import com.onextent.android.activity.OeBaseActivity;
+import com.onextent.android.location.LocationHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.R;
@@ -16,16 +23,20 @@ import com.onextent.oemap.R;
 import java.util.HashSet;
 import java.util.Set;
 
-public class OeMapPresenceService extends IntentService {
+public class OeMapPresenceService extends Service {
+
+    private LocationHelper mLocHelper;
+    private Presence                currentPresence = null;
 
     private String CMD_POLL        = null;
     private String CMD_BOOT        = null;
     private String CMD_ADD_SPACE   = null;
     private String CMD_RM_SPACE    = null;
-    private String KEY_SPACENAME   = null;
     private String KEY_REASON      = null;
     private String KEY_RUNNING     = null;
     private String KEY_SPACENAMES  = null;
+    private String KEY_SPACENAME   = null;
+    private String KEY_UID         = null;
 
 
     private boolean _running = false;
@@ -41,6 +52,7 @@ public class OeMapPresenceService extends IntentService {
         CMD_ADD_SPACE   = getString(R.string.presence_service_cmd_add_space);
         CMD_RM_SPACE    = getString(R.string.presence_service_cmd_rm_space);
         KEY_SPACENAME   = getString(R.string.presence_service_key_spacename);
+        KEY_UID         = getString(R.string.presence_service_key_uid);
         KEY_REASON      = getString(R.string.presence_service_key_reason);
         KEY_RUNNING     = getString(R.string.presence_service_key_running);
         KEY_SPACENAMES  = getString(R.string.presence_service_key_spacenames);
@@ -54,6 +66,35 @@ public class OeMapPresenceService extends IntentService {
             _spacenames = new HashSet<String>();
         }
         createNotification();
+        mLocHelper = new LocationHelper(new LocationHelper.LHContext() {
+            @Override
+            public Context getContext() {
+                return OeMapPresenceService.this;
+            }
+            @Override
+            public void updateLocation(Location l) {
+                broadcast(l);
+            }
+        });
+        mLocHelper.onCreate();
+        mLocHelper.onStart();
+        mLocHelper.onResume();
+    }
+
+    private void broadcast(Location l) {
+
+        String uid = OeBaseActivity.id(this);
+        OeLog.d("broadcast for uid: " + uid);
+        for (String s : _spacenames) {
+            //todo:
+            //  write my own pres to db for each map
+            Intent intent = new Intent(getString(R.string.presence_service_update_intent));
+            intent.putExtra(KEY_UID, uid);
+            intent.putExtra(KEY_SPACENAME, s);
+            //LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+            OeLog.d("    sending action: " + intent.getAction() + " for uid: " + uid + " and space: " + s);
+            sendBroadcast(intent);
+        }
     }
 
     private void createNotification() {
@@ -81,7 +122,14 @@ public class OeMapPresenceService extends IntentService {
     @Override
     public void onDestroy() {
         saveSpacenames();
+        mLocHelper.onPause();
+        mLocHelper.onStop();
         super.onDestroy();
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
     private void saveSpacenames() {
@@ -93,11 +141,17 @@ public class OeMapPresenceService extends IntentService {
     private SharedPreferences mPrefs;
     private SharedPreferences.Editor mPrefEdit;
 
-    public OeMapPresenceService() {
-        super("OeMap Presence Service");
-    }
+    //public OeMapPresenceService() {
+    //    super("OeMap Presence Service");
+    //}
 
     @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        onHandleIntent(intent);
+        return Service.START_STICKY;
+    }
+
+    //@Override
     protected void onHandleIntent(Intent intent) {
 
         Bundle extras = intent.getExtras();
@@ -154,6 +208,7 @@ public class OeMapPresenceService extends IntentService {
     private void stopRunning() {
         hideNotification();
         _running = false;
+        //stopSelf(); //todo:
     }
 
     private void wakeup() {

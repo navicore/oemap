@@ -2,8 +2,10 @@ package com.onextent.oemap;
 
 import android.app.DialogFragment;
 import android.app.FragmentManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.net.Uri;
@@ -37,6 +39,9 @@ public class OeMapActivity extends OeBaseActivity
     private ActionBarDrawerToggle mDrawerToggle;
 
     //private PresenceBroadcaster presenceBroadcaster = null;
+
+    private String KEY_SPACENAME   = null;
+    private String KEY_UID         = null;
 
     private GoogleMap mMap;
     private CharSequence mTitle =  "na";
@@ -276,6 +281,8 @@ public class OeMapActivity extends OeBaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.oe_map_activity);
 
+        KEY_UID = getString(R.string.presence_service_key_uid);
+        KEY_SPACENAME = getString(R.string.presence_service_key_spacename);
         //presenceBroadcaster = PresenceFactory.createBroadcaster(this);
         //presenceBroadcaster.onCreate();
 
@@ -318,12 +325,34 @@ public class OeMapActivity extends OeBaseActivity
             }
         };
 
+        _presenceReceiverFilter = new IntentFilter(getString(R.string.presence_service_update_intent));
+        registerReceiver(_presenceReceiver, _presenceReceiverFilter);
+
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
     }
+
+    private BroadcastReceiver _presenceReceiver = new PresenceReceiver();
+    private IntentFilter _presenceReceiverFilter = null;
+    private class PresenceReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            OeLog.d("PresenceReceiver.onReceive");
+            String uid = intent.getExtras().getString(KEY_UID);
+            String spacename = intent.getExtras().getString(KEY_SPACENAME);
+            OeLog.d("PresenceReceiver.onReceive uid: " + uid + " spacename: " + spacename );
+            //if (mName.equals(spacename)) {
+                OeLog.d("PresenceReceiver.onReceive updating current map");
+                //todo: lookup by uid and map
+            //}
+        }
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

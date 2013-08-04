@@ -8,10 +8,10 @@
         android:minSdkVersion="14"
         android:targetSdkVersion="16" />
 
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
     <permission
             android:name="com.onextent.oemap.permission.MAPS_RECEIVE"
             android:protectionLevel="signature"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
     <uses-permission android:name="com.onextent.oemap.permission.MAPS_RECEIVE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -80,7 +80,7 @@
         </receiver>
         <service
             android:name=".presence.OeMapPresenceService"
-            android:process=":oemap_presence_watcher"
+            android:process=":presence_service"
             android:icon="@drawable/ic_launcher"
             android:label="@string/presence_service_name"
         >

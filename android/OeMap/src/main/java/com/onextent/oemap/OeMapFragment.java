@@ -1,9 +1,14 @@
 package com.onextent.oemap;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -67,6 +72,40 @@ public class OeMapFragment extends MapFragment
     }
 
     @Override
+    public void onStart() {
+
+        super.onStart();
+    }
+
+    @Override
+    public void onStop() {
+
+        mPrefs.unregisterOnSharedPreferenceChangeListener(this);
+        super.onStop();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        init();
+        /*
+        PresenceListener l = new PresenceListener() {
+            @Override
+            public void onPresenceUpdate(Presence p) {
+
+                //todo: ejs will be with a bcast intent
+                mCurrLoc = p.getLocation();
+                setMyMarker();
+                if (!mMapIsInit) {
+                    setLocation();
+                }
+            }
+        };
+        home.getPresenceBroadcaster().setListener(l);
+        */
+    }
+
+    @Override
     public void onPause() {
 
         //home.getPresenceBroadcaster().setListener(null);
@@ -81,38 +120,6 @@ public class OeMapFragment extends MapFragment
             mPrefEdit.commit();
         }
         super.onPause();
-    }
-
-    @Override
-    public void onStop() {
-
-        mPrefs.unregisterOnSharedPreferenceChangeListener(this);
-        super.onStop();
-    }
-
-    @Override
-    public void onStart() {
-
-        super.onStart();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        init();
-        PresenceListener l = new PresenceListener() {
-            @Override
-            public void onPresenceUpdate(Presence p) {
-
-                //todo: ejs will be with a bcast intent
-                mCurrLoc = p.getLocation();
-                setMyMarker();
-                if (!mMapIsInit) {
-                    setLocation();
-                }
-            }
-        };
-        //home.getPresenceBroadcaster().setListener(l);
     }
 
     @Override
