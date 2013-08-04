@@ -8,6 +8,7 @@
         android:minSdkVersion="14"
         android:targetSdkVersion="16" />
 
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
     <permission
             android:name="com.onextent.oemap.permission.MAPS_RECEIVE"
             android:protectionLevel="signature"/>
@@ -71,6 +72,19 @@
             </intent-filter>
         </receiver>
         <service android:name=".GcmHelper$GcmIntentService" />
+
+        <receiver android:name=".OeMapAutostart">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name=".presence.OeMapPresenceService"
+            android:process=":oemap_presence_watcher"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/presence_service_name"
+        >
+    </service>
 
     </application>
 

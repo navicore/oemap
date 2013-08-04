@@ -63,6 +63,7 @@ public abstract class BasePresenceBroadcaster implements PresenceBroadcaster {
     @Override
     public void onCreate() {
 
+        if (true) throw new NullPointerException("wtf?");
         mLocHelper = new LocationHelper(new LocationHelper.LHContext() {
             @Override
             public Activity getActivity() {

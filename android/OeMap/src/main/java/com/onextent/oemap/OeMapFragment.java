@@ -60,7 +60,6 @@ public class OeMapFragment extends MapFragment
         settings.setMyLocationButtonEnabled(false);
 
         float zoom = mPrefs.getFloat(getString(R.string.state_zoom_level), 15);
-        OeLog.d("zoom restored as " + zoom);
         double lat = (double) mPrefs.getFloat(getString(R.string.state_lat), 0);
         double lng = (double) mPrefs.getFloat(getString(R.string.state_lng), 0);
         map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lat, lng)));
@@ -70,14 +69,13 @@ public class OeMapFragment extends MapFragment
     @Override
     public void onPause() {
 
-        home.getPresenceBroadcaster().setListener(null);
+        //home.getPresenceBroadcaster().setListener(null);
 
         GoogleMap m = getMap();
         if (m != null) {
 
             float zoom = m.getCameraPosition().zoom;
             mPrefEdit.putFloat(getString(R.string.state_zoom_level), zoom);
-            OeLog.d("zoom saved as " + zoom);
             mPrefEdit.putFloat(getString(R.string.state_lat), (float) m.getCameraPosition().target.latitude);
             mPrefEdit.putFloat(getString(R.string.state_lng), (float) m.getCameraPosition().target.longitude);
             mPrefEdit.commit();
@@ -106,6 +104,7 @@ public class OeMapFragment extends MapFragment
             @Override
             public void onPresenceUpdate(Presence p) {
 
+                //todo: ejs will be with a bcast intent
                 mCurrLoc = p.getLocation();
                 setMyMarker();
                 if (!mMapIsInit) {
@@ -113,7 +112,7 @@ public class OeMapFragment extends MapFragment
                 }
             }
         };
-        home.getPresenceBroadcaster().setListener(l);
+        //home.getPresenceBroadcaster().setListener(l);
     }
 
     @Override
@@ -228,9 +227,7 @@ public class OeMapFragment extends MapFragment
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
 
-        OeLog.d(s);
         if (s.startsWith("pref_"))  {
-            OeLog.d("..." + s);
             setMapOptions();
             updateMyMarker();
         }

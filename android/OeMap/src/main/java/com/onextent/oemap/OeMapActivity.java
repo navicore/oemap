@@ -24,8 +24,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.onextent.android.activity.OeBaseActivity;
 import com.onextent.android.util.OeLog;
-import com.onextent.oemap.presence.PresenceBroadcaster;
-import com.onextent.oemap.presence.PresenceFactory;
+import com.onextent.oemap.presence.OeMapPresenceService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +36,7 @@ public class OeMapActivity extends OeBaseActivity
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
 
-    private PresenceBroadcaster presenceBroadcaster = null;
+    //private PresenceBroadcaster presenceBroadcaster = null;
 
     private GoogleMap mMap;
     private CharSequence mTitle =  "na";
@@ -57,7 +56,7 @@ public class OeMapActivity extends OeBaseActivity
     private static final int SEPARATOR_POS      = 5;
     //private GcmHelper mGcmHelper;
 
-    private static class DrawerAdapter extends ArrayAdapter {
+    private class DrawerAdapter extends ArrayAdapter {
 
         public DrawerAdapter(Context context, int textViewResourceId, List<String> objects) {
             super(context, textViewResourceId, objects);
@@ -70,19 +69,26 @@ public class OeMapActivity extends OeBaseActivity
                 case NEW_PRIVATE_MAP:
                 case LIST_COHORTS_POS:
                 case SHARE_MAP_POS:
-                case QUIT_MAP_POS:
                 case SEPARATOR_POS:
                     return false;
+                case QUIT_MAP_POS:
+                    return OeMapActivity.this.aMapIsActive();
                 case NEW_PUBLIC_MAP:
                 default:
                     return true;
             }
         }
 
+
         @Override
         public boolean areAllItemsEnabled() {
             return false;
         }
+    }
+
+    private boolean aMapIsActive() {
+        String m = getPrefs().getString(getString(R.string.state_current_mapname), "none");
+        return !"none".equals(m);
     }
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
@@ -161,7 +167,7 @@ public class OeMapActivity extends OeBaseActivity
     private void updateMapNames(String n) {
         SharedPreferences.Editor e = getEditor();
         e.putString(getString(R.string.state_current_mapname), n);
-        presenceBroadcaster.getMapNames().add(n);
+        //presenceBroadcaster.getMapNames().add(n);
         //todo: maintain a list of all maps currently we are in
         //todo: maintain a list of all maps currently we are in
         //todo: maintain a list of all maps currently we are in
@@ -184,9 +190,36 @@ public class OeMapActivity extends OeBaseActivity
         mDrawerList.setItemChecked(position, true);
     }
 
-    public void onFinishNewMapDialog(String newMapName) {
+    void onFinishNewMapDialog(String newMapName) {
         updateMapFrag(newMapName);
         Toast.makeText(this, "New map '" + newMapName + "' created.", Toast.LENGTH_SHORT).show();
+        Intent i =  new Intent(this, OeMapPresenceService.class);
+        i.putExtra("reason", R.string.presence_service_cmd_add_space);
+        i.putExtra(getString(R.string.presence_service_key_reason), getString(R.string.presence_service_cmd_add_space));
+        i.putExtra(getString(R.string.presence_service_key_spacename), newMapName);
+        startService(i);
+    }
+
+    private void wakePresenceService() {
+        Intent i =  new Intent(this, OeMapPresenceService.class);
+        i.putExtra(getString(R.string.presence_service_key_reason), getString(R.string.presence_service_cmd_poll));
+        startService(i);
+    }
+
+    private void quitMap() {
+
+        String spacename = getPrefs().getString(getString(R.string.state_current_mapname), null);
+        if (mDrawerNamesList.contains(spacename)) {
+            mDrawerNamesList.remove(spacename);
+            mDrawerList.deferNotifyDataSetChanged();
+        }
+        setMapFrag("none");
+        updateMapFrag("none");
+
+        Intent i =  new Intent(this, OeMapPresenceService.class);
+        i.putExtra(getString(R.string.presence_service_key_reason), getString(R.string.presence_service_cmd_rm_space));
+        i.putExtra(getString(R.string.presence_service_key_spacename), spacename);
+        startService(i);
     }
 
     /** Swaps fragments in the main content view */
@@ -203,6 +236,7 @@ public class OeMapActivity extends OeBaseActivity
             case SHARE_MAP_POS:
                 break;
             case QUIT_MAP_POS:
+                quitMap();
                 break;
             default:
                 updateMapFrag((String) mDrawerNamesList.get(position));
@@ -230,17 +264,20 @@ public class OeMapActivity extends OeBaseActivity
         }
     }
 
+    /*
+
     public PresenceBroadcaster getPresenceBroadcaster() {
         return presenceBroadcaster;
     }
+     */
 
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.oe_map_activity);
 
-        presenceBroadcaster = PresenceFactory.createBroadcaster(this);
-        presenceBroadcaster.onCreate();
+        //presenceBroadcaster = PresenceFactory.createBroadcaster(this);
+        //presenceBroadcaster.onCreate();
 
         //mGcmHelper = new GcmHelper(this);
         //mGcmHelper.onCreate();
@@ -350,7 +387,7 @@ public class OeMapActivity extends OeBaseActivity
     @Override
     public void onStop() {
 
-        presenceBroadcaster.onStop();
+        //presenceBroadcaster.onStop();
         super.onStop();
     }
 
@@ -358,25 +395,26 @@ public class OeMapActivity extends OeBaseActivity
     public void onStart() {
 
         super.onStart();
-        presenceBroadcaster.onStart();
+        //presenceBroadcaster.onStart();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        presenceBroadcaster.onResume();
+        //presenceBroadcaster.onResume();
         //mGcmHelper.onResume();
         SharedPreferences p = getPrefs();
         String mapname = p.getString(getString(R.string.state_current_mapname), "none");
         setMapFrag(mapname);
         updateMapFrag(mapname);
+        wakePresenceService();
     }
 
     @Override
     public void onPause() {
 
         //mGcmHelper.onPause();
-        presenceBroadcaster.onPause();
+        //presenceBroadcaster.onPause();
         super.onPause();
     }
 }

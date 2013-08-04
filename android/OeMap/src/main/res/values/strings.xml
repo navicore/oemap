@@ -54,6 +54,15 @@
     <string name="pref_show_indoors_summary">Show Indoors on Map</string>
     <string name="state_history">state_history</string>
     <string name="bundle_mapname">mapname</string>
+    <string name="presence_service_name">OeMap Presence Service</string>
+    <string name="presence_service_cmd_poll">poll</string>
+    <string name="presence_service_cmd_boot">boot</string>
+    <string name="presence_service_cmd_add_space">addSpace</string>
+    <string name="presence_service_cmd_rm_space">rmSpace</string>
+    <string name="presence_service_key_spacename">spacename</string>
+    <string name="presence_service_key_reason">reason</string>
+    <string name="presence_service_key_running">presence_service_key_running</string>
+    <string name="presence_service_key_spacenames">presence_service_key_spacenames</string>
 
     <string-array name="pref_map_type_entries">
         <item>Normal</item>
