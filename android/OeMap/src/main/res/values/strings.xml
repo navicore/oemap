@@ -66,6 +66,7 @@
     <string name="presence_service_key_spacenames">presence_service_key_spacenames</string>
 
     <string name="presence_service_update_intent">com.onextent.oemap.presenceServiceUpdate</string>
+    <string name="presence_db_name">oemap_presences</string>
 
     <string-array name="pref_map_type_entries">
         <item>Normal</item>

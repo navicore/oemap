@@ -12,7 +12,9 @@ import com.onextent.android.util.OeLog;
 import org.json.JSONException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 public class PresenceDbHelper extends SQLiteOpenHelper {
@@ -110,9 +112,9 @@ public class PresenceDbHelper extends SQLiteOpenHelper {
         return p;
     }
 
-    public List<Presence> getAll(String spacename) throws JSONException {
+    public Set<Presence> getAll(String spacename) throws JSONException {
         Cursor c = null;
-        List<Presence> l = null;
+        Set<Presence> l = null;
         String[] cols = {"uid", "spacename", "data"};
         try {
             c = _db.query(true, "presences", cols, "spacename='" + spacename + "'", null, null, null, null, null);
@@ -121,7 +123,7 @@ public class PresenceDbHelper extends SQLiteOpenHelper {
             c.moveToFirst();
             for (int i = 0; i < numRows; i++) {
                 if (l == null)
-                    l = new ArrayList<Presence>();
+                    l = new HashSet<Presence>();
                 String json = c.getString(DATA_FLD);
                 Presence p = PresenceFactory.createPresence(json);
                 l.add(p);

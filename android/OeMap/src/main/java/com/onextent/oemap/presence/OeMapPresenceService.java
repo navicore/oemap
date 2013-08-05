@@ -1,6 +1,5 @@
 package com.onextent.oemap.presence;
 
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -12,21 +11,25 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.onextent.android.activity.OeBaseActivity;
 import com.onextent.android.location.LocationHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.R;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class OeMapPresenceService extends Service {
 
+    private SharedPreferences mPrefs;
+    private SharedPreferences.Editor mPrefEdit;
+
     private LocationHelper mLocHelper;
     private Presence                currentPresence = null;
+    private PresenceDbHelper _dbHelper = null;
 
     private String CMD_POLL        = null;
     private String CMD_BOOT        = null;
@@ -47,6 +50,9 @@ public class OeMapPresenceService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        _dbHelper = new PresenceDbHelper(this, getString(R.string.presence_db_name));
+
         CMD_POLL        = getString(R.string.presence_service_cmd_poll);
         CMD_BOOT        = getString(R.string.presence_service_cmd_boot);
         CMD_ADD_SPACE   = getString(R.string.presence_service_cmd_add_space);
@@ -61,10 +67,14 @@ public class OeMapPresenceService extends Service {
         mPrefEdit = mPrefs.edit();
 
         _running = mPrefs.getBoolean(KEY_RUNNING, false);
-        _spacenames = mPrefs.getStringSet(KEY_SPACENAMES, null);
-        if (_spacenames == null) {
-            _spacenames = new HashSet<String>();
+        Set<String> storedNames = mPrefs.getStringSet(KEY_SPACENAMES, null);
+        //_spacenames = new HashSet<String>();
+        _spacenames = new LinkedHashSet<String>();
+        if (storedNames != null)
+        for (String n : storedNames) {
+            _spacenames.add(n);
         }
+        OeLog.d("loaded " + _spacenames.size() + " spacenames");
         createNotification();
         mLocHelper = new LocationHelper(new LocationHelper.LHContext() {
             @Override
@@ -81,13 +91,27 @@ public class OeMapPresenceService extends Service {
         mLocHelper.onResume();
     }
 
+    private void storeLocalPresence(Location l, String s) {
+
+        LatLng latLng       = new LatLng(l.getLatitude(), l.getLongitude());
+        String pid          = OeBaseActivity.id(this.getApplicationContext());
+        SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
+        //todo: allow per-map overrides
+        String label        = p.getString(getString(R.string.pref_username), "nobody");
+        String snippit      = p.getString(getString(R.string.pref_snippit), "sigh...");
+        currentPresence     = PresenceFactory.createPresence(pid, latLng, label, snippit, s);
+
+        _dbHelper.replace(currentPresence);
+    }
+
     private void broadcast(Location l) {
 
         String uid = OeBaseActivity.id(this);
         OeLog.d("broadcast for uid: " + uid);
         for (String s : _spacenames) {
-            //todo:
-            //  write my own pres to db for each map
+
+            storeLocalPresence(l, s);
+
             Intent intent = new Intent(getString(R.string.presence_service_update_intent));
             intent.putExtra(KEY_UID, uid);
             intent.putExtra(KEY_SPACENAME, s);
@@ -136,14 +160,8 @@ public class OeMapPresenceService extends Service {
         mPrefEdit.putBoolean(KEY_RUNNING, _running);
         mPrefEdit.putStringSet(KEY_SPACENAMES, _spacenames);
         mPrefEdit.commit();
+        OeLog.d("saved " + _spacenames.size() + " spacenames");
     }
-
-    private SharedPreferences mPrefs;
-    private SharedPreferences.Editor mPrefEdit;
-
-    //public OeMapPresenceService() {
-    //    super("OeMap Presence Service");
-    //}
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {

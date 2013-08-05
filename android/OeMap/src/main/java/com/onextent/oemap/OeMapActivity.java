@@ -30,10 +30,12 @@ import com.onextent.oemap.presence.OeMapPresenceService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class OeMapActivity extends OeBaseActivity
 {
     private static final String MAP_FRAG_TAG = "oemap";
+    private String KEY_SPACENAMES  = null;
 
     private DrawerLayout mDrawerLayout;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -46,7 +48,7 @@ public class OeMapActivity extends OeBaseActivity
     private String[] mMenuNames;
     private ListView mDrawerList;
     private ArrayList mDrawerNamesList;
-    private ArrayList mMapHistory;
+    //private ArrayList mMapHistory;
 
     private String mMapFragTag;
 
@@ -175,7 +177,7 @@ public class OeMapActivity extends OeBaseActivity
             mDrawerNamesList.add(SEPARATOR_POS + 1, n);
             mDrawerList.deferNotifyDataSetChanged();
         }
-        addHistory(n);
+        //addHistory(n);
         int position = mDrawerNamesList.indexOf(n);
         mDrawerList.setItemChecked(position, true);
     }
@@ -246,7 +248,9 @@ public class OeMapActivity extends OeBaseActivity
 
     private void updateMapNamesFromHistory() {
 
-        List<String> h = getHistory();
+        //List<String> h = getHistory();
+        Set<String> h =  getPrefs().getStringSet(KEY_SPACENAMES, null);
+        if (h != null)
         for (String s : h) {
             if (!mDrawerNamesList.contains(s)) {
                 mDrawerNamesList.add(SEPARATOR_POS + 1, s);
@@ -266,6 +270,7 @@ public class OeMapActivity extends OeBaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.oe_map_activity);
 
+        KEY_SPACENAMES  = getString(R.string.presence_service_key_spacenames);
         //presenceBroadcaster = PresenceFactory.createBroadcaster(this);
         //presenceBroadcaster.onCreate();
 

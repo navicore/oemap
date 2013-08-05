@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.content.LocalBroadcastManager;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -20,11 +19,23 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.Presence;
-import com.onextent.oemap.presence.PresenceListener;
+import com.onextent.oemap.presence.PresenceDbHelper;
+
+import org.json.JSONException;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class OeMapFragment extends MapFragment
         implements  SharedPreferences.OnSharedPreferenceChangeListener
 {
+    private Map<String, Holder> _markers = new HashMap<String, Holder>();
+    private PresenceDbHelper _dbHelper = null;
+    private LatLng mCurrLoc;
+    private Marker mMyMarker;
+
     private String KEY_SPACENAME   = null;
     private String KEY_UID         = null;
 
@@ -34,9 +45,6 @@ public class OeMapFragment extends MapFragment
     private SharedPreferences.Editor mPrefEdit;
 
     private OeMapActivity home;
-    public OeMapFragment() {
-        super();
-    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -72,15 +80,12 @@ public class OeMapFragment extends MapFragment
     }
 
     private String getName() {
-        //String spacename = ((OeMapActivity)getActivity()).getPrefs().getString(getString(R.string.state_current_mapname), null);
 
         String mName = null;
         Bundle args = getArguments();
         if (args != null)
             mName = args.getString(getString(R.string.bundle_mapname));
-
         return mName;
-        //return spacename;
     }
 
     private BroadcastReceiver _presenceReceiver = new PresenceReceiver();
@@ -93,12 +98,29 @@ public class OeMapFragment extends MapFragment
             String mName = getName();
             String uid = intent.getExtras().getString(KEY_UID);
             String spacename = intent.getExtras().getString(KEY_SPACENAME);
-            OeLog.d("PresenceReceiver.onReceive handler for " + mName + " with uid: " + uid + " spacename: " + spacename );
             if (mName != null && mName.equals(spacename)) {
                 OeLog.d("PresenceReceiver.onReceive updating current map with uid: " + uid + " spacename: " + spacename );
-                //todo: lookup by uid and map
+                try {
+                    Presence p = _dbHelper.get(uid, spacename);
+                    if (p == null) {
+                        OeLog.w("PresenceReceiver.onReceive presence not found: " + intent);
+                    } else {
+                        if (isMyPresence(p)) {
+                            OeLog.d("PresenceReceiver.onReceive presence is my own");
+                            mCurrLoc = p.getLocation();
+                        }
+                        setMarker(p);
+                    }
+                } catch (JSONException e) {
+                    OeLog.e("PresenceReceiver.onReceive error: " + e, e);
+                }
             }
         }
+    }
+
+    private boolean isMyPresence(Presence p) {
+
+        return (home.id().equals(p.getUID()));
     }
 
 
@@ -115,32 +137,31 @@ public class OeMapFragment extends MapFragment
         super.onStop();
     }
 
+    private void loadMarkers() {
+
+        String spacename = getName();
+        try {
+            Set<Presence> markers = _dbHelper.getAll(spacename);
+            if (markers != null)
+            for (Presence p : markers) {
+                setMarker(p);
+            }
+        } catch (JSONException e) {
+            OeLog.e("loadMarkers error: " + e, e);
+        }
+
+    }
+
     @Override
     public void onResume() {
         super.onResume();
         init();
-        /*
-        PresenceListener l = new PresenceListener() {
-            @Override
-            public void onPresenceUpdate(Presence p) {
-
-                //todo: ejs will be with a bcast intent
-                mCurrLoc = p.getLocation();
-                setMyMarker();
-                if (!mMapIsInit) {
-                    setLocation();
-                }
-            }
-        };
-        home.getPresenceBroadcaster().setListener(l);
-        */
+        loadMarkers();
         getActivity().registerReceiver(_presenceReceiver, _presenceReceiverFilter);
     }
 
     @Override
     public void onPause() {
-
-        //home.getPresenceBroadcaster().setListener(null);
 
         GoogleMap m = getMap();
         if (m != null) {
@@ -158,6 +179,7 @@ public class OeMapFragment extends MapFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        _dbHelper = new PresenceDbHelper(getActivity(), getString(R.string.presence_db_name));
         KEY_UID = getString(R.string.presence_service_key_uid);
         KEY_SPACENAME = getString(R.string.presence_service_key_spacename);
         home.setMapFragTag(getTag());
@@ -213,38 +235,53 @@ public class OeMapFragment extends MapFragment
         }
     }
 
-    //private Location mCurrLoc;
-    private LatLng mCurrLoc;
-
-    private Marker mMyMarker;
-
     private void setMyMarker() {
 
         if (mCurrLoc == null) return;
+        if (mMyMarker == null) return;
+        mMyMarker.setPosition(mCurrLoc);
+    }
 
+    private class Holder {
+        public final long time;
+        public final Marker marker;
+
+        Holder(Marker m) {
+            marker = m;
+            time = System.currentTimeMillis();
+        }
+    }
+
+    private void setMarker(Presence p) {
+
+        boolean isMine = isMyPresence(p);
         GoogleMap map = getMap();
         if (map == null) return;
 
-        //LatLng latLng = new LatLng(mCurrLoc.getLatitude(), mCurrLoc.getLongitude());
-        String uname = mPrefs.getString(getString(R.string.pref_username), "nobody");
+        Holder h = null;
+        h = _markers.get(p.getUID());
 
-        if (mMyMarker == null) {
-            mMyMarker = map.addMarker(new MarkerOptions()
-                    .position(mCurrLoc)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN))
-                    .title(uname)
-                    .snippet("Here I am."));
+        if (h == null) {
+            float color;
+            if (isMine) {
+                color = BitmapDescriptorFactory.HUE_GREEN;
+            } else {
+                color = BitmapDescriptorFactory.HUE_BLUE;
+            }
+            Marker m = map.addMarker(new MarkerOptions()
+                    .position(p.getLocation())
+                    .icon(BitmapDescriptorFactory.defaultMarker(color))
+                    .title(p.getLabel())
+                    .snippet(p.getSnippet()));
+            h = new Holder(m);
+            _markers.put(p.getUID(), h);
+            if (isMine) {
+                mMyMarker = m;
+            }
         } else {
-            mMyMarker.setPosition(mCurrLoc);
-        }
-
-    }
-
-    private void updateMyMarker() {
-        if (mMyMarker != null) {
-            String uname = mPrefs.getString(getString(R.string.pref_username), "nobody");
-            OeLog.d("setting uname to " + uname);
-            mMyMarker.setTitle(uname);
+            h.marker.setPosition(p.getLocation());
+            h.marker.setTitle(p.getLabel());
+            h.marker.setSnippet(p.getSnippet());
         }
     }
 
@@ -272,7 +309,6 @@ public class OeMapFragment extends MapFragment
 
         if (s.startsWith("pref_"))  {
             setMapOptions();
-            updateMyMarker();
         }
     }
 }

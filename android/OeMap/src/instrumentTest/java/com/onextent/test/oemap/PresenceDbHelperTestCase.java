@@ -5,12 +5,12 @@ import android.test.AndroidTestCase;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.onextent.oemap.presence.Presence;
-import com.onextent.oemap.presence.PresenceFactory;
 import com.onextent.oemap.presence.PresenceDbHelper;
+import com.onextent.oemap.presence.PresenceFactory;
 
 import org.json.JSONException;
 
-import java.util.List;
+import java.util.Set;
 
 public class PresenceDbHelperTestCase extends AndroidTestCase {
 
@@ -91,7 +91,7 @@ public class PresenceDbHelperTestCase extends AndroidTestCase {
         p = PresenceFactory.createPresence("myUid4", new LatLng(30.1, 40.1), "my label", "my snippit", "my new map");
         _dbHelper.replace(p);
 
-        List<Presence> l = _dbHelper.getAll("my new map");
+        Set<Presence> l = _dbHelper.getAll("my new map");
         assertNotNull("should have found these", l);
         assertEquals("wrong number of getAll(map) results: " + l, 4, l.size());
     }

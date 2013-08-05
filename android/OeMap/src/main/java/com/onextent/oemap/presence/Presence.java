@@ -17,5 +17,6 @@ public interface Presence {
     public String getSpaceName();
     public void setSpaceName(String name);
 
+    public long getAgeInMillis();
 }
 
