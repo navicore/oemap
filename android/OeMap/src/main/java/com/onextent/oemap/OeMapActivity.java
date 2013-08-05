@@ -40,9 +40,6 @@ public class OeMapActivity extends OeBaseActivity
 
     //private PresenceBroadcaster presenceBroadcaster = null;
 
-    private String KEY_SPACENAME   = null;
-    private String KEY_UID         = null;
-
     private GoogleMap mMap;
     private CharSequence mTitle =  "na";
     private String mDrawerTitle = "na";
@@ -124,6 +121,7 @@ public class OeMapActivity extends OeBaseActivity
 
     private void updateMapFrag(String mapname) {
         Toast.makeText(this, "Showing '" + mapname + "'.", Toast.LENGTH_SHORT).show();
+        setMapFrag(mapname);
         updateMapNames(mapname);
         setTitle(mapname);
     }
@@ -137,19 +135,19 @@ public class OeMapActivity extends OeBaseActivity
     }
     private void setMapFrag(String mapname) {
 
-        MapFragment fragment = getMapFrag();
+        //MapFragment fragment = getMapFrag();
+        MapFragment fragment = null;  //creating a new frag per map, optimise later
 
         if (fragment == null) {
             fragment = new OeMapFragment();
             Bundle args = new Bundle();
             args.putString("mapname", mapname);
             fragment.setArguments(args);
+            FragmentManager fragmentManager = getFragmentManager();
+            fragmentManager.beginTransaction().replace(
+                    R.id.content_frame, fragment, MAP_FRAG_TAG
+            ).commit();
         }
-
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction().replace(
-                R.id.content_frame, fragment, MAP_FRAG_TAG
-        ).commit();
     }
 
     private void startSettingsDialog() {
@@ -172,19 +170,6 @@ public class OeMapActivity extends OeBaseActivity
     private void updateMapNames(String n) {
         SharedPreferences.Editor e = getEditor();
         e.putString(getString(R.string.state_current_mapname), n);
-        //presenceBroadcaster.getMapNames().add(n);
-        //todo: maintain a list of all maps currently we are in
-        //todo: maintain a list of all maps currently we are in
-        //todo: maintain a list of all maps currently we are in
-        //todo: maintain a list of all maps currently we are in
-        //todo: maintain a list of all maps currently we are in
-        //todo: maintain a list of all maps currently we are in
-        //todo: maintain a list of all maps currently we are in
-        //todo: maintain a list of all maps currently we are in
-        //todo: maintain a list of all maps currently we are in
-        //todo: maintain a list of all maps currently we are in
-        //todo: maintain a list of all maps currently we are in
-        //todo: maintain a list of all maps currently we are in
         e.commit();
         if (!mDrawerNamesList.contains(n)) {
             mDrawerNamesList.add(SEPARATOR_POS + 1, n);
@@ -281,8 +266,6 @@ public class OeMapActivity extends OeBaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.oe_map_activity);
 
-        KEY_UID = getString(R.string.presence_service_key_uid);
-        KEY_SPACENAME = getString(R.string.presence_service_key_spacename);
         //presenceBroadcaster = PresenceFactory.createBroadcaster(this);
         //presenceBroadcaster.onCreate();
 
@@ -325,34 +308,12 @@ public class OeMapActivity extends OeBaseActivity
             }
         };
 
-        _presenceReceiverFilter = new IntentFilter(getString(R.string.presence_service_update_intent));
-        registerReceiver(_presenceReceiver, _presenceReceiverFilter);
-
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
     }
-
-    private BroadcastReceiver _presenceReceiver = new PresenceReceiver();
-    private IntentFilter _presenceReceiverFilter = null;
-    private class PresenceReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            OeLog.d("PresenceReceiver.onReceive");
-            String uid = intent.getExtras().getString(KEY_UID);
-            String spacename = intent.getExtras().getString(KEY_SPACENAME);
-            OeLog.d("PresenceReceiver.onReceive uid: " + uid + " spacename: " + spacename );
-            //if (mName.equals(spacename)) {
-                OeLog.d("PresenceReceiver.onReceive updating current map");
-                //todo: lookup by uid and map
-            //}
-        }
-    }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

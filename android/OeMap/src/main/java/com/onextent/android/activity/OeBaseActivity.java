@@ -31,7 +31,7 @@ public class OeBaseActivity extends Activity {
     private SharedPreferences mPrefs;
     private SharedPreferences.Editor mPrefEdit;
 
-    protected SharedPreferences getPrefs() {
+    public SharedPreferences getPrefs() {
         return mPrefs;
     }
 

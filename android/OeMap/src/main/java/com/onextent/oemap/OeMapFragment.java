@@ -25,8 +25,8 @@ import com.onextent.oemap.presence.PresenceListener;
 public class OeMapFragment extends MapFragment
         implements  SharedPreferences.OnSharedPreferenceChangeListener
 {
-
-    private String mName = null;
+    private String KEY_SPACENAME   = null;
+    private String KEY_UID         = null;
 
     private boolean mMapIsInit = false;
 
@@ -71,6 +71,37 @@ public class OeMapFragment extends MapFragment
         map.moveCamera(CameraUpdateFactory.zoomTo(zoom));
     }
 
+    private String getName() {
+        //String spacename = ((OeMapActivity)getActivity()).getPrefs().getString(getString(R.string.state_current_mapname), null);
+
+        String mName = null;
+        Bundle args = getArguments();
+        if (args != null)
+            mName = args.getString(getString(R.string.bundle_mapname));
+
+        return mName;
+        //return spacename;
+    }
+
+    private BroadcastReceiver _presenceReceiver = new PresenceReceiver();
+    private IntentFilter _presenceReceiverFilter = null;
+    private class PresenceReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String mName = getName();
+            String uid = intent.getExtras().getString(KEY_UID);
+            String spacename = intent.getExtras().getString(KEY_SPACENAME);
+            OeLog.d("PresenceReceiver.onReceive handler for " + mName + " with uid: " + uid + " spacename: " + spacename );
+            if (mName != null && mName.equals(spacename)) {
+                OeLog.d("PresenceReceiver.onReceive updating current map with uid: " + uid + " spacename: " + spacename );
+                //todo: lookup by uid and map
+            }
+        }
+    }
+
+
     @Override
     public void onStart() {
 
@@ -103,6 +134,7 @@ public class OeMapFragment extends MapFragment
         };
         home.getPresenceBroadcaster().setListener(l);
         */
+        getActivity().registerReceiver(_presenceReceiver, _presenceReceiverFilter);
     }
 
     @Override
@@ -119,17 +151,21 @@ public class OeMapFragment extends MapFragment
             mPrefEdit.putFloat(getString(R.string.state_lng), (float) m.getCameraPosition().target.longitude);
             mPrefEdit.commit();
         }
+        getActivity().unregisterReceiver(_presenceReceiver);
         super.onPause();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState != null)
-            mName = savedInstanceState.getString(getString(R.string.bundle_mapname));
+        KEY_UID = getString(R.string.presence_service_key_uid);
+        KEY_SPACENAME = getString(R.string.presence_service_key_spacename);
         home.setMapFragTag(getTag());
 
         mPrefs.registerOnSharedPreferenceChangeListener(this);
+
+        _presenceReceiverFilter = new IntentFilter(getString(R.string.presence_service_update_intent));
+        getActivity().registerReceiver(_presenceReceiver, _presenceReceiverFilter);
     }
 
     private void setMapType() {
