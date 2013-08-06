@@ -95,6 +95,32 @@ public class KeyValueDbHelperTestCase extends AndroidTestCase {
         assertEquals("wrong number of getAll(map) results: " + l, 3, l.size());
     }
 
+    public void testBoolean() throws JSONException {
+
+        _dbHelper.insertBoolean("true", true);
+        _dbHelper.replaceBoolean("false", false);
+        assertTrue("wrong", _dbHelper.getBoolean("true", false));
+        assertFalse("wrong", _dbHelper.getBoolean("false", true));
+    }
+
+    public void testFloat() throws JSONException {
+
+        _dbHelper.insertFloat("101", 101);
+        _dbHelper.replaceFloat("102", 102);
+        assertEquals("wrong", _dbHelper.getFloat("101", 0), (float) 101.0);
+        assertFalse("wrong", _dbHelper.getFloat("102", 0) == 103);
+        assertEquals("wrong", _dbHelper.getFloat("102", 0), (float) 102);
+    }
+
+    public void testDouble() throws JSONException {
+
+        _dbHelper.insertDouble("10.1", 10.1);
+        _dbHelper.replaceDouble("10.2", 10.2);
+        assertEquals("wrong", _dbHelper.getDouble("10.1", 0), 10.1);
+        assertFalse("wrong", _dbHelper.getDouble("10.2", 0) == 10.3);
+        assertEquals("wrong", _dbHelper.getDouble("10.2", 0), 10.2);
+    }
+
     public void testDelete() throws JSONException {
 
         _dbHelper.replace("nine", "9");
@@ -106,6 +132,8 @@ public class KeyValueDbHelperTestCase extends AndroidTestCase {
         _dbHelper.delete("nine");
         v = _dbHelper.get("nine");
         assertNull("should not have found this", v);
+        v = _dbHelper.get("nine", "101010");
+        assertEquals("should have matched default", "101010", v);
     }
 }
 

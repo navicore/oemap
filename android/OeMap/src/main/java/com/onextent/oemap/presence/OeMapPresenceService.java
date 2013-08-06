@@ -15,6 +15,7 @@ import android.preference.PreferenceManager;
 import com.google.android.gms.maps.model.LatLng;
 import com.onextent.android.activity.OeBaseActivity;
 import com.onextent.android.location.LocationHelper;
+import com.onextent.android.util.KeyValueDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.R;
@@ -29,14 +30,13 @@ public class OeMapPresenceService extends Service {
     private LocationHelper mLocHelper;
     private Presence                currentPresence = null;
     private PresenceDbHelper _dbHelper = null;
+    private KeyValueDbHelper _kvHelper = null;
 
     private String CMD_POLL        = null;
     private String CMD_BOOT        = null;
     private String CMD_ADD_SPACE   = null;
     private String CMD_RM_SPACE    = null;
     private String KEY_REASON      = null;
-    private String KEY_RUNNING     = null;
-    private String KEY_SPACENAMES  = null;
     private String KEY_SPACENAME   = null;
     private String KEY_UID         = null;
 
@@ -48,19 +48,12 @@ public class OeMapPresenceService extends Service {
 
     private SharedPreferences _prefs = null;
 
-    public SharedPreferences getDefaultPrefs() {
-        if (_prefs == null) {
-            _prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            //_prefs = getSharedPreferences(getString(R.string.onextent_prefs_key), MODE_MULTI_PROCESS);
-        }
-        return _prefs;
-    }
-
     @Override
     public void onCreate() {
         super.onCreate();
 
         _dbHelper = new PresenceDbHelper(this, getString(R.string.presence_db_name));
+        _kvHelper = new KeyValueDbHelper(this, "oemap_key_value_store");
 
         CMD_POLL        = getString(R.string.presence_service_cmd_poll);
         CMD_BOOT        = getString(R.string.presence_service_cmd_boot);
@@ -69,12 +62,6 @@ public class OeMapPresenceService extends Service {
         KEY_SPACENAME   = getString(R.string.presence_service_key_spacename);
         KEY_UID         = getString(R.string.presence_service_key_uid);
         KEY_REASON      = getString(R.string.presence_service_key_reason);
-        KEY_RUNNING     = getString(R.string.presence_service_key_running);
-        KEY_SPACENAMES  = getString(R.string.presence_service_key_spacenames);
-
-        SharedPreferences prefs = getDefaultPrefs();
-
-        _running = prefs.getBoolean(KEY_RUNNING, false);
 
         try {
             _spacenames = _dbHelper.getAllSpacenames();
@@ -106,10 +93,9 @@ public class OeMapPresenceService extends Service {
 
         LatLng latLng       = new LatLng(l.getLatitude(), l.getLongitude());
         String pid          = OeBaseActivity.id(this.getApplicationContext());
-        SharedPreferences p = getDefaultPrefs();
         //todo: allow per-map overrides
-        String label        = p.getString(getString(R.string.pref_username), "nobody");
-        String snippit      = p.getString(getString(R.string.pref_snippit_summary), "sigh...");
+        String label        = _kvHelper.get(getString(R.string.pref_username), "nobody");
+        String snippit      = _kvHelper.get(getString(R.string.pref_snippit_summary), "sigh...");
         currentPresence     = PresenceFactory.createPresence(pid, latLng, label, snippit, s);
 
         _dbHelper.replacePresence(currentPresence);
@@ -156,8 +142,9 @@ public class OeMapPresenceService extends Service {
 
     @Override
     public void onDestroy() {
-        _dbHelper.close();
         saveSpacenames();
+        _dbHelper.close();
+        _kvHelper.close();
         mLocHelper.onPause();
         mLocHelper.onStop();
         super.onDestroy();
@@ -169,13 +156,6 @@ public class OeMapPresenceService extends Service {
     }
 
     private void saveSpacenames() {
-        /*
-        SharedPreferences prefs = getDefaultPrefs();
-        SharedPreferences.Editor edit = prefs.edit();
-        edit.putBoolean(KEY_RUNNING, _running);
-        edit.putStringSet(KEY_SPACENAMES, _spacenames);
-        edit.commit();
-        */
         for (String s : _spacenames) {
             _dbHelper.replaceSpacename(s);
         }
