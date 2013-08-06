@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -24,7 +23,6 @@ import com.onextent.oemap.presence.PresenceDbHelper;
 import org.json.JSONException;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,6 +30,7 @@ public class OeMapFragment extends MapFragment
         implements  SharedPreferences.OnSharedPreferenceChangeListener
 {
     private Map<String, Holder> _markers = new HashMap<String, Holder>();
+
     private PresenceDbHelper _dbHelper = null;
     private LatLng mCurrLoc;
     private Marker mMyMarker;
@@ -41,18 +40,12 @@ public class OeMapFragment extends MapFragment
 
     private boolean mMapIsInit = false;
 
-    private SharedPreferences mPrefs;
-    private SharedPreferences.Editor mPrefEdit;
-
     private OeMapActivity home;
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         home = (OeMapActivity) activity;
-
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(activity);
-        mPrefEdit = mPrefs.edit();
     }
 
     private void init() {
@@ -72,14 +65,16 @@ public class OeMapFragment extends MapFragment
 
         settings.setMyLocationButtonEnabled(false);
 
-        float zoom = mPrefs.getFloat(getString(R.string.state_zoom_level), 15);
-        double lat = (double) mPrefs.getFloat(getString(R.string.state_lat), 0);
-        double lng = (double) mPrefs.getFloat(getString(R.string.state_lng), 0);
+        //SharedPreferences prefs = home.getDefaultPrefs();
+        SharedPreferences prefs = home.getDefaultPrefs();
+        float zoom = prefs.getFloat(getString(R.string.state_zoom_level), 15);
+        double lat = (double) prefs.getFloat(getString(R.string.state_lat), 0);
+        double lng = (double) prefs.getFloat(getString(R.string.state_lng), 0);
         map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lat, lng)));
         map.moveCamera(CameraUpdateFactory.zoomTo(zoom));
     }
 
-    private String getName() {
+    public String getName() {
 
         String mName = null;
         Bundle args = getArguments();
@@ -92,6 +87,8 @@ public class OeMapFragment extends MapFragment
     private IntentFilter _presenceReceiverFilter = null;
     private class PresenceReceiver extends BroadcastReceiver {
 
+        private boolean _loc_is_init = false;
+
         @Override
         public void onReceive(Context context, Intent intent) {
 
@@ -101,13 +98,18 @@ public class OeMapFragment extends MapFragment
             if (mName != null && mName.equals(spacename)) {
                 OeLog.d("PresenceReceiver.onReceive updating current map with uid: " + uid + " spacename: " + spacename );
                 try {
-                    Presence p = _dbHelper.get(uid, spacename);
+                    Presence p = _dbHelper.getPresence(uid, spacename);
                     if (p == null) {
                         OeLog.w("PresenceReceiver.onReceive presence not found: " + intent);
                     } else {
                         if (isMyPresence(p)) {
                             OeLog.d("PresenceReceiver.onReceive presence is my own");
                             mCurrLoc = p.getLocation();
+                            if (!_loc_is_init) {
+                                _loc_is_init = true;//set map the first time we get a loc
+                                setLocation();
+                                home.updateMapNamesFromHistory();
+                            }
                         }
                         setMarker(p);
                     }
@@ -133,7 +135,6 @@ public class OeMapFragment extends MapFragment
     @Override
     public void onStop() {
 
-        mPrefs.unregisterOnSharedPreferenceChangeListener(this);
         super.onStop();
     }
 
@@ -141,7 +142,7 @@ public class OeMapFragment extends MapFragment
 
         String spacename = getName();
         try {
-            Set<Presence> markers = _dbHelper.getAll(spacename);
+            Set<Presence> markers = _dbHelper.getAllPrecenses(spacename);
             if (markers != null)
             for (Presence p : markers) {
                 setMarker(p);
@@ -156,21 +157,36 @@ public class OeMapFragment extends MapFragment
     public void onResume() {
         super.onResume();
         init();
+        setMapOptions();
         loadMarkers();
         getActivity().registerReceiver(_presenceReceiver, _presenceReceiverFilter);
     }
 
     @Override
+    public void onDestroy() {
+        _dbHelper.close();
+        //SharedPreferences dprefs = home.getDefaultPrefs();
+        //dprefs.unregisterOnSharedPreferenceChangeListener(this);
+
+        SharedPreferences prefs = home.getDefaultPrefs();
+        prefs.unregisterOnSharedPreferenceChangeListener(this);
+        super.onDestroy();
+    }
+
+    @Override
     public void onPause() {
+
 
         GoogleMap m = getMap();
         if (m != null) {
 
             float zoom = m.getCameraPosition().zoom;
-            mPrefEdit.putFloat(getString(R.string.state_zoom_level), zoom);
-            mPrefEdit.putFloat(getString(R.string.state_lat), (float) m.getCameraPosition().target.latitude);
-            mPrefEdit.putFloat(getString(R.string.state_lng), (float) m.getCameraPosition().target.longitude);
-            mPrefEdit.commit();
+            SharedPreferences prefs = home.getDefaultPrefs();
+            SharedPreferences.Editor edit = prefs.edit();
+            edit.putFloat(getString(R.string.state_zoom_level), zoom);
+            edit.putFloat(getString(R.string.state_lat), (float) m.getCameraPosition().target.latitude);
+            edit.putFloat(getString(R.string.state_lng), (float) m.getCameraPosition().target.longitude);
+            edit.commit();
         }
         getActivity().unregisterReceiver(_presenceReceiver);
         super.onPause();
@@ -179,12 +195,17 @@ public class OeMapFragment extends MapFragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         _dbHelper = new PresenceDbHelper(getActivity(), getString(R.string.presence_db_name));
+
         KEY_UID = getString(R.string.presence_service_key_uid);
         KEY_SPACENAME = getString(R.string.presence_service_key_spacename);
         home.setMapFragTag(getTag());
 
-        mPrefs.registerOnSharedPreferenceChangeListener(this);
+        SharedPreferences dprefs = home.getDefaultPrefs();
+        dprefs.registerOnSharedPreferenceChangeListener(this);
+        //SharedPreferences prefs = home.getDefaultPrefs();
+        //prefs.registerOnSharedPreferenceChangeListener(this);
 
         _presenceReceiverFilter = new IntentFilter(getString(R.string.presence_service_update_intent));
         getActivity().registerReceiver(_presenceReceiver, _presenceReceiverFilter);
@@ -194,7 +215,9 @@ public class OeMapFragment extends MapFragment
 
         try {
 
-            int t = Integer.valueOf(mPrefs.getString(getString(R.string.pref_map_type), "0"));
+            //SharedPreferences prefs = home.getDefaultPrefs();
+            SharedPreferences prefs = home.getDefaultPrefs();
+            int t = Integer.valueOf(prefs.getString(getString(R.string.pref_map_type), "0"));
             GoogleMap m = getMap();
             if (m != null) {
                 switch (t) {
@@ -220,7 +243,8 @@ public class OeMapFragment extends MapFragment
         setIndoorsEnabled();
     }
     private void setIndoorsEnabled() {
-        boolean show = mPrefs.getBoolean(getString(R.string.pref_show_indoors), false);
+        SharedPreferences prefs = home.getDefaultPrefs();
+        boolean show = prefs.getBoolean(getString(R.string.pref_show_indoors), false);
         GoogleMap m = getMap();
         if (m != null) {
             m.setIndoorEnabled(show);
@@ -228,7 +252,8 @@ public class OeMapFragment extends MapFragment
     }
 
     private void setTrafficEnabled() {
-        boolean showTraffic = mPrefs.getBoolean(getString(R.string.pref_show_traffic), false);
+        SharedPreferences prefs = home.getDefaultPrefs();
+        boolean showTraffic = prefs.getBoolean(getString(R.string.pref_show_traffic), false);
         GoogleMap m = getMap();
         if (m != null) {
             m.setTrafficEnabled(showTraffic);

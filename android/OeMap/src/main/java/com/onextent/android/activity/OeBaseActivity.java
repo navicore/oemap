@@ -8,18 +8,12 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 
-import com.onextent.android.util.OeLog;
 import com.onextent.oemap.R;
-
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 public class OeBaseActivity extends Activity {
@@ -27,17 +21,6 @@ public class OeBaseActivity extends Activity {
     private static final String INSTALLATION = "INSTALLATION";
     private static final int MAX_HISTORY = 5;
     private static String sID = null;
-
-    private SharedPreferences mPrefs;
-    private SharedPreferences.Editor mPrefEdit;
-
-    public SharedPreferences getPrefs() {
-        return mPrefs;
-    }
-
-    protected SharedPreferences.Editor getEditor() {
-        return mPrefEdit;
-    }
 
     public synchronized static String id(Context context) {
         if (sID == null) {
@@ -73,26 +56,32 @@ public class OeBaseActivity extends Activity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        init();
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        mPrefEdit = mPrefs.edit();
-        init();
     }
 
     private void init() { //first time use init :)
 
-        boolean alreadyInit = mPrefs.getBoolean(getString(R.string.state_init), false);
+        SharedPreferences prefs = getDefaultPrefs();
+        SharedPreferences.Editor edit = prefs.edit();
+
+        boolean alreadyInit = prefs.getBoolean(getString(R.string.state_init), false);
         if (alreadyInit) return;
 
         String uname = getUserName();
 
-        mPrefEdit.putString(getString(R.string.pref_username), uname);
-        mPrefEdit.putBoolean(getString(R.string.state_init), true);
-        mPrefEdit.commit();
+        edit.putString(getString(R.string.pref_username), uname);
+        edit.putBoolean(getString(R.string.state_init), true);
+        edit.commit();
     }
 
+    /*
     protected List<String> getHistory() {
 
         try {
@@ -147,6 +136,7 @@ public class OeBaseActivity extends Activity {
         }
         return newa;
     }
+     */
 
     private String getUserName() {
 
@@ -167,6 +157,17 @@ public class OeBaseActivity extends Activity {
         }
         c.close();
         return uname;
+    }
+
+    private SharedPreferences _prefs = null;
+
+    public SharedPreferences getDefaultPrefs() {
+        if (_prefs == null) {
+            //_prefs = getSharedPreferences(getString(R.string.onextent_prefs_key), MODE_MULTI_PROCESS);
+            _prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            if (_prefs == null) throw new NullPointerException("no prefs");
+        }
+        return _prefs;
     }
 }
 

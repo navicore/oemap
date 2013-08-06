@@ -24,18 +24,18 @@ public class PresenceDbHelperTestCase extends AndroidTestCase {
 
         Presence p = PresenceFactory.createPresence("myUid1", new LatLng(30.1, 40.1), "my label", "my snippit", "my map");
 
-        _dbHelper.insert(p);
+        _dbHelper.insertPresence(p);
     }
 
     public void testBadInsert() {
 
         Presence p = PresenceFactory.createPresence("myUid2", new LatLng(30.1, 40.1), "my label", "my snippit", "my map");
 
-        _dbHelper.insert(p);
+        _dbHelper.insertPresence(p);
 
         boolean success = false;
         try {
-            _dbHelper.insert(p); //should fail as dupe
+            _dbHelper.insertPresence(p); //should fail as dupe
         } catch (SQLException ex) {
             success = true;
         }
@@ -45,36 +45,36 @@ public class PresenceDbHelperTestCase extends AndroidTestCase {
     public void testReplace() {
 
         Presence p = PresenceFactory.createPresence("myUid3", new LatLng(30.1, 40.1), "my label", "my snippit", "my map");
-        _dbHelper.replace(p);
+        _dbHelper.replacePresence(p);
 
         boolean success = false;
         try {
-            _dbHelper.insert(p);
+            _dbHelper.insertPresence(p);
         } catch (SQLException ex) {
             success = true;
         }
         assertTrue("should have been a dupe", success);
 
         success = false;
-        _dbHelper.replace(p); //should work now too
+        _dbHelper.replacePresence(p); //should work now too
     }
 
     public void testGet() throws JSONException {
 
-        Presence p = _dbHelper.get("myUid4", "my map");
+        Presence p = _dbHelper.getPresence("myUid4", "my map");
         assertNull("should not have found this presence", p);
 
         Presence p1 = PresenceFactory.createPresence("myUid4", new LatLng(30.1, 40.1), "my label", "my snippit", "my map");
-        _dbHelper.insert(p1);
+        _dbHelper.insertPresence(p1);
 
-        p = _dbHelper.get("myUid4", "my map");
+        p = _dbHelper.getPresence("myUid4", "my map");
         assertNotNull("should have found this presence", p);
         assertEquals("should have matching 'my label': " + p.toString(), p.getLabel(), "my label");
         assertEquals("should have matching 'my snippit': " + p.toString(), p.getSnippet(), "my snippit");
 
         Presence p2 = PresenceFactory.createPresence("myUid4", new LatLng(30.1, 40.1), "my new label", "my new snippit", "my map");
-        _dbHelper.replace(p2);
-        p = _dbHelper.get("myUid4", "my map");
+        _dbHelper.replacePresence(p2);
+        p = _dbHelper.getPresence("myUid4", "my map");
         assertNotNull("should have found this presence", p);
         assertEquals("should have matching 'my new label': " + p.toString(), p.getLabel(), "my new label");
         assertEquals("should have matching 'my new snippit': " + p.toString(), p.getSnippet(), "my new snippit");
@@ -83,15 +83,15 @@ public class PresenceDbHelperTestCase extends AndroidTestCase {
     public void testGetAll() throws JSONException {
 
         Presence p = PresenceFactory.createPresence("myUid1", new LatLng(30.1, 40.1), "my label", "my snippit", "my new map");
-        _dbHelper.replace(p);
+        _dbHelper.replacePresence(p);
         p = PresenceFactory.createPresence("myUid2", new LatLng(30.1, 40.1), "my label", "my snippit", "my new map");
-        _dbHelper.replace(p);
+        _dbHelper.replacePresence(p);
         p = PresenceFactory.createPresence("myUid3", new LatLng(30.1, 40.1), "my label", "my snippit", "my new map");
-        _dbHelper.replace(p);
+        _dbHelper.replacePresence(p);
         p = PresenceFactory.createPresence("myUid4", new LatLng(30.1, 40.1), "my label", "my snippit", "my new map");
-        _dbHelper.replace(p);
+        _dbHelper.replacePresence(p);
 
-        Set<Presence> l = _dbHelper.getAll("my new map");
+        Set<Presence> l = _dbHelper.getAllPrecenses("my new map");
         assertNotNull("should have found these", l);
         assertEquals("wrong number of getAll(map) results: " + l, 4, l.size());
     }
@@ -99,14 +99,14 @@ public class PresenceDbHelperTestCase extends AndroidTestCase {
     public void testDelete() throws JSONException {
 
         Presence p1 = PresenceFactory.createPresence("myUid9", new LatLng(30.1, 40.1), "my newest label", "my snippit", "my newest map");
-        _dbHelper.replace(p1);
+        _dbHelper.replacePresence(p1);
 
-        Presence p = _dbHelper.get("myUid9", "my newest map");
+        Presence p = _dbHelper.getPresence("myUid9", "my newest map");
         assertNotNull("should have found this", p);
         assertEquals("should have matching 'my newest label': " + p.toString(), p.getLabel(), "my newest label");
 
-        _dbHelper.delete(p1);
-        p = _dbHelper.get("myUid9", "my newest map");
+        _dbHelper.deletePresence(p1);
+        p = _dbHelper.getPresence("myUid9", "my newest map");
         assertNull("should not have found this", p);
     }
 }

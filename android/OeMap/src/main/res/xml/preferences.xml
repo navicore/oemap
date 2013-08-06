@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        >
 
     <EditTextPreference
         android:key="@string/pref_username"
@@ -15,15 +17,6 @@
             android:summary="@string/pref_snippit_summary"
             android:defaultValue="Here I am."
             />
-
-    <ListPreference
-        android:entries="@array/pref_map_type_entries"
-        android:title="@string/pref_map_types_title"
-        android:key="@string/pref_map_type"
-        android:entryValues="@array/pref_map_type_values"
-        android:summary="@string/pref_map_types_summary"
-        android:defaultValue="0"
-        />
 
     <CheckBoxPreference
         android:key="@string/pref_show_traffic"

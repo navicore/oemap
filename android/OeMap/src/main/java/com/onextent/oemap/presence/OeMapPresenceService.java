@@ -19,13 +19,12 @@ import com.onextent.android.util.OeLog;
 import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.R;
 
+import org.json.JSONException;
+
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class OeMapPresenceService extends Service {
-
-    private SharedPreferences mPrefs;
-    private SharedPreferences.Editor mPrefEdit;
 
     private LocationHelper mLocHelper;
     private Presence                currentPresence = null;
@@ -47,6 +46,16 @@ public class OeMapPresenceService extends Service {
 
     private Notification _notification = null;
 
+    private SharedPreferences _prefs = null;
+
+    public SharedPreferences getDefaultPrefs() {
+        if (_prefs == null) {
+            _prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            //_prefs = getSharedPreferences(getString(R.string.onextent_prefs_key), MODE_MULTI_PROCESS);
+        }
+        return _prefs;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -63,18 +72,20 @@ public class OeMapPresenceService extends Service {
         KEY_RUNNING     = getString(R.string.presence_service_key_running);
         KEY_SPACENAMES  = getString(R.string.presence_service_key_spacenames);
 
-        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        mPrefEdit = mPrefs.edit();
+        SharedPreferences prefs = getDefaultPrefs();
 
-        _running = mPrefs.getBoolean(KEY_RUNNING, false);
-        Set<String> storedNames = mPrefs.getStringSet(KEY_SPACENAMES, null);
-        //_spacenames = new HashSet<String>();
-        _spacenames = new LinkedHashSet<String>();
-        if (storedNames != null)
-        for (String n : storedNames) {
-            _spacenames.add(n);
+        _running = prefs.getBoolean(KEY_RUNNING, false);
+
+        try {
+            _spacenames = _dbHelper.getAllSpacenames();
+        } catch (JSONException e) {
+            OeLog.e("error reading spacenames: " + e, e);
         }
-        OeLog.d("loaded " + _spacenames.size() + " spacenames");
+        if (_spacenames == null)
+            _spacenames = new LinkedHashSet<String>();
+
+        int sz = _spacenames == null ? 0 : _spacenames.size();
+        OeLog.d("loaded " + sz + " spacenames");
         createNotification();
         mLocHelper = new LocationHelper(new LocationHelper.LHContext() {
             @Override
@@ -95,13 +106,13 @@ public class OeMapPresenceService extends Service {
 
         LatLng latLng       = new LatLng(l.getLatitude(), l.getLongitude());
         String pid          = OeBaseActivity.id(this.getApplicationContext());
-        SharedPreferences p = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences p = getDefaultPrefs();
         //todo: allow per-map overrides
         String label        = p.getString(getString(R.string.pref_username), "nobody");
-        String snippit      = p.getString(getString(R.string.pref_snippit), "sigh...");
+        String snippit      = p.getString(getString(R.string.pref_snippit_summary), "sigh...");
         currentPresence     = PresenceFactory.createPresence(pid, latLng, label, snippit, s);
 
-        _dbHelper.replace(currentPresence);
+        _dbHelper.replacePresence(currentPresence);
     }
 
     private void broadcast(Location l) {
@@ -145,6 +156,7 @@ public class OeMapPresenceService extends Service {
 
     @Override
     public void onDestroy() {
+        _dbHelper.close();
         saveSpacenames();
         mLocHelper.onPause();
         mLocHelper.onStop();
@@ -157,9 +169,16 @@ public class OeMapPresenceService extends Service {
     }
 
     private void saveSpacenames() {
-        mPrefEdit.putBoolean(KEY_RUNNING, _running);
-        mPrefEdit.putStringSet(KEY_SPACENAMES, _spacenames);
-        mPrefEdit.commit();
+        /*
+        SharedPreferences prefs = getDefaultPrefs();
+        SharedPreferences.Editor edit = prefs.edit();
+        edit.putBoolean(KEY_RUNNING, _running);
+        edit.putStringSet(KEY_SPACENAMES, _spacenames);
+        edit.commit();
+        */
+        for (String s : _spacenames) {
+            _dbHelper.replaceSpacename(s);
+        }
         OeLog.d("saved " + _spacenames.size() + " spacenames");
     }
 
