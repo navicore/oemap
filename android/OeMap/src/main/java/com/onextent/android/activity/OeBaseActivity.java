@@ -5,9 +5,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 
+import com.onextent.android.util.KeyValueDbHelper;
 import com.onextent.oemap.R;
 
 import java.io.File;
@@ -21,6 +21,7 @@ public class OeBaseActivity extends Activity {
     private static final String INSTALLATION = "INSTALLATION";
     private static final int MAX_HISTORY = 5;
     private static String sID = null;
+    private KeyValueDbHelper _kvHelper = null;
 
     public synchronized static String id(Context context) {
         if (sID == null) {
@@ -64,79 +65,19 @@ public class OeBaseActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        _kvHelper = new KeyValueDbHelper(this, getString(R.string.app_key_value_store_name));
     }
 
     private void init() { //first time use init :)
 
-        SharedPreferences prefs = getDefaultPrefs();
-        SharedPreferences.Editor edit = prefs.edit();
-
-        boolean alreadyInit = prefs.getBoolean(getString(R.string.state_init), false);
+        boolean alreadyInit = _kvHelper.getBoolean(getString(R.string.state_init), false);
         if (alreadyInit) return;
 
         String uname = getUserName();
 
-        edit.putString(getString(R.string.pref_username), uname);
-        edit.putBoolean(getString(R.string.state_init), true);
-        edit.commit();
+        _kvHelper.replace(getString(R.string.pref_username), uname);
+        _kvHelper.replaceBoolean(getString(R.string.state_init), true);
     }
-
-    /*
-    protected List<String> getHistory() {
-
-        try {
-
-            String h = mPrefs.getString(getString(R.string.state_history), "[]");
-            JSONArray a = new JSONArray(h);
-            List<String> l = new ArrayList<String>();
-
-            for (int i = 0; i < a.length(); i++) {
-                String s = a.getString(i);
-                l.add(s);
-            }
-            OeLog.d("getting history: " + l.toString());
-            return l;
-
-        } catch (JSONException e) {
-            OeLog.w(e.toString(), e);
-            return null;
-        }
-    }
-
-    //todo? think about named histories for multiple stuff
-    protected void addHistory(String item) {
-
-        String h = mPrefs.getString(getString(R.string.state_history), "[]");
-        try {
-            JSONArray a = new JSONArray(h);
-            a = trimHistory(a, item);
-            a.put(item); //ejs todo: fixed len most recent = top
-            OeLog.d("adding history: " + a.toString());
-            mPrefEdit.putString(getString(R.string.state_history), a.toString());
-            mPrefEdit.commit();
-        } catch (JSONException e) {
-            OeLog.w(e.toString(), e);
-        }
-    }
-
-    private JSONArray trimHistory(JSONArray a, String item) {
-        //cut json array to max len and remove items matching item
-        // probably because 'item' is going on top of the new hist
-        JSONArray newa = new JSONArray();
-        int offs = newa.length() - MAX_HISTORY;
-        if (offs < 0) offs = 0;
-        for (int i = 0; i < MAX_HISTORY && i < a.length(); i++) {
-            try {
-                String newitem = a.getString(i + offs);
-                if (newitem.equals(item)) continue;
-                newa.put(a.get(i + offs));
-            } catch (JSONException e) {
-                OeLog.w(e.toString());
-            }
-        }
-        return newa;
-    }
-     */
 
     private String getUserName() {
 
@@ -161,6 +102,7 @@ public class OeBaseActivity extends Activity {
 
     private SharedPreferences _prefs = null;
 
+    /*
     public SharedPreferences getDefaultPrefs() {
         if (_prefs == null) {
             //_prefs = getSharedPreferences(getString(R.string.onextent_prefs_key), MODE_MULTI_PROCESS);
@@ -169,5 +111,6 @@ public class OeBaseActivity extends Activity {
         }
         return _prefs;
     }
+     */
 }
 

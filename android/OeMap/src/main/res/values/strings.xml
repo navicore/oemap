@@ -70,6 +70,7 @@
     <string name="null_map_name">none</string>
     <string name="null_map_location_message">Join or create a map to find your location.</string>
     <string name="onextent_prefs_key">onextent_prefs</string>
+    <string name="app_key_value_store_name">onextent_key_value_store</string>
 
     <string-array name="pref_map_type_entries">
         <item>Normal</item>

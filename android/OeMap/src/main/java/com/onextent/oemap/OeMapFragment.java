@@ -16,6 +16,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.onextent.android.util.KeyValueDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.Presence;
 import com.onextent.oemap.presence.PresenceDbHelper;
@@ -26,12 +27,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class OeMapFragment extends MapFragment
-        implements  SharedPreferences.OnSharedPreferenceChangeListener
-{
+public class OeMapFragment extends MapFragment  {
+
     private Map<String, Holder> _markers = new HashMap<String, Holder>();
 
     private PresenceDbHelper _dbHelper = null;
+    private KeyValueDbHelper _prefs = null;
     private LatLng mCurrLoc;
     private Marker mMyMarker;
 
@@ -66,10 +67,10 @@ public class OeMapFragment extends MapFragment
         settings.setMyLocationButtonEnabled(false);
 
         //SharedPreferences prefs = home.getDefaultPrefs();
-        SharedPreferences prefs = home.getDefaultPrefs();
-        float zoom = prefs.getFloat(getString(R.string.state_zoom_level), 15);
-        double lat = (double) prefs.getFloat(getString(R.string.state_lat), 0);
-        double lng = (double) prefs.getFloat(getString(R.string.state_lng), 0);
+        //SharedPreferences prefs = home.getDefaultPrefs();
+        float zoom = _prefs.getFloat(getString(R.string.state_zoom_level), 15);
+        double lat = (double) _prefs.getFloat(getString(R.string.state_lat), 0);
+        double lng = (double) _prefs.getFloat(getString(R.string.state_lng), 0);
         map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lat, lng)));
         map.moveCamera(CameraUpdateFactory.zoomTo(zoom));
     }
@@ -165,11 +166,12 @@ public class OeMapFragment extends MapFragment
     @Override
     public void onDestroy() {
         _dbHelper.close();
+        _prefs.close();
         //SharedPreferences dprefs = home.getDefaultPrefs();
         //dprefs.unregisterOnSharedPreferenceChangeListener(this);
 
-        SharedPreferences prefs = home.getDefaultPrefs();
-        prefs.unregisterOnSharedPreferenceChangeListener(this);
+        //SharedPreferences prefs = home.getDefaultPrefs();
+        //prefs.unregisterOnSharedPreferenceChangeListener(this);
         super.onDestroy();
     }
 
@@ -181,12 +183,11 @@ public class OeMapFragment extends MapFragment
         if (m != null) {
 
             float zoom = m.getCameraPosition().zoom;
-            SharedPreferences prefs = home.getDefaultPrefs();
-            SharedPreferences.Editor edit = prefs.edit();
-            edit.putFloat(getString(R.string.state_zoom_level), zoom);
-            edit.putFloat(getString(R.string.state_lat), (float) m.getCameraPosition().target.latitude);
-            edit.putFloat(getString(R.string.state_lng), (float) m.getCameraPosition().target.longitude);
-            edit.commit();
+            //SharedPreferences prefs = home.getDefaultPrefs();
+            //SharedPreferences.Editor edit = prefs.edit();
+            _prefs.replaceFloat(getString(R.string.state_zoom_level), zoom);
+            _prefs.replaceFloat(getString(R.string.state_lat), (float) m.getCameraPosition().target.latitude);
+            _prefs.replaceFloat(getString(R.string.state_lng), (float) m.getCameraPosition().target.longitude);
         }
         getActivity().unregisterReceiver(_presenceReceiver);
         super.onPause();
@@ -197,13 +198,14 @@ public class OeMapFragment extends MapFragment
         super.onCreate(savedInstanceState);
 
         _dbHelper = new PresenceDbHelper(getActivity(), getString(R.string.presence_db_name));
+        _prefs = new KeyValueDbHelper(getActivity(), getString(R.string.app_key_value_store_name));
 
         KEY_UID = getString(R.string.presence_service_key_uid);
         KEY_SPACENAME = getString(R.string.presence_service_key_spacename);
         home.setMapFragTag(getTag());
 
-        SharedPreferences dprefs = home.getDefaultPrefs();
-        dprefs.registerOnSharedPreferenceChangeListener(this);
+        //SharedPreferences dprefs = home.getDefaultPrefs();
+        //dprefs.registerOnSharedPreferenceChangeListener(this);
         //SharedPreferences prefs = home.getDefaultPrefs();
         //prefs.registerOnSharedPreferenceChangeListener(this);
 
@@ -216,8 +218,9 @@ public class OeMapFragment extends MapFragment
         try {
 
             //SharedPreferences prefs = home.getDefaultPrefs();
-            SharedPreferences prefs = home.getDefaultPrefs();
-            int t = Integer.valueOf(prefs.getString(getString(R.string.pref_map_type), "0"));
+            //SharedPreferences prefs = home.getDefaultPrefs();
+            //int t = Integer.valueOf(prefs.getString(getString(R.string.pref_map_type), "0"));
+            int t = _prefs.getInt(getString(R.string.pref_map_type), 0);
             GoogleMap m = getMap();
             if (m != null) {
                 switch (t) {
@@ -243,8 +246,8 @@ public class OeMapFragment extends MapFragment
         setIndoorsEnabled();
     }
     private void setIndoorsEnabled() {
-        SharedPreferences prefs = home.getDefaultPrefs();
-        boolean show = prefs.getBoolean(getString(R.string.pref_show_indoors), false);
+        //SharedPreferences prefs = home.getDefaultPrefs();
+        boolean show = _prefs.getBoolean(getString(R.string.pref_show_indoors), false);
         GoogleMap m = getMap();
         if (m != null) {
             m.setIndoorEnabled(show);
@@ -252,8 +255,8 @@ public class OeMapFragment extends MapFragment
     }
 
     private void setTrafficEnabled() {
-        SharedPreferences prefs = home.getDefaultPrefs();
-        boolean showTraffic = prefs.getBoolean(getString(R.string.pref_show_traffic), false);
+        //SharedPreferences prefs = home.getDefaultPrefs();
+        boolean showTraffic = _prefs.getBoolean(getString(R.string.pref_show_traffic), false);
         GoogleMap m = getMap();
         if (m != null) {
             m.setTrafficEnabled(showTraffic);
@@ -329,6 +332,7 @@ public class OeMapFragment extends MapFragment
         return true;
     }
 
+    /*
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
 
@@ -336,5 +340,6 @@ public class OeMapFragment extends MapFragment
             setMapOptions();
         }
     }
+     */
 }
 

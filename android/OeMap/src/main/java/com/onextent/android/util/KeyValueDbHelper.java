@@ -55,6 +55,11 @@ public class KeyValueDbHelper extends SQLiteOpenHelper {
         super.close();
     }
 
+    public void insertInt(String key, int value) {
+
+        insert(key, Integer.toString(value));
+    }
+
     public void insertFloat(String key, float value) {
 
         insert(key, Float.toString(value));
@@ -80,6 +85,11 @@ public class KeyValueDbHelper extends SQLiteOpenHelper {
         values.put("key", key);
         values.put("value", value);
         _db.insertOrThrow("pairs", null, values);
+    }
+
+    public void replaceInt(String key, int value) {
+
+        replace(key, Integer.toString(value));
     }
 
     public void replaceFloat(String key, float value) {
@@ -131,6 +141,14 @@ public class KeyValueDbHelper extends SQLiteOpenHelper {
             return defaultValue;
         else
             return Double.valueOf(value);
+    }
+
+    public int getInt(String key, int defaultValue) {
+        String value = get(key);
+        if (value == null)
+            return defaultValue;
+        else
+            return Integer.valueOf(value);
     }
 
     public long getLong(String key, long defaultValue) {

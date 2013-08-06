@@ -25,6 +25,8 @@ import android.widget.Toast;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.onextent.android.activity.OeBaseActivity;
+import com.onextent.android.util.KeyValueDbHelper;
+import com.onextent.android.util.ListDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.OeMapPresenceService;
 import com.onextent.oemap.presence.PresenceDbHelper;
@@ -33,7 +35,6 @@ import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class OeMapActivity extends OeBaseActivity {
     public static final int NEW_PUBLIC_MAP = 0;
@@ -43,20 +44,24 @@ public class OeMapActivity extends OeBaseActivity {
     public static final int QUIT_MAP_POS = 4;
     public static final int SEPARATOR_POS = 5;
     private static final String MAP_FRAG_TAG = "oemap";
-    private String KEY_SPACENAMES = null;
-    private DrawerLayout mDrawerLayout;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private GoogleMap mMap;
-    private CharSequence mTitle = "na";
-    private String mDrawerTitle = "na";
-    private String[] mMenuNames;
-    private ListView mDrawerList;
-    private ArrayList mDrawerNamesList;
-    private String mMapFragTag;
-    private PresenceDbHelper _dbHelper = null;
+
+    //private String                  KEY_SPACENAMES = null;
+    private DrawerLayout            mDrawerLayout;
+    private ActionBarDrawerToggle   mDrawerToggle;
+    private GoogleMap               mMap;
+    private CharSequence            mTitle = "na";
+    //private String                  mDrawerTitle = "na";
+    private String[]                mMenuNames;
+    private ListView                mDrawerList;
+    private ArrayList               mDrawerNamesList;
+    private String                  mMapFragTag;
+
+    private PresenceDbHelper    _dbHelper           = null;
+    private ListDbHelper        _spacenameDbHelper  = null;
+    private KeyValueDbHelper    _prefs              = null;
 
     private boolean aMapIsActive() {
-        String m = getDefaultPrefs().getString(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
+        String m = _prefs.get(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
         return !getString(R.string.null_map_name).equals(m);
     }
 
@@ -128,10 +133,10 @@ public class OeMapActivity extends OeBaseActivity {
     }
 
     private void updateMapNames(String n) {
-        SharedPreferences.Editor e = getDefaultPrefs().edit();
-        e.clear();
-        e.putString(getString(R.string.state_current_mapname), n);
-        e.commit();
+        //SharedPreferences.Editor e = getDefaultPrefs().edit();
+        //e.clear();
+        _prefs.replace(getString(R.string.state_current_mapname), n);
+        //e.commit();
         if (!mDrawerNamesList.contains(n)) {
             mDrawerNamesList.add(SEPARATOR_POS + 1, n);
             mDrawerList.deferNotifyDataSetChanged();
@@ -158,7 +163,7 @@ public class OeMapActivity extends OeBaseActivity {
 
     private void quitMap() {
 
-        String spacename = getDefaultPrefs().getString(getString(R.string.state_current_mapname), null);
+        String spacename = _prefs.get(getString(R.string.state_current_mapname), null);
         if (mDrawerNamesList.contains(spacename)) {
             mDrawerNamesList.remove(spacename);
             mDrawerList.deferNotifyDataSetChanged();
@@ -207,9 +212,9 @@ public class OeMapActivity extends OeBaseActivity {
 
     public void updateMapNamesFromHistory() {
 
-        Set<String> h = null;
+        List<String> h = null;
         try {
-            h = _dbHelper.getAllSpacenames();
+            h = _spacenameDbHelper.getAll();
         } catch (JSONException e) {
             OeLog.e(e.toString(), e);
             return;
@@ -241,13 +246,15 @@ public class OeMapActivity extends OeBaseActivity {
         setContentView(R.layout.oe_map_activity);
 
         _dbHelper = new PresenceDbHelper(this, getString(R.string.presence_db_name));
+        _spacenameDbHelper = new ListDbHelper(this, "oemap_spacename_store");
+        _prefs = new KeyValueDbHelper(this, getString(R.string.app_key_value_store_name));
 
-        KEY_SPACENAMES = getString(R.string.presence_service_key_spacenames);
+        //KEY_SPACENAMES = getString(R.string.presence_service_key_spacenames);
 
         mMenuNames = getResources().getStringArray(R.array.menu_names_array);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mTitle = getResources().getString(R.string.app_name);
-        mDrawerTitle = getResources().getString(R.string.drawer_title);
+        //mDrawerTitle = getResources().getString(R.string.drawer_title);
 
         mDrawerNamesList = new ArrayList();
         for (String n : mMenuNames) {
@@ -324,17 +331,17 @@ public class OeMapActivity extends OeBaseActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
         //int pos = Integer.valueOf(getDefaultPrefs().getString(getString(R.string.pref_map_type), "2"));
-        int pos = Integer.valueOf(getDefaultPrefs().getString(getString(R.string.pref_map_type), "0"));
+        int pos = _prefs.getInt(getString(R.string.pref_map_type), 0);
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
                 OeLog.d("set map type to " + listItems[i]);
                 //int t = Integer.valueOf(mPrefs.getString(getString(R.string.pref_map_type), "0"));
-                SharedPreferences prefs = getDefaultPrefs();
-                SharedPreferences.Editor edit = prefs.edit();
-                edit.putString(getString(R.string.pref_map_type), Integer.toString(i));
-                edit.commit();
+                //SharedPreferences prefs = getDefaultPrefs();
+                //SharedPreferences.Editor edit = prefs.edit();
+                _prefs.replaceInt(getString(R.string.pref_map_type), i);
+                //edit.commit();
             }
 
             @Override
@@ -429,9 +436,9 @@ public class OeMapActivity extends OeBaseActivity {
     @Override
     public void onResume() {
         super.onResume();
-        SharedPreferences prefs = getDefaultPrefs();
+        //SharedPreferences prefs = getDefaultPrefs();
 
-        String mapname = prefs.getString(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
+        String mapname = _prefs.get(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
         setMapFrag(mapname);
         updateMapFrag(mapname);
         wakePresenceService();

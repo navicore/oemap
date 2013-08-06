@@ -10,27 +10,28 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.onextent.android.activity.OeBaseActivity;
 import com.onextent.android.location.LocationHelper;
 import com.onextent.android.util.KeyValueDbHelper;
+import com.onextent.android.util.ListDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.R;
 
 import org.json.JSONException;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OeMapPresenceService extends Service {
 
-    private LocationHelper mLocHelper;
-    private Presence                currentPresence = null;
-    private PresenceDbHelper _dbHelper = null;
-    private KeyValueDbHelper _kvHelper = null;
+    private LocationHelper   mLocHelper;
+    private Presence         currentPresence  = null;
+    private PresenceDbHelper _dbHelper        = null;
+    private KeyValueDbHelper _kvHelper        = null;
+    private ListDbHelper _spacenameDbHelper = null;
 
     private String CMD_POLL        = null;
     private String CMD_BOOT        = null;
@@ -42,7 +43,7 @@ public class OeMapPresenceService extends Service {
 
 
     private boolean _running = false;
-    private Set<String> _spacenames = null;
+    private List<String> _spacenames = null;
 
     private Notification _notification = null;
 
@@ -53,7 +54,8 @@ public class OeMapPresenceService extends Service {
         super.onCreate();
 
         _dbHelper = new PresenceDbHelper(this, getString(R.string.presence_db_name));
-        _kvHelper = new KeyValueDbHelper(this, "oemap_key_value_store");
+        _kvHelper = new KeyValueDbHelper(this, getString(R.string.app_key_value_store_name));
+        _spacenameDbHelper = new ListDbHelper(this, "oemap_spacename_store");
 
         CMD_POLL        = getString(R.string.presence_service_cmd_poll);
         CMD_BOOT        = getString(R.string.presence_service_cmd_boot);
@@ -64,12 +66,12 @@ public class OeMapPresenceService extends Service {
         KEY_REASON      = getString(R.string.presence_service_key_reason);
 
         try {
-            _spacenames = _dbHelper.getAllSpacenames();
+            _spacenames = _spacenameDbHelper.getAll();
         } catch (JSONException e) {
             OeLog.e("error reading spacenames: " + e, e);
         }
         if (_spacenames == null)
-            _spacenames = new LinkedHashSet<String>();
+            _spacenames = new ArrayList<String>();
 
         int sz = _spacenames == null ? 0 : _spacenames.size();
         OeLog.d("loaded " + sz + " spacenames");
@@ -145,6 +147,7 @@ public class OeMapPresenceService extends Service {
         saveSpacenames();
         _dbHelper.close();
         _kvHelper.close();
+        _spacenameDbHelper.close();
         mLocHelper.onPause();
         mLocHelper.onStop();
         super.onDestroy();
@@ -157,7 +160,7 @@ public class OeMapPresenceService extends Service {
 
     private void saveSpacenames() {
         for (String s : _spacenames) {
-            _dbHelper.replaceSpacename(s);
+            _spacenameDbHelper.replace(s);
         }
         OeLog.d("saved " + _spacenames.size() + " spacenames");
     }
