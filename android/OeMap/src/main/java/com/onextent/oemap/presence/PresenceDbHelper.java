@@ -54,11 +54,14 @@ public class PresenceDbHelper extends SQLiteOpenHelper {
             _db = getWritableDatabase();
     }
 
-    public void cleanup() {
+    @Override
+    public void close() {
         if (_db != null) {
+            //does android do this anyway?
             _db.close();
             _db = null;
         }
+        super.close();
     }
 
     public void insertPresence(Presence presence) {

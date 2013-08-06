@@ -16,8 +16,15 @@ public class PresenceDbHelperTestCase extends AndroidTestCase {
 
     private PresenceDbHelper _dbHelper;
 
+    @Override
     protected void setUp() {
         _dbHelper = new PresenceDbHelper(getContext(), "testPresenceDb");
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        _dbHelper.close();
+        super.tearDown();
     }
 
     public void testInsert() {
