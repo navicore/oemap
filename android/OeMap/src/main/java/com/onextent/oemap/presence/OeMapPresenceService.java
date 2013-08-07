@@ -97,7 +97,7 @@ public class OeMapPresenceService extends Service {
         String pid          = OeBaseActivity.id(this.getApplicationContext());
         //todo: allow per-map overrides
         String label        = _kvHelper.get(getString(R.string.pref_username), "nobody");
-        String snippit      = _kvHelper.get(getString(R.string.pref_snippit_summary), "sigh...");
+        String snippit      = _kvHelper.get(getString(R.string.pref_snippit), "sigh...");
         currentPresence     = PresenceFactory.createPresence(pid, latLng, label, snippit, s);
 
         _dbHelper.replacePresence(currentPresence);

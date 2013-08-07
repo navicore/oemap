@@ -30,6 +30,7 @@ import com.onextent.android.util.ListDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.OeMapPresenceService;
 import com.onextent.oemap.presence.PresenceDbHelper;
+import com.onextent.oemap.settings.OeMapPreferencesDialog;
 
 import org.json.JSONException;
 
@@ -45,12 +46,9 @@ public class OeMapActivity extends OeBaseActivity {
     public static final int SEPARATOR_POS = 5;
     private static final String MAP_FRAG_TAG = "oemap";
 
-    //private String                  KEY_SPACENAMES = null;
     private DrawerLayout            mDrawerLayout;
     private ActionBarDrawerToggle   mDrawerToggle;
-    private GoogleMap               mMap;
     private CharSequence            mTitle = "na";
-    //private String                  mDrawerTitle = "na";
     private String[]                mMenuNames;
     private ListView                mDrawerList;
     private ArrayList               mDrawerNamesList;
@@ -65,14 +63,13 @@ public class OeMapActivity extends OeBaseActivity {
         return !getString(R.string.null_map_name).equals(m);
     }
 
-    private GoogleMap getMap() {
+    public GoogleMap getMap() {
 
-        if (mMap != null) return mMap;
         FragmentManager fragmentManager = getFragmentManager();
         MapFragment fragment = (MapFragment) fragmentManager.findFragmentByTag(mMapFragTag);
         if (fragment != null && mMapFragTag != null) {
-            mMap = fragment.getMap();
-            return mMap;
+            GoogleMap map = fragment.getMap();
+            return map;
         } else {
             OeLog.w("null map tag!!!");
         }
@@ -116,8 +113,11 @@ public class OeMapActivity extends OeBaseActivity {
 
     private void startSettingsDialog() {
 
-        Intent intent = new Intent(this, OeMapSettingsActivity.class);
-        startActivity(intent);
+        DialogFragment ald = new OeMapPreferencesDialog();
+        ald.show(getFragmentManager(), "OeMap Preferences Dialog");
+        // Display the fragment as the main content.
+        //Intent intent = new Intent(this, OeMapSettingsActivity.class);
+        //startActivity(intent);
     }
 
     private void showNewPrivateMapDialog() {

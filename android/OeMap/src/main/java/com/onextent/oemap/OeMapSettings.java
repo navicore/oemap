@@ -10,12 +10,8 @@ public class OeMapSettings extends PreferenceFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getPreferenceManager().setSharedPreferencesName(getString(R.string.onextent_prefs_key));
-        getPreferenceManager().setSharedPreferencesMode(Context.MODE_MULTI_PROCESS);
-
         // Load the preferences from an XML resource
         addPreferencesFromResource(R.xml.preferences);
     }
-
 }
 

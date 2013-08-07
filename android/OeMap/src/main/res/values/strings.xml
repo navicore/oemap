@@ -28,8 +28,8 @@
 
     <string name="pref_username_summary">Your name you want displayed on the maps</string>
     <string name="pref_snippit_summary">A message displaying along with your avatar.</string>
-    <string name="pref_username_fld_title">Your User Name</string>
-    <string name="pref_snippit_fld_title">Your Avatar Message</string>
+    <string name="pref_username_fld_title">Your Default User Name</string>
+    <string name="pref_snippit_fld_title">Your Default Avatar Message</string>
 
     <string name="pref_username">pref_username</string>
     <string name="pref_snippit">pref_snippit</string>
