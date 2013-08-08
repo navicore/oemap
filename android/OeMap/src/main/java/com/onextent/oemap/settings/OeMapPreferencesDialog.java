@@ -39,6 +39,7 @@ public class OeMapPreferencesDialog extends DialogFragment {
             EditText snippitEdit = (EditText) _view.findViewById(R.id.pref_snippit);
             snippitEdit.setText(snippit);
 
+            setShowZoomCtlCb();
             //setShowTrafficUICb();
             //setShowInDoorsCb();
 
@@ -49,6 +50,23 @@ public class OeMapPreferencesDialog extends DialogFragment {
         return _view;
     }
 
+    private void setShowZoomCtlCb() {
+
+        boolean zoom = _prefs.getBoolean(getString(R.string.pref_show_zoom_ctl), false);
+        CheckBox zoomCheckBox = (CheckBox) _view.findViewById(R.id.pref_show_zoom_control);
+        zoomCheckBox.setChecked(zoom);
+
+        zoomCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+
+                _prefs.replaceBoolean(getString(R.string.pref_show_zoom_ctl), b);
+                OeMapActivity a = (OeMapActivity) getActivity();
+                a.getMap().getUiSettings().setZoomControlsEnabled(b);
+            }
+        });
+
+    }
     /*
     private void setShowInDoorsCb() {
 

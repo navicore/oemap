@@ -186,8 +186,10 @@ public class OeMapPresenceService extends Service {
         } if (CMD_ADD_SPACE.equals(reason)) {
 
             String spacename = extras.getString(KEY_SPACENAME);
-            _spacenames.add(spacename);
-            saveSpacenames();
+            if (!_spacenames.contains(spacename)) {
+                _spacenames.add(spacename);
+                saveSpacenames();
+            }
             startRunning();
 
         } if (CMD_RM_SPACE.equals(reason)) {

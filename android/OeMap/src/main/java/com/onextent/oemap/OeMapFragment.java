@@ -72,6 +72,9 @@ public class OeMapFragment extends MapFragment  {
         double lng = (double) _prefs.getFloat(getString(R.string.state_lng), 0);
         map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lat, lng)));
         map.moveCamera(CameraUpdateFactory.zoomTo(zoom));
+
+        boolean zoomCtl = _prefs.getBoolean(home.getString(R.string.pref_show_zoom_ctl), true);
+        settings.setZoomControlsEnabled(zoomCtl);
     }
 
     public String getName() {
@@ -108,7 +111,7 @@ public class OeMapFragment extends MapFragment  {
                             if (!_loc_is_init) {
                                 _loc_is_init = true;//set map the first time we get a loc
                                 setLocation();
-                                home.updateMapNamesFromHistory();
+                                //home.updateMapNamesFromHistory();
                             }
                         }
                         setMarker(p);

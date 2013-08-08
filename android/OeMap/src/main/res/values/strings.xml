@@ -71,6 +71,8 @@
     <string name="null_map_location_message">Join or create a map to find your location.</string>
     <string name="onextent_prefs_key">onextent_prefs</string>
     <string name="app_key_value_store_name">onextent_key_value_store</string>
+    <string name="pref_show_zoom_control_fld_text">Show Zoom Control</string>
+    <string name="pref_show_zoom_ctl">pref_show_zoom_ctl</string>
 
     <string-array name="pref_map_type_entries">
         <item>Normal</item>

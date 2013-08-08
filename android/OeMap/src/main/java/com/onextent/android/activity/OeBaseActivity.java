@@ -2,7 +2,6 @@ package com.onextent.android.activity;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -99,18 +98,5 @@ public class OeBaseActivity extends Activity {
         c.close();
         return uname;
     }
-
-    private SharedPreferences _prefs = null;
-
-    /*
-    public SharedPreferences getDefaultPrefs() {
-        if (_prefs == null) {
-            //_prefs = getSharedPreferences(getString(R.string.onextent_prefs_key), MODE_MULTI_PROCESS);
-            _prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            if (_prefs == null) throw new NullPointerException("no prefs");
-        }
-        return _prefs;
-    }
-     */
 }
 

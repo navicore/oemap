@@ -71,6 +71,7 @@ public class GcmHelper implements OeLifeCycle {
         }
     }
 
+    @Override
     public void onCreate() {
 
         regid = getRegistrationId(activity.getApplicationContext());
@@ -83,11 +84,18 @@ public class GcmHelper implements OeLifeCycle {
     }
 
     @Override
+    public void onDestroy() {
+
+    }
+
+    @Override
     public void onResume() {
+
     }
 
     @Override
     public void onPause() {
+
     }
 
     @Override

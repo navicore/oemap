@@ -59,6 +59,11 @@ public class LocationHelper implements
         mLocationClient = new LocationClient(context.getContext(), this, this);
     }
 
+    @Override
+    public void onDestroy() {
+
+    }
+
 
     ///////////////////////////////
     // begin location aware impl //
