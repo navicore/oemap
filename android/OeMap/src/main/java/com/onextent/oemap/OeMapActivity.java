@@ -326,6 +326,7 @@ public class OeMapActivity extends OeBaseActivity {
             OeLog.e(e.toString(), e);
             return;
         }
+        if (_spacenames == null)  _spacenames = new ArrayList<String>();
         _spacenames_adapter = new ArrayAdapter<String>(actionBar.getThemedContext(),
         android.R.layout.simple_spinner_item, android.R.id.text1, _spacenames);
         actionBar.setDisplayShowTitleEnabled(false);
