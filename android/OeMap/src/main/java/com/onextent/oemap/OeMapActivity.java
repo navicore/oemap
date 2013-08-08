@@ -19,6 +19,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.PopupMenu;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -317,39 +318,38 @@ public class OeMapActivity extends OeBaseActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
+
+    }
+    private void setMapTyp(int t) {
+
+        GoogleMap m = getMap();
+        if (m != null) {
+            m.setMapType(t);
+        }
+        _prefs.replaceInt(getString(R.string.pref_map_type), t);
     }
 
-    private void initMapTypeSpinner(Menu menu) {
+    private void initMapTypeMenu(Menu menu) {
 
 
-        //final String[] listItems = {"Normal", "Terrain", "Satellite"};
-        final String[] listItems = getResources().getStringArray(R.array.pref_map_type_entries);
-        final int[] listValues = getResources().getIntArray(R.array.pref_map_type_values);
-        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, listItems);
-
-        Spinner spinner = (Spinner) menu.findItem(R.id.map_types).getActionView();
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-        //int pos = Integer.valueOf(getDefaultPrefs().getString(getString(R.string.pref_map_type), "2"));
-        int pos = _prefs.getInt(getString(R.string.pref_map_type), 0);
-        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
-                OeLog.d("set map type to " + listItems[i]);
-                //int t = Integer.valueOf(mPrefs.getString(getString(R.string.pref_map_type), "0"));
-                //SharedPreferences prefs = getDefaultPrefs();
-                //SharedPreferences.Editor edit = prefs.edit();
-                _prefs.replaceInt(getString(R.string.pref_map_type), i);
-                //edit.commit();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-        spinner.setSelection(pos);
+        MenuItem m = null;
+        int t = _prefs.getInt(getString(R.string.pref_map_type), 0);
+        switch (t) {
+            case GoogleMap.MAP_TYPE_NORMAL:
+                m = menu.findItem(R.id.map_type_normal);
+                break;
+            case GoogleMap.MAP_TYPE_TERRAIN:
+                m = menu.findItem(R.id.map_type_terrain);
+                break;
+            case GoogleMap.MAP_TYPE_SATELLITE:
+                m = menu.findItem(R.id.map_type_satellite);
+                break;
+            default:
+                OeLog.e("unknown map type: " + t);
+                break;
+        }
+        if (m != null)
+            m.setChecked(true);
     }
 
     @Override
@@ -358,7 +358,7 @@ public class OeMapActivity extends OeBaseActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
 
-        initMapTypeSpinner(menu);
+        initMapTypeMenu(menu);
 
         return true;
     }
@@ -413,6 +413,21 @@ public class OeMapActivity extends OeBaseActivity {
                 break;
             case R.id.action_settings:
                 startSettingsDialog();
+                break;
+            case R.id.map_types:
+                //createMapTypePopupMenu(item.getActionView());
+                break;
+            case R.id.map_type_normal:
+                item.setChecked(true);
+                setMapTyp(GoogleMap.MAP_TYPE_NORMAL);
+                break;
+            case R.id.map_type_terrain:
+                item.setChecked(true);
+                setMapTyp(GoogleMap.MAP_TYPE_TERRAIN);
+                break;
+            case R.id.map_type_satellite:
+                item.setChecked(true);
+                setMapTyp(GoogleMap.MAP_TYPE_SATELLITE);
                 break;
             case R.id.action_about:
             default:

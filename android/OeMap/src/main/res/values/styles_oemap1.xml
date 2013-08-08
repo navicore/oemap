@@ -38,6 +38,12 @@
         <item name="android:backgroundStacked">@drawable/ab_stacked_solid_oemap1</item>
         <item name="android:backgroundSplit">@drawable/ab_background_textured_oemap1</item>
         <item name="android:progressBarStyle">@style/ProgressBar.Oemap1</item>
+        <item name="android:titleTextStyle">@style/OnExtent.TitleTextStyle</item>  <!-- OnExtent -->
+    </style>
+
+    <!-- OnExtent -->
+    <style name="OnExtent.TitleTextStyle" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">#f4ebeb</item>
     </style>
 
     <style name="ActionBar.Transparent.Oemap1" parent="@android:style/Widget.Holo.Light.ActionBar">
@@ -61,8 +67,14 @@
         <item name="android:background">@drawable/spinner_background_ab_oemap1</item>
         <item name="android:popupBackground">@drawable/menu_dropdown_panel_oemap1</item>
         <item name="android:dropDownSelector">@drawable/selectable_background_oemap1</item>
+        <!-- OnExtent NOT WORKING!!! -->
+        <item name="android:textAppearance">@style/OnExtent.SpinnerTitleText</item>
     </style>
-    
+    <!-- OnExtent NOT WORKING!!! -->
+    <style name="OnExtent.SpinnerTitleText" parent="@android:style/TextAppearance.Holo.Widget">
+        <item name="android:textColor">#f4ebeb</item>
+    </style>
+
     <style name="ProgressBar.Oemap1" parent="@android:style/Widget.Holo.Light.ProgressBar.Horizontal">
         <item name="android:progressDrawable">@drawable/progress_horizontal_oemap1</item>
     </style>

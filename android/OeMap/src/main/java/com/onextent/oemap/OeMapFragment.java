@@ -205,20 +205,10 @@ public class OeMapFragment extends MapFragment  {
 
         try {
 
-            int t = _prefs.getInt(getString(R.string.pref_map_type), 0);
+            int t = _prefs.getInt(getString(R.string.pref_map_type), GoogleMap.MAP_TYPE_NORMAL);
             GoogleMap m = getMap();
             if (m != null) {
-                switch (t) {
-                    case 0:
-                        m.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                        break;
-                    case 1:
-                        m.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-                        break;
-                    case 2:
-                        m.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-                        break;
-                }
+                m.setMapType(t);
             }
         } catch (Throwable err) {
             OeLog.e(err.toString(), err);
