@@ -174,6 +174,7 @@ public class OeMapPresenceService extends Service {
     //@Override
     protected void onHandleIntent(Intent intent) {
 
+        if (intent == null) return;
         Bundle extras = intent.getExtras();
         String reason = extras.getString(KEY_REASON);
         OeLog.d("cmd reason: " + reason);

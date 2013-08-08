@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -40,14 +41,35 @@ public class OeMapPreferencesDialog extends DialogFragment {
             snippitEdit.setText(snippit);
 
             setShowZoomCtlCb();
-            //setShowTrafficUICb();
-            //setShowInDoorsCb();
+            setDoneButtonCb();
 
         } catch (Exception e) {
             OeLog.e(e.toString(), e);
         }
 
         return _view;
+    }
+
+    private void setDoneButtonCb() {
+
+        Button doneButton = (Button) _view.findViewById(R.id.pref_done_button);
+        doneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                saveSettings();
+                dismiss();
+            }
+        });
+    }
+
+    private void saveSettings() {
+        EditText labelEdit = (EditText) _view.findViewById(R.id.pref_username);
+        String label = labelEdit.getText().toString();
+        _prefs.replace(getString(R.string.pref_username), label);
+
+        EditText snippitEdit = (EditText) _view.findViewById(R.id.pref_snippit);
+        String snippit = snippitEdit.getText().toString();
+        _prefs.replace(getString(R.string.pref_snippit), snippit);
     }
 
     private void setShowZoomCtlCb() {
@@ -66,55 +88,6 @@ public class OeMapPreferencesDialog extends DialogFragment {
             }
         });
 
-    }
-    /*
-    private void setShowInDoorsCb() {
-
-        boolean showInDoors = _prefs.getBoolean(getString(R.string.pref_show_indoors), false);
-        CheckBox showInDoorsCheckBox = (CheckBox) _view.findViewById(R.id.pref_show_indoors);
-        showInDoorsCheckBox.setChecked(showInDoors);
-
-        showInDoorsCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-
-                _prefs.replaceBoolean(getString(R.string.pref_show_indoors), b);
-                OeMapActivity a = (OeMapActivity) getActivity();
-                a.getMap().setIndoorEnabled(b);
-            }
-        });
-
-    }
-
-    private void setShowTrafficUICb() {
-
-        boolean showTraffic = _prefs.getBoolean(getString(R.string.pref_show_traffic), false);
-        CheckBox showTrafficCheckBox = (CheckBox) _view.findViewById(R.id.pref_show_traffic);
-        showTrafficCheckBox.setChecked(showTraffic);
-
-        showTrafficCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                _prefs.replaceBoolean(getString(R.string.pref_show_traffic), b);
-                OeMapActivity a = (OeMapActivity) getActivity();
-                a.getMap().setTrafficEnabled(b);
-            }
-        });
-    }
-    */
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-
-        EditText labelEdit = (EditText) _view.findViewById(R.id.pref_username);
-        String label = labelEdit.getText().toString();
-        _prefs.replace(getString(R.string.pref_username), label);
-
-        EditText snippitEdit = (EditText) _view.findViewById(R.id.pref_snippit);
-        String snippit = snippitEdit.getText().toString();
-        _prefs.replace(getString(R.string.pref_snippit), snippit);
-
-        super.onDismiss(dialog);
     }
 
     @Override
