@@ -28,7 +28,7 @@ public class OeMapPreferencesDialog extends DialogFragment {
 
         Dialog d = getDialog();
         if (d != null) d.setTitle(getString(R.string.app_name) + " Preferences");
-        _view = inflater.inflate(R.layout.preferences, container, false);
+        _view = inflater.inflate(R.layout.preferences_dialog_layout, container, false);
         try {
 
             String label = _prefs.get(getString(R.string.pref_username), "nobody");
@@ -39,8 +39,8 @@ public class OeMapPreferencesDialog extends DialogFragment {
             EditText snippitEdit = (EditText) _view.findViewById(R.id.pref_snippit);
             snippitEdit.setText(snippit);
 
-            setShowTrafficUICb();
-            setShowInDoorsCb();
+            //setShowTrafficUICb();
+            //setShowInDoorsCb();
 
         } catch (Exception e) {
             OeLog.e(e.toString(), e);
@@ -49,6 +49,7 @@ public class OeMapPreferencesDialog extends DialogFragment {
         return _view;
     }
 
+    /*
     private void setShowInDoorsCb() {
 
         boolean showInDoors = _prefs.getBoolean(getString(R.string.pref_show_indoors), false);
@@ -82,6 +83,7 @@ public class OeMapPreferencesDialog extends DialogFragment {
             }
         });
     }
+    */
 
     @Override
     public void onDismiss(DialogInterface dialog) {

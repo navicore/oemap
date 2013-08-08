@@ -356,24 +356,32 @@ public class OeMapActivity extends OeBaseActivity {
     private void initMapTypeMenu(Menu menu) {
 
 
-        MenuItem m = null;
-        int t = _prefs.getInt(getString(R.string.pref_map_type), 0);
+        MenuItem typeItem = null;
+        int t = _prefs.getInt(getString(R.string.pref_map_type), GoogleMap.MAP_TYPE_NORMAL);
         switch (t) {
             case GoogleMap.MAP_TYPE_NORMAL:
-                m = menu.findItem(R.id.map_type_normal);
+                typeItem = menu.findItem(R.id.map_type_normal);
                 break;
             case GoogleMap.MAP_TYPE_TERRAIN:
-                m = menu.findItem(R.id.map_type_terrain);
+                typeItem = menu.findItem(R.id.map_type_terrain);
                 break;
             case GoogleMap.MAP_TYPE_SATELLITE:
-                m = menu.findItem(R.id.map_type_satellite);
+                typeItem = menu.findItem(R.id.map_type_satellite);
                 break;
             default:
                 OeLog.e("unknown map type: " + t);
                 break;
         }
-        if (m != null)
-            m.setChecked(true);
+        if (typeItem != null)
+            typeItem.setChecked(true);
+
+        boolean showTraffic = _prefs.getBoolean(getString(R.string.pref_show_traffic), false);
+        MenuItem trafficItem = menu.findItem(R.id.menu_show_traffic);
+        trafficItem.setChecked(showTraffic);
+
+        boolean showIndoors = _prefs.getBoolean(getString(R.string.pref_show_indoors), false);
+        MenuItem inDoorsItem = menu.findItem(R.id.menu_show_indoors);
+        inDoorsItem.setChecked(showIndoors);
     }
 
     @Override
@@ -415,6 +423,7 @@ public class OeMapActivity extends OeBaseActivity {
         if (mDrawerToggle.onOptionsItemSelected(item)) {
             return true;
         }
+        boolean checked;
         // Handle your other action bar items...
         switch (item.getItemId()) {
             case R.id.action_refresh:
@@ -438,9 +447,6 @@ public class OeMapActivity extends OeBaseActivity {
             case R.id.action_settings:
                 startSettingsDialog();
                 break;
-            case R.id.map_types:
-                //createMapTypePopupMenu(item.getActionView());
-                break;
             case R.id.map_type_normal:
                 item.setChecked(true);
                 setMapTyp(GoogleMap.MAP_TYPE_NORMAL);
@@ -453,11 +459,39 @@ public class OeMapActivity extends OeBaseActivity {
                 item.setChecked(true);
                 setMapTyp(GoogleMap.MAP_TYPE_SATELLITE);
                 break;
+            case R.id.menu_show_traffic:
+                checked = item.isChecked();
+                item.setChecked(!checked);
+                setShowTrafficOption(!checked);
+                break;
+            case R.id.menu_show_indoors:
+                checked = item.isChecked();
+                item.setChecked(!checked);
+                setShowInDoorsOption(!checked);
+                break;
             case R.id.action_about:
             default:
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setShowTrafficOption(boolean b) {
+
+        GoogleMap m = getMap();
+        if (m != null) {
+            m.setTrafficEnabled(b);
+        }
+        _prefs.replaceBoolean(getString(R.string.pref_show_traffic), b);
+    }
+
+    private void setShowInDoorsOption(boolean b) {
+
+        GoogleMap m = getMap();
+        if (m != null) {
+            m.setIndoorEnabled(b);
+        }
+        _prefs.replaceBoolean(getString(R.string.pref_show_indoors), b);
     }
 
     @Override

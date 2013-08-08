@@ -7,38 +7,47 @@
             android:icon="@android:drawable/ic_menu_compass"
             />
 
+    <!-- ejs todo: put these in a submenu on small screens -->
+
+    <group
+            android:checkableBehavior="single"
+            android:showAsAction="never|withText"
+            >
+        <item
+                android:id="@+id/map_type_normal"
+                android:checked="false"
+                android:title="Normal"/>
+        <item
+                android:id="@+id/map_type_terrain"
+                android:checked="false"
+                android:title="Terrain"/>
+        <item
+                android:id="@+id/map_type_satellite"
+                android:checked="false"
+                android:title="Satellite"/>
+    </group>
+
+    <group
+            android:checkableBehavior="all"
+            android:showAsAction="never|withText"
+            >
+        <item
+                android:id="@+id/menu_show_traffic"
+                android:checked="false"
+                android:title="@string/pref_show_traffic_title"
+                />
+        <item
+                android:id="@+id/menu_show_indoors"
+                android:checked="false"
+                android:title="@string/pref_show_indoors_title"
+                />
+    </group>
+
     <item
             android:id="@+id/action_settings"
             android:title="@string/action_settings"
             android:showAsAction="never|withText"
             />
-
-    <item
-            android:id="@+id/map_types"
-            android:title="Map Types"
-            android:showAsAction="never|withText"
-            >
-
-        <!-- menu -->
-        <group android:checkableBehavior="single"
-               android:showAsAction="never|withText"
-                >
-            <item
-                    android:id="@+id/map_type_normal"
-                    android:checked="false"
-                    android:title="Normal"/>
-            <item
-                    android:id="@+id/map_type_terrain"
-                    android:checked="false"
-                    android:title="Terrain"/>
-            <item
-                    android:id="@+id/map_type_satellite"
-                    android:checked="false"
-                    android:title="Satellite"/>
-        </group>
-        <!-- /menu -->
-
-    </item>
 
     <item
             android:id="@+id/action_help"

@@ -154,7 +154,7 @@ public class GcmHelper implements OeLifeCycle {
      * Registers the application with GCM servers asynchronously.
      * <p/>
      * Stores the registration id, app versionCode, and expiration time in the
-     * application's shared preferences.
+     * application's shared preferences_dialog_layout.
      */
     private void registerBackground() {
         new AsyncTask<Void, Void, String>() {
