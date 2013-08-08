@@ -110,6 +110,13 @@ public class OeMapActivity extends OeBaseActivity {
                     R.id.content_frame, fragment, MAP_FRAG_TAG
             ).commit();
         }
+
+        if (!_spacenames.contains(mapname)) {
+            _spacenames.add(mapname);
+            _spacenames_adapter.notifyDataSetChanged();
+        }
+        int pos = _spacenames.indexOf(mapname);
+        getActionBar().setSelectedNavigationItem(pos);
     }
 
     private void startSettingsDialog() {
@@ -298,28 +305,44 @@ public class OeMapActivity extends OeBaseActivity {
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
+        setActiveMapsSpinner();
+
         ActionBar actionBar = getActionBar();
-        String[] listItems = {"none"};
-        //SpinnerAdapter adapter = new ArrayAdapter(this,  android.R.layout.simple_list_item_1, listItems);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(actionBar.getThemedContext(),
-                android.R.layout.simple_spinner_item, android.R.id.text1, listItems);
-        actionBar.setDisplayShowTitleEnabled(false);
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        // Set up the dropdown list navigation in the action bar.
-        actionBar.setListNavigationCallbacks(adapter, new ActionBar.OnNavigationListener() {
-            @Override
-            public boolean onNavigationItemSelected(int i, long l) {
-                return false;
-            }
-        });
-
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
 
     }
+
+    private ArrayAdapter<String> _spacenames_adapter = null;
+    private List<String> _spacenames = null;
+    private void setActiveMapsSpinner() {
+
+        ActionBar actionBar = getActionBar();
+        _spacenames = null;
+        try {
+            _spacenames = _spacenameDbHelper.getAll();
+        } catch (JSONException e) {
+            OeLog.e(e.toString(), e);
+            return;
+        }
+        _spacenames_adapter = new ArrayAdapter<String>(actionBar.getThemedContext(),
+        android.R.layout.simple_spinner_item, android.R.id.text1, _spacenames);
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
+        _spacenames_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // Set up the dropdown list navigation in the action bar.
+        actionBar.setListNavigationCallbacks(_spacenames_adapter, new ActionBar.OnNavigationListener() {
+            @Override
+            public boolean onNavigationItemSelected(int i, long l) {
+                String n = _spacenames.get(i);
+                setMapFrag(n);
+                return false;
+            }
+        });
+    }
+
     private void setMapTyp(int t) {
 
         GoogleMap m = getMap();
