@@ -12,7 +12,7 @@ import org.json.JSONException;
 
 public class SpaceListContentProviderTestCase extends AndroidTestCase {
 
-    private static final String[] PROJECTION = {SpaceListContentProvider.Spaces._ID, SpaceListContentProvider.Spaces.NAME};
+    private static final String[] PROJECTION = SpaceListContentProvider.Spaces.PROJECTION_ALL;
     private static final String[] SPACENAMES = {"one", "two", "three"};
 
     private ContentResolver _resolver;
@@ -26,7 +26,7 @@ public class SpaceListContentProviderTestCase extends AndroidTestCase {
         for (String s : SPACENAMES) {
 
             ContentValues values = new ContentValues();
-            values.put(SpaceListContentProvider.SPACE_NAME, s);
+            values.put(SpaceListContentProvider.Spaces.NAME, s);
             _resolver.insert(SpaceListContentProvider.CONTENT_URI, values);
         }
     }
@@ -42,11 +42,11 @@ public class SpaceListContentProviderTestCase extends AndroidTestCase {
         final String TEST_VAL = "won!";
 
         ContentValues values = new ContentValues();
-        values.put(SpaceListContentProvider.SPACE_NAME, TEST_VAL);
+        values.put(SpaceListContentProvider.Spaces.NAME, TEST_VAL);
         _resolver.insert(SpaceListContentProvider.CONTENT_URI, values);
 
         Cursor c = _resolver.query(SpaceListContentProvider.CONTENT_URI, null, null, null, null);
-        int SPACENAME_IDX = c.getColumnIndex(SpaceListContentProvider.SPACE_NAME);
+        int SPACENAME_IDX =  c.getColumnIndex(SpaceListContentProvider.Spaces.NAME);
         while (c.moveToNext()) {
 
             String space = c.getString(SPACENAME_IDX);
@@ -59,13 +59,13 @@ public class SpaceListContentProviderTestCase extends AndroidTestCase {
         final String TEST_VAL = "won";
 
         ContentValues values = new ContentValues();
-        values.put(SpaceListContentProvider.SPACE_NAME, TEST_VAL);
+        values.put(SpaceListContentProvider.Spaces.NAME, TEST_VAL);
         _resolver.insert(SpaceListContentProvider.CONTENT_URI, values);
 
         Cursor c = _resolver.query(SpaceListContentProvider.CONTENT_URI, PROJECTION, SpaceListContentProvider.Spaces.NAME + "='" + TEST_VAL + "'", null, null);
         assertEquals(c.getCount(), 1);
         c.moveToFirst();
-        int i = c.getColumnIndex(SpaceListContentProvider.SPACE_NAME);
+        int i = c.getColumnIndex(SpaceListContentProvider.Spaces.NAME);
         assertTrue(i >= 0);
         String space = c.getString(i);
 
@@ -78,7 +78,7 @@ public class SpaceListContentProviderTestCase extends AndroidTestCase {
 
         Cursor c = _resolver.query(SpaceListContentProvider.CONTENT_URI, PROJECTION, SpaceListContentProvider.Spaces.NAME + "='" + TEST_VAL + "'", null, null);
         c.moveToFirst();
-        int i = c.getColumnIndex(SpaceListContentProvider.SPACE_NAME);
+        int i = c.getColumnIndex(SpaceListContentProvider.Spaces.NAME);
         assertTrue(i >= 0);
         String space = c.getString(i);
         i = c.getColumnIndex(SpaceListContentProvider.Spaces._ID);
@@ -86,7 +86,7 @@ public class SpaceListContentProviderTestCase extends AndroidTestCase {
         int id = c.getInt(i);
 
         ContentValues values = new ContentValues();
-        values.put(SpaceListContentProvider.SPACE_NAME, TEST_VAL);
+        values.put(SpaceListContentProvider.Spaces.NAME, TEST_VAL);
         _resolver.delete(SpaceListContentProvider.CONTENT_URI, SpaceListContentProvider.Spaces._ID + "=" + id, null);
 
         c = _resolver.query(SpaceListContentProvider.CONTENT_URI, PROJECTION, SpaceListContentProvider.Spaces.NAME + "='" + TEST_VAL + "'", null, null);

@@ -15,34 +15,33 @@ import android.text.TextUtils;
 
 public class SpaceListContentProvider extends ContentProvider {
 
-    private static final String AUTHORITY = "com.onextent.oemap.provider.SpaceListContentProvider";
-    public static final int SPACE_LIST = 1;
-    public static final int SPACE_ID = 2;
-    private static final String SPACE_TABLE = SpaceListDbHelper.SPACE_TABLE;
-    public static final String SPACE_NAME = SpaceListDbHelper.SPACE_NAME;
-    public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" + SPACE_TABLE);
-    private static final UriMatcher sURIMatcher;
+    private static final String AUTHORITY   = "com.onextent.oemap.provider.SpaceListContentProvider";
+    public  static final int    SPACE_LIST  = 1;
+    public  static final int    SPACE_ID    = 2;
+    public  static final Uri    CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" + Spaces.CONTENT_PATH);
+
+    private static final UriMatcher _uriMatcher;
+
     private SQLiteDatabase _db = null;
 
     static {
-        sURIMatcher = new UriMatcher(UriMatcher.NO_MATCH);
-        sURIMatcher.addURI(AUTHORITY, Spaces.CONTENT_PATH, SPACE_LIST);
-        sURIMatcher.addURI(AUTHORITY, Spaces.CONTENT_PATH + "/#", SPACE_ID);
+        _uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+        _uriMatcher.addURI(AUTHORITY, Spaces.CONTENT_PATH, SPACE_LIST);
+        _uriMatcher.addURI(AUTHORITY, Spaces.CONTENT_PATH + "/#", SPACE_ID);
     }
 
     public static interface Spaces extends BaseColumns {
-        public static final Uri CONTENT_URI = SpaceListContentProvider.CONTENT_URI;
-        public static final String NAME = SpaceListDbHelper.SPACE_NAME;
-        public static final String CONTENT_PATH = SpaceListContentProvider.SPACE_TABLE;
-        public static final String CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/com.onextent.oemap.provider.spaces";
-        public static final String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/com.onextent.oemap.provider.spaces";
-        public static final String[] PROJECTION_ALL = {_ID, NAME};
-        public static final String SORT_ORDER_DEFAULT = NAME + " ASC";
+        static String NAME              = SpaceListDbHelper.SPACE_NAME;
+        static String CONTENT_PATH      = SpaceListDbHelper.SPACE_TABLE;
+        static String CONTENT_TYPE      = ContentResolver.CURSOR_DIR_BASE_TYPE + "/com.onextent.oemap.provider.spaces";
+        static String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/com.onextent.oemap.provider.spaces";
+        static String[] PROJECTION_ALL  = {_ID, NAME};
+        static String SORT_ORDER_DEFAULT = NAME + " ASC";
     }
 
     @Override
     public String getType(Uri uri) {
-        switch (sURIMatcher.match(uri)) {
+        switch (_uriMatcher.match(uri)) {
             case SPACE_LIST:
                 return Spaces.CONTENT_TYPE;
             case SPACE_ID:
@@ -69,11 +68,11 @@ public class SpaceListContentProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
-        builder.setTables(SPACE_TABLE);
+        builder.setTables(Spaces.CONTENT_PATH);
         if (TextUtils.isEmpty(sortOrder)) {
             sortOrder = Spaces.SORT_ORDER_DEFAULT;
         }
-        switch (sURIMatcher.match(uri)) {
+        switch (_uriMatcher.match(uri)) {
             case SPACE_LIST:
                 // all nice and well
                 break;
@@ -91,10 +90,10 @@ public class SpaceListContentProvider extends ContentProvider {
     }
 
     public Uri insert(Uri uri, ContentValues values) {
-        if (sURIMatcher.match(uri) != SPACE_LIST) {
+        if (_uriMatcher.match(uri) != SPACE_LIST) {
             throw new IllegalArgumentException("Unsupported URI for insertion: " + uri);
         }
-        long id = _db.insert(SPACE_TABLE, null, values);
+        long id = _db.insert(Spaces.CONTENT_PATH, null, values);
         if (id > 0) {
             // notify all listeners of changes and return itemUri:
             Uri itemUri = ContentUris.withAppendedId(uri, id);
@@ -102,14 +101,14 @@ public class SpaceListContentProvider extends ContentProvider {
             return itemUri;
         }
         // s.th. went wrong:
-        throw new SQLException("Problem while inserting into " + SPACE_TABLE + ", uri: " + uri); // use another exception here!!!
+        throw new SQLException("Problem while inserting into " + Spaces.CONTENT_PATH + ", uri: " + uri); // use another exception here!!!
     }
 
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         int delCount = 0;
-        switch (sURIMatcher.match(uri)) {
+        switch (_uriMatcher.match(uri)) {
             case SPACE_LIST:
-                delCount = _db.delete(SPACE_TABLE, selection, selectionArgs);
+                delCount = _db.delete(Spaces.CONTENT_PATH, selection, selectionArgs);
                 break;
             case SPACE_ID:
                 String idStr = uri.getLastPathSegment();
@@ -117,7 +116,7 @@ public class SpaceListContentProvider extends ContentProvider {
                 if (!TextUtils.isEmpty(selection)) {
                     where += " AND " + selection;
                 }
-                delCount = _db.delete(SPACE_TABLE, where, selectionArgs);
+                delCount = _db.delete(Spaces.CONTENT_PATH, where, selectionArgs);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported URI: " + uri);
