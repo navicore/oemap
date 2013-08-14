@@ -27,7 +27,7 @@ import com.onextent.android.util.KeyValueDbHelper;
 import com.onextent.android.util.ListDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.OeMapPresenceService;
-import com.onextent.oemap.store.PresenceDbHelper;
+import com.onextent.oemap.provider.PresenceDbHelper;
 import com.onextent.oemap.settings.OeMapPreferencesDialog;
 
 import org.json.JSONException;

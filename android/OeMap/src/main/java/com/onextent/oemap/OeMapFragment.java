@@ -18,7 +18,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.onextent.android.util.KeyValueDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.Presence;
-import com.onextent.oemap.store.PresenceDbHelper;
+import com.onextent.oemap.provider.PresenceDbHelper;
 
 import org.json.JSONException;
 
