@@ -3,16 +3,11 @@ package com.onextent.test.android;
 import android.database.SQLException;
 import android.test.AndroidTestCase;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.onextent.android.util.KeyValueDbHelper;
-import com.onextent.oemap.presence.Presence;
-import com.onextent.oemap.presence.PresenceDbHelper;
-import com.onextent.oemap.presence.PresenceFactory;
 
 import org.json.JSONException;
 
 import java.util.Map;
-import java.util.Set;
 
 public class KeyValueDbHelperTestCase extends AndroidTestCase {
 

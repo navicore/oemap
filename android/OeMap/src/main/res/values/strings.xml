@@ -78,6 +78,7 @@
     <string name="prefs_snippit_hint">Enter your status message. Ex: Hi, join me on this
         photowalk!
     </string>
+    <string name="oemap_spacename_store">oemap_spacename_store</string>
 
     <string-array name="pref_map_type_entries">
         <item>Normal</item>

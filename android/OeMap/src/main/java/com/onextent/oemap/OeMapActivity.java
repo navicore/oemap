@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -28,7 +27,7 @@ import com.onextent.android.util.KeyValueDbHelper;
 import com.onextent.android.util.ListDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.OeMapPresenceService;
-import com.onextent.oemap.presence.PresenceDbHelper;
+import com.onextent.oemap.store.PresenceDbHelper;
 import com.onextent.oemap.settings.OeMapPreferencesDialog;
 
 import org.json.JSONException;
@@ -113,6 +112,11 @@ public class OeMapActivity extends OeBaseActivity {
         int pos = _spacenames.indexOf(mapname);
         getActionBar().setSelectedNavigationItem(pos);
         updateMapNames(mapname);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        //No call for super(). Bug on API Level > 11.
     }
 
     private void startSettingsDialog() {
@@ -207,11 +211,13 @@ public class OeMapActivity extends OeBaseActivity {
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 
+    /*
     @Override
     public void setTitle(CharSequence title) {
         mTitle = title;
         getActionBar().setTitle(mTitle);
     }
+     */
 
     public void clearMapNamesHistory() {
         //clear history
@@ -259,7 +265,7 @@ public class OeMapActivity extends OeBaseActivity {
         setContentView(R.layout.oe_map_activity);
 
         _dbHelper = new PresenceDbHelper(this, getString(R.string.presence_db_name));
-        _spacenameDbHelper = new ListDbHelper(this, "oemap_spacename_store");
+        _spacenameDbHelper = new ListDbHelper(this, getString(R.string.oemap_spacename_store));
         _prefs = new KeyValueDbHelper(this, getString(R.string.app_key_value_store_name));
         _history_store = new ListDbHelper(this, "oemap_history_store");
 

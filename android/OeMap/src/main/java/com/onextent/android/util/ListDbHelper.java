@@ -7,8 +7,6 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import com.onextent.android.util.OeLog;
-
 import org.json.JSONException;
 
 import java.util.ArrayList;
@@ -19,6 +17,8 @@ public class ListDbHelper extends SQLiteOpenHelper {
 
     private static int DATABASE_VERSION = 1;
     SQLiteDatabase _db;
+    public static final String ITEMS_TABLE = "items"; //table name
+    public static final String ITEM = "item"; //table name
 
     public ListDbHelper(Context context, String dbname) { //for tests
         super(context, dbname, null, DATABASE_VERSION);
@@ -33,14 +33,14 @@ public class ListDbHelper extends SQLiteOpenHelper {
 
     private void createTables(SQLiteDatabase sqLiteDatabase) {
 
-        String qs = "CREATE TABLE items (item, PRIMARY KEY (item));";
+        String qs = "CREATE TABLE " + ITEMS_TABLE + " (item, PRIMARY KEY (" + ITEM + "));";
         sqLiteDatabase.execSQL(qs);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i2) {
 
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS items;");
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + ITEMS_TABLE + ";");
     }
 
     private void establishDb() {
@@ -62,17 +62,17 @@ public class ListDbHelper extends SQLiteOpenHelper {
     public void insert(String item) {
         ContentValues values = new ContentValues();
         values.put("item", item);
-        _db.insertOrThrow("items", null, values);
+        _db.insertOrThrow(ITEMS_TABLE, null, values);
     }
 
     public void replace(String item) {
         ContentValues values = new ContentValues();
         values.put("item", item);
-        _db.replaceOrThrow("items", null, values);
+        _db.replaceOrThrow(ITEMS_TABLE, null, values);
     }
 
     public void deleteAll() {
-        _db.delete("items", null, null);
+        _db.delete(ITEMS_TABLE, null, null);
     }
 
     public List<String> getAll() throws JSONException {
@@ -80,7 +80,7 @@ public class ListDbHelper extends SQLiteOpenHelper {
         List<String> l = null;
         String[] cols = {"item"};
         try {
-            c = _db.query(true, "items", cols, null, null, null, null, null, null);
+            c = _db.query(true, ITEMS_TABLE, cols, null, null, null, null, null, null);
             int DATA_FLD = c.getColumnIndex("item");
             int numRows = c.getCount();
             c.moveToFirst();

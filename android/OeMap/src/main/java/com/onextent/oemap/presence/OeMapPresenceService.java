@@ -19,6 +19,7 @@ import com.onextent.android.util.ListDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.R;
+import com.onextent.oemap.store.PresenceDbHelper;
 
 import org.json.JSONException;
 

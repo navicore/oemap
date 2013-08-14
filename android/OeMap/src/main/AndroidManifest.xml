@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.onextent.oemap"
-    android:versionCode="1"
-    android:versionName="1.0" >
+          package="com.onextent.oemap"
+          android:versionCode="1"
+          android:versionName="1.0">
 
     <uses-sdk
-        android:minSdkVersion="14"
-        android:targetSdkVersion="16" />
+            android:minSdkVersion="14"
+            android:targetSdkVersion="16"/>
 
     <permission
             android:name="com.onextent.oemap.permission.MAPS_RECEIVE"
             android:protectionLevel="signature"/>
+
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"></uses-permission>
     <uses-permission android:name="com.onextent.oemap.permission.MAPS_RECEIVE"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -22,12 +23,14 @@
     <uses-permission android:name="android.permission.READ_PROFILE"/>
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
 
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
 
-    <permission android:name="com.onextent.oemap.gcm.permission.C2D_MESSAGE"  android:protectionLevel="signature" />
-    <uses-permission android:name="com.onextent.oemap.gcm.permission.C2D_MESSAGE" />
+    <permission
+            android:name="com.onextent.oemap.gcm.permission.C2D_MESSAGE"
+            android:protectionLevel="signature"/>
+    <uses-permission android:name="com.onextent.oemap.gcm.permission.C2D_MESSAGE"/>
 
     <uses-feature
             android:glEsVersion="0x00020000"
@@ -35,17 +38,17 @@
             />
 
     <application
-        android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+            android:allowBackup="true"
+            android:icon="@drawable/ic_launcher"
+            android:label="@string/app_name"
+            android:theme="@style/AppTheme">
         <activity
-            android:name="com.onextent.oemap.OeMapActivity"
-            android:label="@string/app_name" >
+                android:name="com.onextent.oemap.OeMapActivity"
+                android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
 
@@ -53,32 +56,36 @@
             android:value="AIzaSyDUH26dpZ2IcqURmGQ46UhPDiVAR-pjS2M"
         -->
         <meta-data
-            android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyDUH26dpZ2IcqURmGQ46UhPDiVAR-pjS2M"
-            />
+                android:name="com.google.android.maps.v2.API_KEY"
+                android:value="AIzaSyDUH26dpZ2IcqURmGQ46UhPDiVAR-pjS2M"
+                />
 
         <receiver
                 android:name=".GcmHelper$GcmBroadcastReceiver"
-                android:permission="com.google.android.c2dm.permission.SEND" >
+                android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-                <category android:name="com.onextent.oemap.gcm" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+                <category android:name="com.onextent.oemap.gcm"/>
             </intent-filter>
         </receiver>
-        <service android:name=".GcmHelper$GcmIntentService" />
+        <service android:name=".GcmHelper$GcmIntentService"/>
 
         <receiver android:name=".OeMapAutostart">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
         <service
-            android:name=".presence.OeMapPresenceService"
-            android:process=":presence_service"
-            android:icon="@drawable/ic_launcher"
-            android:label="@string/presence_service_name"
-        >
-    </service>
+                android:name=".presence.OeMapPresenceService"
+                android:process=":presence_service"
+                android:icon="@drawable/ic_launcher"
+                android:label="@string/presence_service_name"
+                />
+        <provider
+                android:authorities="com.onextent.oemap.store.SpaceListContentProvider"
+                android:multiprocess="true"
+                android:name=".store.SpaceListContentProvider"
+                />
 
     </application>
 

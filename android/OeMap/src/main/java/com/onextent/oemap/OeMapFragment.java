@@ -5,9 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -20,7 +18,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.onextent.android.util.KeyValueDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.Presence;
-import com.onextent.oemap.presence.PresenceDbHelper;
+import com.onextent.oemap.store.PresenceDbHelper;
 
 import org.json.JSONException;
 
