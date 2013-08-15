@@ -30,7 +30,7 @@ public class KvDbHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i2) {
 
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS pairs;");
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + KV_TABLE + ";");
     }
 }
 
