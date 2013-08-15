@@ -4,13 +4,14 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.onextent.oemap.R;
+
 public class KvDbHelper extends SQLiteOpenHelper {
 
-    private static int DATABASE_VERSION = 1;
+    private static int DATABASE_VERSION = 2;
     public static final String KV_TABLE = "kv";
     public static final String KV_KEY = "key";
     public static final String KV_VALUE = "value";
-    public static final String DB_NAME = "oemap_kv_store";
 
     private static final String SQL_CREATE =
             "CREATE TABLE " + KV_TABLE +
@@ -18,7 +19,7 @@ public class KvDbHelper extends SQLiteOpenHelper {
             KV_KEY + " TEXT UNIQUE, " + KV_VALUE + " TEXT)";
 
     public KvDbHelper(Context context) {
-        super(context, DB_NAME, null, DATABASE_VERSION);
+        super(context, context.getString(R.string.db_name_preferences), null, DATABASE_VERSION);
     }
 
     @Override

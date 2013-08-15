@@ -17,11 +17,11 @@ import android.os.IBinder;
 import com.google.android.gms.maps.model.LatLng;
 import com.onextent.android.activity.OeBaseActivity;
 import com.onextent.android.location.LocationHelper;
-import com.onextent.android.util.KeyValueDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.R;
-import com.onextent.oemap.provider.OldPresenceDbHelper;
+import com.onextent.oemap.provider.KvHelper;
+import com.onextent.oemap.provider.PresenceHelper;
 import com.onextent.oemap.provider.SpaceHelper;
 import com.onextent.oemap.provider.SpaceProvider;
 
@@ -30,8 +30,8 @@ public class OeMapPresenceService extends Service {
     private SpaceHelper _spaceHelper;
     private LocationHelper   mLocHelper;
     private Presence         currentPresence  = null;
-    private OldPresenceDbHelper _dbHelper        = null;
-    private KeyValueDbHelper _kvHelper        = null;
+    private PresenceHelper   _dbHelper        = null;
+    private KvHelper _kvHelper        = null;
 
     private String CMD_POLL        = null;
     private String CMD_BOOT        = null;
@@ -53,8 +53,8 @@ public class OeMapPresenceService extends Service {
         super.onCreate();
 
         _spaceHelper = new SpaceHelper(this);
-        _dbHelper = new OldPresenceDbHelper(this, getString(R.string.presence_db_name));
-        _kvHelper = new KeyValueDbHelper(this, getString(R.string.app_key_value_store_name));
+        _dbHelper = new PresenceHelper(this);
+        _kvHelper = new KvHelper(this);
 
         CMD_POLL        = getString(R.string.presence_service_cmd_poll);
         CMD_BOOT        = getString(R.string.presence_service_cmd_boot);
@@ -132,8 +132,6 @@ public class OeMapPresenceService extends Service {
 
     @Override
     public void onDestroy() {
-        _dbHelper.close();
-        _kvHelper.close();
         mLocHelper.onPause();
         mLocHelper.onStop();
         super.onDestroy();

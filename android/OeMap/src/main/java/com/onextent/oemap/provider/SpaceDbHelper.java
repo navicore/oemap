@@ -4,19 +4,21 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.onextent.oemap.R;
+
 
 public class SpaceDbHelper extends SQLiteOpenHelper {
 
-    private static int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
+
     public static final String SPACE_TABLE = "spaces";
     public static final String SPACE_NAME = "spacename";
-    public static final String DB_NAME = "oemap_spacename_db";
 
     private static final String SQL_CREATE = "CREATE TABLE " +
         SPACE_TABLE + " (_id INTEGER PRIMARY KEY, " + SPACE_NAME + " TEXT)";
 
     public SpaceDbHelper(Context context) {
-        super(context, DB_NAME, null, DATABASE_VERSION);
+        super(context, context.getString(R.string.db_name_spaces), null, DATABASE_VERSION);
     }
 
     @Override

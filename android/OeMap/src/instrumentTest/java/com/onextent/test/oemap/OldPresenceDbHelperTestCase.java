@@ -5,7 +5,6 @@ import android.test.AndroidTestCase;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.onextent.oemap.presence.Presence;
-import com.onextent.oemap.provider.OldPresenceDbHelper;
 import com.onextent.oemap.presence.PresenceFactory;
 
 import org.json.JSONException;

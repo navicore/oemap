@@ -4,14 +4,15 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.onextent.oemap.R;
+
 public class PresenceDbHelper extends SQLiteOpenHelper {
 
-    private static int DATABASE_VERSION = 1;
+    private static int DATABASE_VERSION = 2;
     public static final String PRESENCE_TABLE = "presence";
     public static final String PRESENCE_UID = "uid";
     public static final String PRESENCE_SPACE = "space";
     public static final String PRESENCE_DATA = "data";
-    public static final String DB_NAME = "oemap_presence_store";
 
     //ejs todo: constrain mus be key + map
     private static final String SQL_CREATE =
@@ -22,7 +23,7 @@ public class PresenceDbHelper extends SQLiteOpenHelper {
             PRESENCE_DATA +" TEXT, UNIQUE (" + PRESENCE_UID + ", " + PRESENCE_SPACE+ "))";
 
     public PresenceDbHelper(Context context) {
-        super(context, DB_NAME, null, DATABASE_VERSION);
+        super(context, context.getString(R.string.db_name_presence), null, DATABASE_VERSION);
     }
 
     @Override

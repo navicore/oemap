@@ -2,7 +2,6 @@ package com.onextent.oemap.settings;
 
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,20 +11,20 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
-import com.onextent.android.util.KeyValueDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.R;
+import com.onextent.oemap.provider.KvHelper;
 
 public class OeMapPreferencesDialog extends DialogFragment {
 
-    private KeyValueDbHelper _prefs;
+    private KvHelper _prefs;
     private View _view;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        _prefs = new KeyValueDbHelper(getActivity(), getString(R.string.app_key_value_store_name));
+        _prefs = new KvHelper(getActivity());
 
         Dialog d = getDialog();
         if (d != null) d.setTitle(getString(R.string.app_name) + " Preferences");
@@ -92,7 +91,6 @@ public class OeMapPreferencesDialog extends DialogFragment {
 
     @Override
     public void onDestroyView() {
-        _prefs.close();
         super.onDestroyView();
     }
 }

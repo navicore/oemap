@@ -3,8 +3,6 @@ package com.onextent.test.android;
 import android.database.SQLException;
 import android.test.AndroidTestCase;
 
-import com.onextent.android.util.KeyValueDbHelper;
-
 import org.json.JSONException;
 
 import java.util.Map;

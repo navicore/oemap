@@ -6,8 +6,8 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 
-import com.onextent.android.util.KeyValueDbHelper;
 import com.onextent.oemap.R;
+import com.onextent.oemap.provider.KvHelper;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,7 +20,7 @@ public class OeBaseActivity extends Activity {
     private static final String INSTALLATION = "INSTALLATION";
     private static final int MAX_HISTORY = 5;
     private static String sID = null;
-    private KeyValueDbHelper _kvHelper = null;
+    private KvHelper _kvHelper = null;
 
     public synchronized static String id(Context context) {
         if (sID == null) {
@@ -64,7 +64,7 @@ public class OeBaseActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        _kvHelper = new KeyValueDbHelper(this, getString(R.string.app_key_value_store_name));
+        _kvHelper = new KvHelper(this);
     }
 
     private void init() { //first time use init :)

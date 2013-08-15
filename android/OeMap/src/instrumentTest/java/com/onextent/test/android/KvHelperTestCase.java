@@ -1,12 +1,9 @@
 package com.onextent.test.android;
 
-import android.content.ContentResolver;
 import android.database.SQLException;
 import android.test.AndroidTestCase;
 
-import com.onextent.android.util.KeyValueDbHelper;
 import com.onextent.oemap.provider.KvHelper;
-import com.onextent.oemap.provider.KvProvider;
 
 import org.json.JSONException;
 

@@ -15,10 +15,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.onextent.android.util.KeyValueDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.Presence;
-import com.onextent.oemap.provider.OldPresenceDbHelper;
+import com.onextent.oemap.provider.KvHelper;
+import com.onextent.oemap.provider.PresenceHelper;
 
 import org.json.JSONException;
 
@@ -30,8 +30,8 @@ public class OeMapFragment extends MapFragment  {
 
     private Map<String, Holder> _markers = new HashMap<String, Holder>();
 
-    private OldPresenceDbHelper _dbHelper = null;
-    private KeyValueDbHelper _prefs = null;
+    private PresenceHelper _dbHelper = null;
+    private KvHelper _prefs = null;
     private LatLng mCurrLoc;
     private Marker mMyMarker;
 
@@ -165,8 +165,6 @@ public class OeMapFragment extends MapFragment  {
 
     @Override
     public void onDestroy() {
-        _dbHelper.close();
-        _prefs.close();
 
         super.onDestroy();
     }
@@ -191,8 +189,8 @@ public class OeMapFragment extends MapFragment  {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        _dbHelper = new OldPresenceDbHelper(getActivity(), getString(R.string.presence_db_name));
-        _prefs = new KeyValueDbHelper(getActivity(), getString(R.string.app_key_value_store_name));
+        _dbHelper = new PresenceHelper(getActivity());
+        _prefs = new KvHelper(getActivity());
 
         KEY_UID = getString(R.string.presence_service_key_uid);
         KEY_SPACENAME = getString(R.string.presence_service_key_spacename);
