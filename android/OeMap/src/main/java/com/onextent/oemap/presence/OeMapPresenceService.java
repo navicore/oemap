@@ -21,7 +21,7 @@ import com.onextent.android.util.KeyValueDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.R;
-import com.onextent.oemap.provider.PresenceDbHelper;
+import com.onextent.oemap.provider.OldPresenceDbHelper;
 import com.onextent.oemap.provider.SpaceHelper;
 import com.onextent.oemap.provider.SpaceProvider;
 
@@ -30,7 +30,7 @@ public class OeMapPresenceService extends Service {
     private SpaceHelper _spaceHelper;
     private LocationHelper   mLocHelper;
     private Presence         currentPresence  = null;
-    private PresenceDbHelper _dbHelper        = null;
+    private OldPresenceDbHelper _dbHelper        = null;
     private KeyValueDbHelper _kvHelper        = null;
 
     private String CMD_POLL        = null;
@@ -53,7 +53,7 @@ public class OeMapPresenceService extends Service {
         super.onCreate();
 
         _spaceHelper = new SpaceHelper(this);
-        _dbHelper = new PresenceDbHelper(this, getString(R.string.presence_db_name));
+        _dbHelper = new OldPresenceDbHelper(this, getString(R.string.presence_db_name));
         _kvHelper = new KeyValueDbHelper(this, getString(R.string.app_key_value_store_name));
 
         CMD_POLL        = getString(R.string.presence_service_cmd_poll);

@@ -10,7 +10,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import java.util.HashMap;
 import java.util.Map;
 
-
+@Deprecated
 public class KeyValueDbHelper extends SQLiteOpenHelper {
 
     private static int DATABASE_VERSION = 1;

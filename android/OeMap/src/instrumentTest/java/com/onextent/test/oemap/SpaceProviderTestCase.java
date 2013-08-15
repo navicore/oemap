@@ -108,6 +108,7 @@ public class SpaceProviderTestCase extends AndroidTestCase {
         int i = c.getColumnIndex(SpaceProvider.Spaces.NAME);
         assertTrue(i >= 0);
         String space = c.getString(i);
+        assertEquals(space, TEST_VAL);
         i = c.getColumnIndex(SpaceProvider.Spaces._ID);
         assertTrue(i >= 0);
         int id = c.getInt(i);

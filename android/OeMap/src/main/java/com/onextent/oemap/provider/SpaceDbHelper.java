@@ -8,16 +8,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class SpaceDbHelper extends SQLiteOpenHelper {
 
     private static int DATABASE_VERSION = 1;
-    private SQLiteDatabase _db;
     public static final String SPACE_TABLE = "spaces";
     public static final String SPACE_NAME = "spacename";
     public static final String DB_NAME = "oemap_spacename_db";
 
     private static final String SQL_CREATE = "CREATE TABLE " +
-        SPACE_TABLE +                       // Table's name
-        " (" +                           // The columns in the table
-        " _id INTEGER PRIMARY KEY, " +
-        " " + SPACE_NAME + " TEXT)";
+        SPACE_TABLE + " (_id INTEGER PRIMARY KEY, " + SPACE_NAME + " TEXT)";
 
     public SpaceDbHelper(Context context) {
         super(context, DB_NAME, null, DATABASE_VERSION);

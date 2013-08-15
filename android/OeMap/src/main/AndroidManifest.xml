@@ -82,6 +82,11 @@
                 android:label="@string/presence_service_name"
                 />
         <provider
+                android:authorities="com.onextent.oemap.provider.KvProvider"
+                android:multiprocess="true"
+                android:name=".provider.KvProvider"
+                />
+        <provider
                 android:authorities="com.onextent.oemap.provider.SpaceProvider"
                 android:multiprocess="true"
                 android:name=".provider.SpaceProvider"

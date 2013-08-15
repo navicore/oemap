@@ -28,7 +28,7 @@ import com.onextent.android.util.KeyValueDbHelper;
 import com.onextent.android.util.ListDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.OeMapPresenceService;
-import com.onextent.oemap.provider.PresenceDbHelper;
+import com.onextent.oemap.provider.OldPresenceDbHelper;
 import com.onextent.oemap.provider.SpaceProvider;
 import com.onextent.oemap.settings.OeMapPreferencesDialog;
 
@@ -53,7 +53,7 @@ public class OeMapActivity extends OeBaseActivity {
     private ListView mDrawerList;
     private ArrayList<String> mDrawerNamesList;
     private String mMapFragTag;
-    private PresenceDbHelper _dbHelper = null;
+    private OldPresenceDbHelper _dbHelper = null;
     private KeyValueDbHelper _prefs = null;
     private ListDbHelper _history_store = null;
     private ArrayAdapter<String> _spacenames_adapter = null;
@@ -250,7 +250,7 @@ public class OeMapActivity extends OeBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.oe_map_activity);
 
-        _dbHelper = new PresenceDbHelper(this, getString(R.string.presence_db_name));
+        _dbHelper = new OldPresenceDbHelper(this, getString(R.string.presence_db_name));
         _prefs = new KeyValueDbHelper(this, getString(R.string.app_key_value_store_name));
         _history_store = new ListDbHelper(this, "oemap_history_store");
 
