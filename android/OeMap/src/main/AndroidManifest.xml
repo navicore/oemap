@@ -6,7 +6,7 @@
 
     <uses-sdk
             android:minSdkVersion="14"
-            android:targetSdkVersion="16"/>
+            android:targetSdkVersion="18"/>
 
     <permission
             android:name="com.onextent.oemap.permission.MAPS_RECEIVE"
@@ -82,9 +82,9 @@
                 android:label="@string/presence_service_name"
                 />
         <provider
-                android:authorities="com.onextent.oemap.provider.SpaceListContentProvider"
+                android:authorities="com.onextent.oemap.provider.SpaceProvider"
                 android:multiprocess="true"
-                android:name=".provider.SpaceListContentProvider"
+                android:name=".provider.SpaceProvider"
                 />
 
     </application>

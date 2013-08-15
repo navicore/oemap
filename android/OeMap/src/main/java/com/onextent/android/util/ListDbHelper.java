@@ -7,8 +7,6 @@ import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import org.json.JSONException;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,7 +73,7 @@ public class ListDbHelper extends SQLiteOpenHelper {
         _db.delete(ITEMS_TABLE, null, null);
     }
 
-    public List<String> getAll() throws JSONException {
+    public List<String> getAll() {
         Cursor c = null;
         List<String> l = null;
         String[] cols = {"item"};

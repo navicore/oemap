@@ -4,10 +4,13 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 
@@ -15,24 +18,20 @@ import com.google.android.gms.maps.model.LatLng;
 import com.onextent.android.activity.OeBaseActivity;
 import com.onextent.android.location.LocationHelper;
 import com.onextent.android.util.KeyValueDbHelper;
-import com.onextent.android.util.ListDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.R;
 import com.onextent.oemap.provider.PresenceDbHelper;
-
-import org.json.JSONException;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.onextent.oemap.provider.SpaceHelper;
+import com.onextent.oemap.provider.SpaceProvider;
 
 public class OeMapPresenceService extends Service {
 
+    private SpaceHelper _spaceHelper;
     private LocationHelper   mLocHelper;
     private Presence         currentPresence  = null;
     private PresenceDbHelper _dbHelper        = null;
     private KeyValueDbHelper _kvHelper        = null;
-    private ListDbHelper _spacenameDbHelper = null;
 
     private String CMD_POLL        = null;
     private String CMD_BOOT        = null;
@@ -44,7 +43,6 @@ public class OeMapPresenceService extends Service {
 
 
     private boolean _running = false;
-    private List<String> _spacenames = null;
 
     private Notification _notification = null;
 
@@ -54,9 +52,9 @@ public class OeMapPresenceService extends Service {
     public void onCreate() {
         super.onCreate();
 
+        _spaceHelper = new SpaceHelper(this);
         _dbHelper = new PresenceDbHelper(this, getString(R.string.presence_db_name));
         _kvHelper = new KeyValueDbHelper(this, getString(R.string.app_key_value_store_name));
-        _spacenameDbHelper = new ListDbHelper(this, "oemap_spacename_store");
 
         CMD_POLL        = getString(R.string.presence_service_cmd_poll);
         CMD_BOOT        = getString(R.string.presence_service_cmd_boot);
@@ -66,16 +64,6 @@ public class OeMapPresenceService extends Service {
         KEY_UID         = getString(R.string.presence_service_key_uid);
         KEY_REASON      = getString(R.string.presence_service_key_reason);
 
-        try {
-            _spacenames = _spacenameDbHelper.getAll();
-        } catch (JSONException e) {
-            OeLog.e("error reading spacenames: " + e, e);
-        }
-        if (_spacenames == null)
-            _spacenames = new ArrayList<String>();
-
-        int sz = _spacenames == null ? 0 : _spacenames.size();
-        OeLog.d("loaded " + sz + " spacenames");
         createNotification();
         mLocHelper = new LocationHelper(new LocationHelper.LHContext() {
             @Override
@@ -108,14 +96,13 @@ public class OeMapPresenceService extends Service {
 
         String uid = OeBaseActivity.id(this);
         OeLog.d("broadcast for uid: " + uid);
-        for (String s : _spacenames) {
+        for (String s : _spaceHelper.getAllSpaceNames()) {
 
             storeLocalPresence(l, s);
 
             Intent intent = new Intent(getString(R.string.presence_service_update_intent));
             intent.putExtra(KEY_UID, uid);
             intent.putExtra(KEY_SPACENAME, s);
-            //LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
             OeLog.d("    sending action: " + intent.getAction() + " for uid: " + uid + " and space: " + s);
             sendBroadcast(intent);
         }
@@ -145,10 +132,8 @@ public class OeMapPresenceService extends Service {
 
     @Override
     public void onDestroy() {
-        saveSpacenames();
         _dbHelper.close();
         _kvHelper.close();
-        _spacenameDbHelper.close();
         mLocHelper.onPause();
         mLocHelper.onStop();
         super.onDestroy();
@@ -157,13 +142,6 @@ public class OeMapPresenceService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
-    }
-
-    private void saveSpacenames() {
-        for (String s : _spacenames) {
-            _spacenameDbHelper.replace(s);
-        }
-        OeLog.d("saved " + _spacenames.size() + " spacenames");
     }
 
     @Override
@@ -188,45 +166,45 @@ public class OeMapPresenceService extends Service {
         } if (CMD_ADD_SPACE.equals(reason)) {
 
             String spacename = extras.getString(KEY_SPACENAME);
-            if (!_spacenames.contains(spacename)) {
-                _spacenames.add(spacename);
-                saveSpacenames();
-            }
+
+            ContentValues values = new ContentValues();
+            values.put(SpaceProvider.Spaces.NAME, spacename);
+            Uri r = getContentResolver().insert(SpaceProvider.CONTENT_URI, values);
+
             startRunning();
 
         } if (CMD_RM_SPACE.equals(reason)) {
 
             String spacename = extras.getString(KEY_SPACENAME);
-            _spacenames.remove(spacename);
-            saveSpacenames();
+            _spaceHelper.deleteSpacename(spacename);
 
-            //if no more maps, stop running
-            if (_spacenames.isEmpty()) {
+            if (!_spaceHelper.hasSpaceNames()) {
                 stopRunning();
             }
 
         } if (CMD_POLL.equals(reason)) {
 
-            if (!_spacenames.isEmpty())
+            if (_spaceHelper.hasSpaceNames()) {
                 wakeup();
+            }
 
         } else {
 
             OeLog.w("unknown reason intent");
-
         }
     }
 
     private void poll() {
 
-        for (String map : _spacenames) {
-
-            OeLog.d("polling " + map + " ...");
+        Cursor c = getContentResolver().query(SpaceProvider.CONTENT_URI,
+                SpaceProvider.Spaces.PROJECTION_ALL, null, null,
+                SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
+        int pos = c.getColumnIndex(SpaceProvider.Spaces.NAME);
+        while (c.moveToNext()) {
+            String s = c.getString(pos);
+            OeLog.d("polling " + s + " ...");
         }
-        //for each map:
-        //  do a getall rest call
-        //  write to db
-        //  bcast intent for map
+        c.close();
     }
 
     private void stopRunning() {

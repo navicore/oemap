@@ -6,6 +6,7 @@ import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,9 +29,8 @@ import com.onextent.android.util.ListDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.OeMapPresenceService;
 import com.onextent.oemap.provider.PresenceDbHelper;
+import com.onextent.oemap.provider.SpaceProvider;
 import com.onextent.oemap.settings.OeMapPreferencesDialog;
-
-import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +54,6 @@ public class OeMapActivity extends OeBaseActivity {
     private ArrayList<String> mDrawerNamesList;
     private String mMapFragTag;
     private PresenceDbHelper _dbHelper = null;
-    private ListDbHelper _spacenameDbHelper = null;
     private KeyValueDbHelper _prefs = null;
     private ListDbHelper _history_store = null;
     private ArrayAdapter<String> _spacenames_adapter = null;
@@ -211,14 +210,6 @@ public class OeMapActivity extends OeBaseActivity {
         mDrawerLayout.closeDrawer(mDrawerList);
     }
 
-    /*
-    @Override
-    public void setTitle(CharSequence title) {
-        mTitle = title;
-        getActionBar().setTitle(mTitle);
-    }
-     */
-
     public void clearMapNamesHistory() {
         //clear history
         int sz = mDrawerNamesList.size();
@@ -231,12 +222,7 @@ public class OeMapActivity extends OeBaseActivity {
     public void updateMapNamesFromHistory() {
 
         List<String> h = null;
-        try {
-            h = _history_store.getAll();
-        } catch (JSONException e) {
-            OeLog.e(e.toString(), e);
-            return;
-        }
+        h = _history_store.getAll();
         if (h == null)
             h = new ArrayList<String>();
 
@@ -252,7 +238,7 @@ public class OeMapActivity extends OeBaseActivity {
     @Override
     protected void onDestroy() {
         _dbHelper.close();
-        _spacenameDbHelper.close();
+        //_spacenameDbHelper.close();
         _prefs.close();
         _history_store.close();
         super.onDestroy();
@@ -265,16 +251,12 @@ public class OeMapActivity extends OeBaseActivity {
         setContentView(R.layout.oe_map_activity);
 
         _dbHelper = new PresenceDbHelper(this, getString(R.string.presence_db_name));
-        _spacenameDbHelper = new ListDbHelper(this, getString(R.string.oemap_spacename_store));
         _prefs = new KeyValueDbHelper(this, getString(R.string.app_key_value_store_name));
         _history_store = new ListDbHelper(this, "oemap_history_store");
-
-        //KEY_SPACENAMES = getString(R.string.presence_service_key_spacenames);
 
         mMenuNames = getResources().getStringArray(R.array.menu_names_array);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mTitle = getResources().getString(R.string.app_name);
-        //mDrawerTitle = getResources().getString(R.string.drawer_title);
 
         mDrawerNamesList = new ArrayList();
         for (String n : mMenuNames) {
@@ -329,13 +311,16 @@ public class OeMapActivity extends OeBaseActivity {
 
         ActionBar actionBar = getActionBar();
         _spacenames = null;
-        try {
-            _spacenames = _spacenameDbHelper.getAll();
-        } catch (JSONException e) {
-            OeLog.e(e.toString(), e);
-            return;
+        _spacenames = new ArrayList<String>();
+        Cursor c = getContentResolver().query(SpaceProvider.CONTENT_URI,
+                SpaceProvider.Spaces.PROJECTION_ALL, null, null,
+                SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
+        int pos = c.getColumnIndex(SpaceProvider.Spaces.NAME);
+        while (c.moveToNext()) {
+            String n = c.getString(pos);
+            _spacenames.add(n);
         }
-        if (_spacenames == null) _spacenames = new ArrayList<String>();
+        c.close();
         _spacenames_adapter = new ArrayAdapter<String>(actionBar.getThemedContext(),
                 android.R.layout.simple_spinner_item, android.R.id.text1, _spacenames);
         actionBar.setDisplayShowTitleEnabled(false);
