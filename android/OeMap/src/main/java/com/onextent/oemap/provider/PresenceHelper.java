@@ -3,11 +3,7 @@ package com.onextent.oemap.provider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 
-import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.Presence;
 import com.onextent.oemap.presence.PresenceFactory;
 
@@ -39,7 +35,7 @@ public class PresenceHelper {
 
     public void deletePresence(Presence presence) {
         _context.getContentResolver().delete(PresenceProvider.CONTENT_URI,
-                    PresenceProvider.IPresence.UID + "=" + presence.getUID(), null);
+                    PresenceProvider.IPresence.UID + "='" + presence.getUID() + "'", null);
     }
 
     //todo: ejs not sure if this deletes all

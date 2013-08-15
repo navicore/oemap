@@ -13,12 +13,13 @@ public class PresenceDbHelper extends SQLiteOpenHelper {
     public static final String PRESENCE_DATA = "data";
     public static final String DB_NAME = "oemap_presence_store";
 
+    //ejs todo: constrain mus be key + map
     private static final String SQL_CREATE =
             "CREATE TABLE " + PRESENCE_TABLE +
             " (_id INTEGER PRIMARY KEY, " +
-            PRESENCE_UID + " TEXT UNIQUE, " +
+            PRESENCE_UID + " TEXT, " +
             PRESENCE_SPACE + " TEXT, " +
-            PRESENCE_DATA +" TEXT)";
+            PRESENCE_DATA +" TEXT, UNIQUE (" + PRESENCE_UID + ", " + PRESENCE_SPACE+ "))";
 
     public PresenceDbHelper(Context context) {
         super(context, DB_NAME, null, DATABASE_VERSION);
