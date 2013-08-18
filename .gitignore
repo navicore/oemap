@@ -6,5 +6,6 @@ build/
 obj/
 gen/
 eclimd.log
+*.swp
 local.properties
 
