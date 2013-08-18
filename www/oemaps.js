@@ -4,7 +4,7 @@ app.use(express.bodyParser());
 
 app.get('/', function(req, res) {
   res.type('text/plain');
-  res.send('i am a beautiful butterfly');
+  res.send('Welcome to the Alpha Test of OeMap');
 });
 
 var presences = {};

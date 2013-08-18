@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.location.Location;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 
@@ -25,11 +26,25 @@ import com.onextent.oemap.provider.PresenceHelper;
 import com.onextent.oemap.provider.SpaceHelper;
 import com.onextent.oemap.provider.SpaceProvider;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpParams;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+
 public class OeMapPresenceService extends Service {
 
     private SpaceHelper _spaceHelper;
     private LocationHelper   mLocHelper;
-    private Presence         currentPresence  = null;
     private PresenceHelper   _dbHelper        = null;
     private KvHelper _kvHelper        = null;
 
@@ -80,16 +95,15 @@ public class OeMapPresenceService extends Service {
         mLocHelper.onResume();
     }
 
-    private void storeLocalPresence(Location l, String s) {
+    private Presence createPresence(Location l, String s) {
 
         LatLng latLng       = new LatLng(l.getLatitude(), l.getLongitude());
         String pid          = OeBaseActivity.id(this.getApplicationContext());
         //todo: allow per-map overrides
         String label        = _kvHelper.get(getString(R.string.pref_username), "nobody");
         String snippit      = _kvHelper.get(getString(R.string.pref_snippit), "sigh...");
-        currentPresence     = PresenceFactory.createPresence(pid, latLng, label, snippit, s);
-
-        _dbHelper.replacePresence(currentPresence);
+        Presence p = PresenceFactory.createPresence(pid, latLng, label, snippit, s);
+        return p;
     }
 
     private void broadcast(Location l) {
@@ -98,14 +112,93 @@ public class OeMapPresenceService extends Service {
         OeLog.d("broadcast for uid: " + uid);
         for (String s : _spaceHelper.getAllSpaceNames()) {
 
-            storeLocalPresence(l, s);
+            Presence p = createPresence(l, s);
 
-            Intent intent = new Intent(getString(R.string.presence_service_update_intent));
-            intent.putExtra(KEY_UID, uid);
-            intent.putExtra(KEY_SPACENAME, s);
-            OeLog.d("    sending action: " + intent.getAction() + " for uid: " + uid + " and space: " + s);
-            sendBroadcast(intent);
+            _dbHelper.replacePresence(p);
+
+            broadcastIntent(p);
+
+            sendPresence(p);
         }
+    }
+
+    private void broadcastIntent(Presence p) {
+
+        Intent intent = new Intent(getString(R.string.presence_service_update_intent));
+        intent.putExtra(KEY_UID, p.getUID());
+        intent.putExtra(KEY_SPACENAME, p.getSpaceName());
+        OeLog.d("    sending action: " + intent.getAction() + " for uid: " + p.getUID() +
+                " and space: " + p.getSpaceName());
+        sendBroadcast(intent);
+    }
+
+    private class Send extends AsyncTask<Presence, Void, String> {
+
+        @Override
+        protected String doInBackground(Presence... presences) {
+            String r = null;
+            Presence p = presences[0];
+            OeLog.d("Send.doInBackground: " + p.toString());
+            HttpClient client = new DefaultHttpClient();
+            HttpPut put = new HttpPut("http://10.0.0.2:8080/presence");
+            put.addHeader("Content-Type", "application/json");
+            put.addHeader("Accept", "application/json");
+            try {
+                put.setEntity(new StringEntity(p.toString()));
+                HttpResponse response = client.execute(put);
+                InputStream content = response.getEntity().getContent();
+                BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
+                StringBuilder sb = new StringBuilder();
+                String line = null;
+
+                while ((line = buffer.readLine()) != null) {
+                    sb.append(line + "\n");
+                }
+                r = sb.toString();
+            } catch (UnsupportedEncodingException e) {
+                r = e.toString();
+            } catch (IOException e) {
+                r = e.toString();
+            }
+            return r;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            OeLog.d("Send.onPreExecute");
+            super.onPreExecute();
+        }
+
+        @Override
+        protected void onPostExecute(String r) {
+
+            OeLog.d("Send.onPostExecute: " + r);
+            super.onPostExecute(r);
+        }
+
+        @Override
+        protected void onProgressUpdate(Void... values) {
+            OeLog.d("Send.onProgressUpdate");
+            super.onProgressUpdate(values);
+        }
+
+        @Override
+        protected void onCancelled(String s) {
+            OeLog.d("Send.onCancelled(s): " + s);
+            super.onCancelled(s);
+        }
+
+        @Override
+        protected void onCancelled() {
+            OeLog.d("Send.onCancelled");
+            super.onCancelled();
+        }
+    }
+
+    private void sendPresence(Presence p) {
+
+        OeLog.d("sendPresence");
+        new Send().execute(p);
     }
 
     private void createNotification() {
