@@ -6,7 +6,7 @@ import org.json.JSONException;
 
 public class PresenceFactory {
 
-    public static Presence createPresence(String pid, LatLng l, String lbl, String snippet, String spacename, long ttl) {
+    public static Presence createPresence(String pid, LatLng l, String lbl, String snippet, String spacename, int ttl) {
 
         return new JsonPresence(pid, l, lbl, snippet, spacename, ttl);
     }

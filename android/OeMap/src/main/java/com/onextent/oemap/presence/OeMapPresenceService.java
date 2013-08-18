@@ -101,7 +101,7 @@ public class OeMapPresenceService extends Service {
         //todo: allow per-map overrides
         String label        = _kvHelper.get(getString(R.string.pref_username), "nobody");
         String snippit      = _kvHelper.get(getString(R.string.pref_snippit), "sigh...");
-        long ttl            = _kvHelper.getLong(getString(R.string.pref_ttl), DEFAULT_TTL);
+        int ttl            = _kvHelper.getInt(getString(R.string.pref_ttl), DEFAULT_TTL);
         Presence p = PresenceFactory.createPresence(pid, latLng, label, snippit, s, ttl);
         return p;
     }
