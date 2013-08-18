@@ -6,9 +6,9 @@ import org.json.JSONException;
 
 public class PresenceFactory {
 
-    public static Presence createPresence(String pid, LatLng l, String lbl, String snippet, String spacename) {
+    public static Presence createPresence(String pid, LatLng l, String lbl, String snippet, String spacename, long ttl) {
 
-        return new JsonPresence(pid, l, lbl, snippet, spacename);
+        return new JsonPresence(pid, l, lbl, snippet, spacename, ttl);
     }
 
     public static Presence createPresence(String json) throws JSONException {

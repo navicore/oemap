@@ -102,7 +102,7 @@ public class OeMapPresenceService extends Service {
         //todo: allow per-map overrides
         String label        = _kvHelper.get(getString(R.string.pref_username), "nobody");
         String snippit      = _kvHelper.get(getString(R.string.pref_snippit), "sigh...");
-        Presence p = PresenceFactory.createPresence(pid, latLng, label, snippit, s);
+        Presence p = PresenceFactory.createPresence(pid, latLng, label, snippit, s, -1); //todo: ejs ttl
         return p;
     }
 

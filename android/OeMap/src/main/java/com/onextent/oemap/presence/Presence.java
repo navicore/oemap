@@ -18,5 +18,7 @@ public interface Presence {
     public void setSpaceName(String name);
 
     public long getAgeInMillis();
+
+    public long getTimeToLive();
 }
 
