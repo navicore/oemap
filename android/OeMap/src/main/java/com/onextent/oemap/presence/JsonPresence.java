@@ -20,7 +20,8 @@ public class JsonPresence implements Presence {
     private final String _uid, _label, _snippet;
     private String _spacename;
     private final LatLng _location;
-    private final long _create_time, _time_to_live;
+    private final long _create_time;
+    private final int _time_to_live;
 
     JsonPresence(String json) throws JSONException {
         JSONObject jobj = new JSONObject(json);
@@ -30,10 +31,10 @@ public class JsonPresence implements Presence {
         _snippet        = jobj.getString(KEY_SNP);
         _spacename      = jobj.getString(KEY_SPC);
         _create_time    = jobj.getLong(KEY_TIM);
-        _time_to_live   = jobj.getLong(KEY_TTL);
+        _time_to_live   = jobj.getInt(KEY_TTL);
     }
 
-    JsonPresence(String pid, LatLng l, String lbl, String snippet, String spacename, long ttl) {
+    JsonPresence(String pid, LatLng l, String lbl, String snippet, String spacename, int ttl) {
         _uid = pid;
         _location = l;
         _label = lbl;
@@ -69,15 +70,17 @@ public class JsonPresence implements Presence {
     }
 
     @Override
-    public long getTimeToLive() {
+    public int getTimeToLive() {
         return _time_to_live;
     }
 
+    /*
     @Override
     public void setSpaceName(String name) {
 
         _spacename = name;
     }
+     */
 
     @Override
     public long getAgeInMillis() {

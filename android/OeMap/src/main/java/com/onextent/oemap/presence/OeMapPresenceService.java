@@ -28,20 +28,19 @@ import com.onextent.oemap.provider.SpaceProvider;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.HttpParams;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.List;
 
 public class OeMapPresenceService extends Service {
+
+    public static final int DEFAULT_TTL = Presence.MEDIUM;
 
     private SpaceHelper _spaceHelper;
     private LocationHelper   mLocHelper;
@@ -102,7 +101,8 @@ public class OeMapPresenceService extends Service {
         //todo: allow per-map overrides
         String label        = _kvHelper.get(getString(R.string.pref_username), "nobody");
         String snippit      = _kvHelper.get(getString(R.string.pref_snippit), "sigh...");
-        Presence p = PresenceFactory.createPresence(pid, latLng, label, snippit, s, -1); //todo: ejs ttl
+        long ttl            = _kvHelper.getLong(getString(R.string.pref_ttl), DEFAULT_TTL);
+        Presence p = PresenceFactory.createPresence(pid, latLng, label, snippit, s, ttl);
         return p;
     }
 

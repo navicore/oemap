@@ -1,0 +1,14 @@
+db.presences.ensureIndex({"uid": 1, "space": 1}, {"unique": true})
+
+db.presences.ensureIndex(
+  {"short_ttl_start_time": 1}, {"expireAfterSeconds" : 5 * 60}
+)
+
+db.presences.ensureIndex(
+  {"medium_ttl_start_time": 1}, {"expireAfterSeconds" : 60 * 60}
+)
+
+db.presences.ensureIndex(
+  {"long_ttl_start_time": 1}, {"expireAfterSeconds" : 24* 60 * 60}
+)
+

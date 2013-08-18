@@ -34,14 +34,35 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function(err, db) {
     //put a presence
     app.put('/presence', function(req, res) {
 
-        console.log('put presence: ' + req.body)
+        console.log('put presence uid: ' + req.body.uid + " space: " + req.body.space)
         if (!req.body) {
             return res.send('Error 404: No presence in put');
         }
-        db.collection('presences').insert(req.body, function(err, doc) {
-            //todo: handle err
-            //todo: make pid uid and overwrite map dupes
-        })
+        var ttl = req.body.ttl
+        var now = new Date()
+        switch (ttl) {
+            case 0:
+                req.body['short_ttl_start_time'] = now
+                break;
+            case 1:
+                req.body['medium_ttl_start_time'] = now
+                break;
+            case 2:
+                req.body['long_ttl_start_time'] = now
+                break;
+            default:
+                req.body['medium_ttl_start_time'] = now
+                break;
+        }
+        db.collection('presences').update(
+                {"uid": req.body.uid, "space": req.body.space}, 
+                req.body, 
+                {"upsert": true}, 
+                function(err, doc) {
+                    //todo: handle err
+                    //todo: make pid uid and overwrite map dupes
+                }
+        )
         res.send(200);
     });
 
