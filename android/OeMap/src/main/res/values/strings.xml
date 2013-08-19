@@ -70,14 +70,7 @@
     <string name="prefs_snippit_hint">Enter your status message. Ex: Hi, join me on this photowalk! </string>
     <string name="prefs_username_hint">Enter the name you wish to appear on maps.</string>
 
-    <string name="presence_service_cmd_add_space">addSpace</string>
-    <string name="presence_service_cmd_boot">boot</string>
-    <string name="presence_service_cmd_poll">poll</string>
-    <string name="presence_service_cmd_rm_space">rmSpace</string>
-    <string name="presence_service_key_reason">reason</string>
     <string name="presence_service_key_running">presence_service_key_running</string>
-    <string name="presence_service_key_spacename">spacename</string>
-    <string name="presence_service_key_spacenames">presence_service_key_spacenames</string>
     <string name="presence_service_key_uid">uid</string>
     <string name="presence_service_name">OeMap Presence Service</string>
     <string name="presence_service_update_intent">com.onextent.oemap.presenceServiceUpdate</string>

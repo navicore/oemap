@@ -54,13 +54,14 @@ public class OeMapPresenceService extends Service {
     private PresenceHelper _dbHelper = null;
     private KvHelper       _kvHelper = null;
 
-    private String CMD_POLL         = null;
-    private String CMD_BOOT         = null;
-    private String CMD_ADD_SPACE    = null;
-    private String CMD_RM_SPACE     = null;
-    private String KEY_REASON       = null;
-    private String KEY_SPACENAME    = null;
-    private String KEY_UID          = null;
+    public static final String CMD_POLL = "poll";
+    public static final String CMD_BOOT = "boot";
+    public static final String CMD_ADD_SPACE = "add_space";
+    public static final String CMD_RM_SPACE  = "rm_space";
+    public static final String KEY_REASON    = "reason";
+    public static final String KEY_SPACENAME = "spacename";
+    public static final String KEY_SPACENAMES = "spacenames";
+    public static final String KEY_UID       = "uid";
 
     private AsyncTask       _currentTask        = null;
     private AsyncTask       _currentPollTask    = null;
@@ -77,14 +78,6 @@ public class OeMapPresenceService extends Service {
         _dbHelper = new PresenceHelper(this);
         _kvHelper = new KvHelper(this);
 
-        CMD_POLL        = getString(R.string.presence_service_cmd_poll);
-        CMD_BOOT        = getString(R.string.presence_service_cmd_boot);
-        CMD_ADD_SPACE   = getString(R.string.presence_service_cmd_add_space);
-        CMD_RM_SPACE    = getString(R.string.presence_service_cmd_rm_space);
-        KEY_SPACENAME   = getString(R.string.presence_service_key_spacename);
-        KEY_UID         = getString(R.string.presence_service_key_uid);
-        KEY_REASON      = getString(R.string.presence_service_key_reason);
-
         createNotification();
         _locHelper = new LocationHelper(new LocationHelper.LHContext() {
             @Override
@@ -96,6 +89,13 @@ public class OeMapPresenceService extends Service {
             public void updateLocation(Location l) {
                 broadcast(l);
                 poll();  //todo: put on timer?
+            }
+        });
+        _locHelper.setCallback(new LocationHelper.Callback() {
+
+            @Override
+            public void onConnected() {
+                wakeup();
             }
         });
         _locHelper.onCreate();
@@ -211,7 +211,7 @@ public class OeMapPresenceService extends Service {
             handleBoot();
 
         }
-        if (CMD_ADD_SPACE.equals(reason)) {
+        else if (CMD_ADD_SPACE.equals(reason)) {
 
             String spacename = extras.getString(KEY_SPACENAME);
 
@@ -222,7 +222,7 @@ public class OeMapPresenceService extends Service {
             startRunning();
 
         }
-        if (CMD_RM_SPACE.equals(reason)) {
+        else if (CMD_RM_SPACE.equals(reason)) {
 
             String spacename = extras.getString(KEY_SPACENAME);
 
@@ -237,13 +237,15 @@ public class OeMapPresenceService extends Service {
             }
 
         }
+
         if (CMD_POLL.equals(reason)) {
 
             if (_spaceHelper.hasSpaceNames()) {
                 wakeup();
             }
+        }
 
-        } else {
+        else {
 
             OeLog.w("unknown reason intent");
         }
@@ -330,6 +332,9 @@ public class OeMapPresenceService extends Service {
     private void wakeup() {
         showNotification();
         poll(); //do one now
+        Location l = _locHelper.getLastLocation();
+        if (l != null)
+            broadcast(l);
     }
 
     private void startRunning() {
@@ -337,7 +342,6 @@ public class OeMapPresenceService extends Service {
             _running = true;
             //   use TimerManager setrecurring
         }
-        wakeup();
     }
 
     private void handleBoot() {

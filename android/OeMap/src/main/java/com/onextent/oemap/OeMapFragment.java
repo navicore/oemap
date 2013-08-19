@@ -16,6 +16,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.onextent.android.util.OeLog;
+import com.onextent.oemap.presence.OeMapPresenceService;
 import com.onextent.oemap.presence.Presence;
 import com.onextent.oemap.presence.PresenceFactory;
 import com.onextent.oemap.provider.KvHelper;
@@ -35,9 +36,6 @@ public class OeMapFragment extends MapFragment  {
     private KvHelper _prefs = null;
     private LatLng _currLoc;
     private Marker mMyMarker;
-
-    private String KEY_SPACENAME   = null;
-    private String KEY_UID         = null;
 
     private boolean mMapIsInit = false;
 
@@ -96,8 +94,8 @@ public class OeMapFragment extends MapFragment  {
         public void onReceive(Context context, Intent intent) {
 
             String mName = getName();
-            String uid = intent.getExtras().getString(KEY_UID);
-            String spacename = intent.getExtras().getString(KEY_SPACENAME);
+            String uid = intent.getExtras().getString(OeMapPresenceService.KEY_UID);
+            String spacename = intent.getExtras().getString(OeMapPresenceService.KEY_SPACENAME);
             if (mName != null && mName.equals(spacename)) {
                 OeLog.d("PresenceReceiver.onReceive updating current map with uid: " + uid + " spacename: " + spacename );
                 try {
@@ -195,8 +193,6 @@ public class OeMapFragment extends MapFragment  {
         _dbHelper = new PresenceHelper(getActivity());
         _prefs = new KvHelper(getActivity());
 
-        KEY_UID = getString(R.string.presence_service_key_uid);
-        KEY_SPACENAME = getString(R.string.presence_service_key_spacename);
         home.setMapFragTag(getTag());
 
         _presenceReceiverFilter = new IntentFilter(getString(R.string.presence_service_update_intent));

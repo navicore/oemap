@@ -150,9 +150,8 @@ public class OeMapActivity extends OeBaseActivity {
     void enableNewMap(String newMapName) {
         setMapFrag(newMapName);
         Intent i = new Intent(this, OeMapPresenceService.class);
-        i.putExtra("reason", R.string.presence_service_cmd_add_space);
-        i.putExtra(getString(R.string.presence_service_key_reason), getString(R.string.presence_service_cmd_add_space));
-        i.putExtra(getString(R.string.presence_service_key_spacename), newMapName);
+        i.putExtra(OeMapPresenceService.KEY_REASON, OeMapPresenceService.CMD_ADD_SPACE);
+        i.putExtra(OeMapPresenceService.KEY_SPACENAME, newMapName);
         startService(i);
     }
 
@@ -163,7 +162,7 @@ public class OeMapActivity extends OeBaseActivity {
 
     private void wakePresenceService() {
         Intent i = new Intent(this, OeMapPresenceService.class);
-        i.putExtra(getString(R.string.presence_service_key_reason), getString(R.string.presence_service_cmd_poll));
+        i.putExtra(OeMapPresenceService.KEY_REASON, OeMapPresenceService.CMD_POLL);
         startService(i);
     }
 
@@ -176,8 +175,8 @@ public class OeMapActivity extends OeBaseActivity {
         //todo: helper method that sets location for none
 
         Intent i = new Intent(this, OeMapPresenceService.class);
-        i.putExtra(getString(R.string.presence_service_key_reason), getString(R.string.presence_service_cmd_rm_space));
-        i.putExtra(getString(R.string.presence_service_key_spacename), spacename);
+        i.putExtra(OeMapPresenceService.KEY_REASON, OeMapPresenceService.CMD_RM_SPACE);
+        i.putExtra(OeMapPresenceService.KEY_SPACENAME, spacename);
         startService(i);
     }
 

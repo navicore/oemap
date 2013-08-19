@@ -20,18 +20,18 @@ public class LocationHelper implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener
 {
-    final LHContext context;
+    final LHContext _context;
 
     // A request to connect to Location Services
-    private LocationRequest mLocationRequest;
+    private LocationRequest _LocationRequest;
 
     // Stores the current instantiation of the location client in this object
-    private LocationClient mLocationClient;
+    private LocationClient _locationClient;
 
-    private boolean mSharingLoc;
+    private boolean _sharingLoc;
 
     public LocationHelper(LHContext c) {
-        this.context = c;
+        this._context = c;
     }
 
     public static interface LHContext {
@@ -44,19 +44,19 @@ public class LocationHelper implements
     public void onCreate() {
 
         // Create a new global location parameters object
-        mLocationRequest = LocationRequest.create();
+        _LocationRequest = LocationRequest.create();
 
-        mLocationRequest.setInterval(LocationUtils.UPDATE_INTERVAL_IN_MILLISECONDS);
+        _LocationRequest.setInterval(LocationUtils.UPDATE_INTERVAL_IN_MILLISECONDS);
 
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        _LocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-        mLocationRequest.setFastestInterval(LocationUtils.FAST_INTERVAL_CEILING_IN_MILLISECONDS);
+        _LocationRequest.setFastestInterval(LocationUtils.FAST_INTERVAL_CEILING_IN_MILLISECONDS);
 
         /*
          * Create a new location client, using the enclosing class to
          * handle callbacks.
          */
-        mLocationClient = new LocationClient(context.getContext(), this, this);
+        _locationClient = new LocationClient(_context.getContext(), this, this);
     }
 
     @Override
@@ -73,7 +73,7 @@ public class LocationHelper implements
     private boolean servicesConnected() {
         // Check that Google Play services is available
         int resultCode =
-                GooglePlayServicesUtil.isGooglePlayServicesAvailable(context.getContext());
+                GooglePlayServicesUtil.isGooglePlayServicesAvailable(_context.getContext());
         if (ConnectionResult.SUCCESS == resultCode) {
             Log.d("Location Updates",
                     "Google Play services is available.");
@@ -87,10 +87,21 @@ public class LocationHelper implements
 
     }
 
+    private Callback _connCallback = null;
+    public void setCallback(Callback cb) {
+        _connCallback = cb;
+    }
+
+    public interface Callback {
+        void onConnected();
+    }
+
     @Override
     public void onConnected(Bundle bundle) {
         OeLog.d("LocationHelper.onConnected");
         startUpdates();
+        if (_connCallback != null)
+            _connCallback.onConnected();
     }
 
     @Override
@@ -106,24 +117,24 @@ public class LocationHelper implements
     @Override
     public void onStart() {
 
-        if (mLocationClient == null) throw new NullPointerException("no loc client");
+        if (_locationClient == null) throw new NullPointerException("no loc client");
         /*
          * Connect the client. Don't re-start any requests here;
          * instead, wait for onResume()
          */
-        mLocationClient.connect();
+        _locationClient.connect();
     }
 
     @Override
     public void onStop() {
 
         // If the client is connected
-        if (mLocationClient.isConnected()) {
+        if (_locationClient.isConnected()) {
             stopPeriodicUpdates();
         }
 
         // After disconnect() is called, the client is considered "dead".
-        mLocationClient.disconnect();
+        _locationClient.disconnect();
     }
 
     @Override
@@ -139,12 +150,17 @@ public class LocationHelper implements
     @Override
     public void onLocationChanged(Location location) {
 
-        context.updateLocation(location);
+        _context.updateLocation(location);
+    }
+
+    public Location getLastLocation() {
+
+        if (!_locationClient.isConnected()) return null;
+
+        return _locationClient.getLastLocation();
     }
 
     private void startUpdates() {
-
-        Location currentLocation = mLocationClient.getLastLocation();
 
         if (servicesConnected()) {
             startPeriodicUpdates();
@@ -157,7 +173,7 @@ public class LocationHelper implements
      */
     private void startPeriodicUpdates() {
 
-        mLocationClient.requestLocationUpdates(mLocationRequest, this);
+        _locationClient.requestLocationUpdates(_LocationRequest, this);
     }
 
     /**
@@ -166,7 +182,7 @@ public class LocationHelper implements
      */
     private void stopPeriodicUpdates() {
 
-        mLocationClient.removeLocationUpdates(this);
+        _locationClient.removeLocationUpdates(this);
     }
 }
 
