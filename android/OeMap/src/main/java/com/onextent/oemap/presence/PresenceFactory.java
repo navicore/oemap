@@ -3,6 +3,7 @@ package com.onextent.oemap.presence;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 public class PresenceFactory {
 
@@ -11,6 +12,9 @@ public class PresenceFactory {
         return new JsonPresence(pid, l, lbl, snippet, spacename, ttl);
     }
 
+    public static Presence createPresence(JSONObject jobj) throws JSONException {
+        return new JsonPresence(jobj);
+    }
     public static Presence createPresence(String json) throws JSONException {
         return new JsonPresence(json);
     }

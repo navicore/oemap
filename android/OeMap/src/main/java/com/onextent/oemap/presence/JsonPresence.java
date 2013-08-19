@@ -25,8 +25,8 @@ public class JsonPresence implements Presence {
     private final int   _time_to_live;
     private final String _spacename;
 
-    JsonPresence(String json) throws JSONException {
-        JSONObject jobj = new JSONObject(json);
+    JsonPresence(JSONObject jobj) throws JSONException {
+
         _uid = jobj.getString(KEY_UID);
 
         //see http://www.geojson.org for standard.  for some reason lon comes before lat
@@ -43,6 +43,10 @@ public class JsonPresence implements Presence {
         _spacename      = jobj.getString(KEY_SPC);
         _create_time    = jobj.getLong(KEY_TIM);
         _time_to_live   = jobj.getInt(KEY_TTL);
+    }
+
+    JsonPresence(String json) throws JSONException {
+        this(new JSONObject(json));
     }
 
     JsonPresence(String pid, LatLng l, String lbl, String snippet, String spacename, int ttl) {
