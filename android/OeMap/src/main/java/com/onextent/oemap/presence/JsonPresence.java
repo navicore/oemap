@@ -21,9 +21,9 @@ public class JsonPresence implements Presence {
     private static final int LONGITUDE_IDX = 0;
     private final String _uid, _label, _snippet;
     private final LatLng _location;
-    private final long _create_time;
-    private final int _time_to_live;
-    private String _spacename;
+    private final long  _create_time;
+    private final int   _time_to_live;
+    private final String _spacename;
 
     JsonPresence(String json) throws JSONException {
         JSONObject jobj = new JSONObject(json);
@@ -38,21 +38,21 @@ public class JsonPresence implements Presence {
             _location = null;
         }
 
-        _label = jobj.getString(KEY_LBL);
-        _snippet = jobj.getString(KEY_SNP);
-        _spacename = jobj.getString(KEY_SPC);
-        _create_time = jobj.getLong(KEY_TIM);
-        _time_to_live = jobj.getInt(KEY_TTL);
+        _label          = jobj.getString(KEY_LBL);
+        _snippet        = jobj.getString(KEY_SNP);
+        _spacename      = jobj.getString(KEY_SPC);
+        _create_time    = jobj.getLong(KEY_TIM);
+        _time_to_live   = jobj.getInt(KEY_TTL);
     }
 
     JsonPresence(String pid, LatLng l, String lbl, String snippet, String spacename, int ttl) {
-        _uid = pid;
-        _location = l;
-        _label = lbl;
-        _snippet = snippet;
-        _spacename = spacename;
-        _create_time = System.currentTimeMillis();
-        _time_to_live = ttl;
+        _uid            = pid;
+        _location       = l;
+        _label          = lbl;
+        _snippet        = snippet;
+        _spacename      = spacename;
+        _create_time    = System.currentTimeMillis();
+        _time_to_live   = ttl;
     }
 
     @Override
@@ -84,14 +84,6 @@ public class JsonPresence implements Presence {
     public int getTimeToLive() {
         return _time_to_live;
     }
-
-    /*
-    @Override
-    public void setSpaceName(String name) {
-
-        _spacename = name;
-    }
-     */
 
     @Override
     public long getAgeInMillis() {

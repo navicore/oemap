@@ -18,17 +18,24 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function(err, db) {
     //return a list of presences for the space
     app.get('/presence', function(req, res) {
         
-        console.log('get presence')
-        var space = req.query.space
+        var spc = req.query.space
+        //todo: dist= (in meters)
+        var dist = req.query.dist
+        //todo: count= (nearest n people (within dist))
+        var count = req.query.count
                            
-        if (!space)
+        if (!spc)
             return res.send('Error 404: No space requested');
-        //todo: get from mongo
-        var m = ""
-
-        if (!m)
-            return res.send('Error 404: No space found');
-        res.json(m);
+        console.log('get presence for ' + spc)
+        db.collection('presences').find({"space": spc}).toArray(function(err, doc) {
+            console.log(doc)
+            if (err)
+                return res.send('Error 404: Error: ' + err);
+            if (!doc || doc.length < 1)
+                return res.send('Error 404: No presences found');
+            return res.json(doc);
+        })
+        return
     });
 
     //put a presence
