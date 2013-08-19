@@ -17,6 +17,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.Presence;
+import com.onextent.oemap.presence.PresenceFactory;
 import com.onextent.oemap.provider.KvHelper;
 import com.onextent.oemap.provider.PresenceHelper;
 
@@ -32,7 +33,7 @@ public class OeMapFragment extends MapFragment  {
 
     private PresenceHelper _dbHelper = null;
     private KvHelper _prefs = null;
-    private LatLng mCurrLoc;
+    private LatLng _currLoc;
     private Marker mMyMarker;
 
     private String KEY_SPACENAME   = null;
@@ -76,6 +77,7 @@ public class OeMapFragment extends MapFragment  {
     }
 
     public String getName() {
+        if (isDetached()) return null;
 
         String mName = null;
         Bundle args = getArguments();
@@ -101,11 +103,12 @@ public class OeMapFragment extends MapFragment  {
                 try {
                     Presence p = _dbHelper.getPresence(uid, spacename);
                     if (p == null) {
-                        OeLog.w("PresenceReceiver.onReceive presence not found: " + intent);
+                        OeLog.d("PresenceReceiver.onReceive deleting presence: " + intent);
+                        removeMarker(PresenceFactory.createPresence(uid, null, null, null, spacename, Presence.NONE));
                     } else {
                         if (isMyPresence(p)) {
                             OeLog.d("PresenceReceiver.onReceive presence is my own");
-                            mCurrLoc = p.getLocation();
+                            _currLoc = p.getLocation();
                             if (!_loc_is_init) {
                                 _loc_is_init = true;//set map the first time we get a loc
                                 setLocation();
@@ -172,6 +175,7 @@ public class OeMapFragment extends MapFragment  {
     @Override
     public void onPause() {
 
+        getActivity().unregisterReceiver(_presenceReceiver);
 
         GoogleMap m = getMap();
         if (m != null) {
@@ -181,7 +185,6 @@ public class OeMapFragment extends MapFragment  {
             _prefs.replaceFloat(getString(R.string.state_lat), (float) m.getCameraPosition().target.latitude);
             _prefs.replaceFloat(getString(R.string.state_lng), (float) m.getCameraPosition().target.longitude);
         }
-        getActivity().unregisterReceiver(_presenceReceiver);
         super.onPause();
     }
 
@@ -197,7 +200,6 @@ public class OeMapFragment extends MapFragment  {
         home.setMapFragTag(getTag());
 
         _presenceReceiverFilter = new IntentFilter(getString(R.string.presence_service_update_intent));
-        getActivity().registerReceiver(_presenceReceiver, _presenceReceiverFilter);
     }
 
     private void setMapType() {
@@ -237,9 +239,9 @@ public class OeMapFragment extends MapFragment  {
 
     private void setMyMarker() {
 
-        if (mCurrLoc == null) return;
+        if (_currLoc == null) return;
         if (mMyMarker == null) return;
-        mMyMarker.setPosition(mCurrLoc);
+        mMyMarker.setPosition(_currLoc);
     }
 
     private class Holder {
@@ -252,7 +254,25 @@ public class OeMapFragment extends MapFragment  {
         }
     }
 
+    private void removeMarker(Presence p) {
+        Holder h = _markers.remove(p.getUID());
+        if (h != null) {
+            h.marker.remove();
+        }
+    }
+
     private void setMarker(Presence p) {
+        if (p.getTimeToLive() == Presence.NONE) {
+
+            removeMarker(p);
+
+        } else {
+
+            updateMarker(p);
+        }
+    }
+
+    private void updateMarker(Presence p) {
 
         boolean isMine = isMyPresence(p);
         GoogleMap map = getMap();
@@ -287,12 +307,12 @@ public class OeMapFragment extends MapFragment  {
 
     public boolean setLocation() {
 
-        if (mCurrLoc == null) return false; //not yet
+        if (_currLoc == null) return false; //not yet
 
         GoogleMap map = getMap();
         if (map == null)  return false;
 
-        map.animateCamera(CameraUpdateFactory.newLatLng(mCurrLoc));
+        map.animateCamera(CameraUpdateFactory.newLatLng(_currLoc));
         map.setMyLocationEnabled(true);
 
         setMyMarker();

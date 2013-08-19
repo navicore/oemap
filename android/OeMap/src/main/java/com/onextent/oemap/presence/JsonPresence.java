@@ -10,6 +10,7 @@ import org.json.JSONObject;
 public class JsonPresence implements Presence {
 
     private static final String KEY_UID = "uid";
+
     private static final String KEY_LOC = "location";
     private static final String KEY_CRD = "coordinates";
     private static final String KEY_LBL = "label";
@@ -122,6 +123,12 @@ public class JsonPresence implements Presence {
             OeLog.e(e.toString(), e);
             return null;
         }
+    }
+
+    @Override
+    public int hashCode() {
+        //return super.hashCode();
+        return getSpaceName().hashCode() +  getUID().hashCode() + 5000;
     }
 }
 

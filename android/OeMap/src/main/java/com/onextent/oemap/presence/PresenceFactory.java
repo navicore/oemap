@@ -7,9 +7,9 @@ import org.json.JSONObject;
 
 public class PresenceFactory {
 
-    public static Presence createPresence(String pid, LatLng l, String lbl, String snippet, String spacename, int ttl) {
+    public static Presence createPresence(String uid, LatLng l, String lbl, String snippet, String spacename, int ttl) {
 
-        return new JsonPresence(pid, l, lbl, snippet, spacename, ttl);
+        return new JsonPresence(uid, l, lbl, snippet, spacename, ttl);
     }
 
     public static Presence createPresence(JSONObject jobj) throws JSONException {

@@ -32,8 +32,6 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -42,26 +40,34 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.HashSet;
+import java.util.Set;
 
 public class OeMapPresenceService extends Service {
 
+    private static final String PRESENCE_URL =  "http://10.0.0.2:8080/presence";
+
     public static final int DEFAULT_TTL = Presence.MEDIUM;
-    private SpaceHelper _spaceHelper;
-    private LocationHelper mLocHelper;
+
+    private SpaceHelper    _spaceHelper;
+    private LocationHelper _locHelper;
     private PresenceHelper _dbHelper = null;
-    private KvHelper _kvHelper = null;
-    private String CMD_POLL = null;
-    private String CMD_BOOT = null;
-    private String CMD_ADD_SPACE = null;
-    private String CMD_RM_SPACE = null;
-    private String KEY_REASON = null;
-    private String KEY_SPACENAME = null;
-    private String KEY_UID = null;
-    private AsyncTask _currentTask = null;
-    private AsyncTask _currentPollTask = null;
-    private boolean _running = false;
-    private Notification _notification = null;
-    private SharedPreferences _prefs = null;
+    private KvHelper       _kvHelper = null;
+
+    private String CMD_POLL         = null;
+    private String CMD_BOOT         = null;
+    private String CMD_ADD_SPACE    = null;
+    private String CMD_RM_SPACE     = null;
+    private String KEY_REASON       = null;
+    private String KEY_SPACENAME    = null;
+    private String KEY_UID          = null;
+
+    private AsyncTask       _currentTask        = null;
+    private AsyncTask       _currentPollTask    = null;
+
+    private boolean         _running      = false;
+    private Notification    _notification = null;
+    private SharedPreferences _prefs      = null;
 
     @Override
     public void onCreate() {
@@ -71,16 +77,16 @@ public class OeMapPresenceService extends Service {
         _dbHelper = new PresenceHelper(this);
         _kvHelper = new KvHelper(this);
 
-        CMD_POLL = getString(R.string.presence_service_cmd_poll);
-        CMD_BOOT = getString(R.string.presence_service_cmd_boot);
-        CMD_ADD_SPACE = getString(R.string.presence_service_cmd_add_space);
-        CMD_RM_SPACE = getString(R.string.presence_service_cmd_rm_space);
-        KEY_SPACENAME = getString(R.string.presence_service_key_spacename);
-        KEY_UID = getString(R.string.presence_service_key_uid);
-        KEY_REASON = getString(R.string.presence_service_key_reason);
+        CMD_POLL        = getString(R.string.presence_service_cmd_poll);
+        CMD_BOOT        = getString(R.string.presence_service_cmd_boot);
+        CMD_ADD_SPACE   = getString(R.string.presence_service_cmd_add_space);
+        CMD_RM_SPACE    = getString(R.string.presence_service_cmd_rm_space);
+        KEY_SPACENAME   = getString(R.string.presence_service_key_spacename);
+        KEY_UID         = getString(R.string.presence_service_key_uid);
+        KEY_REASON      = getString(R.string.presence_service_key_reason);
 
         createNotification();
-        mLocHelper = new LocationHelper(new LocationHelper.LHContext() {
+        _locHelper = new LocationHelper(new LocationHelper.LHContext() {
             @Override
             public Context getContext() {
                 return OeMapPresenceService.this;
@@ -92,20 +98,30 @@ public class OeMapPresenceService extends Service {
                 poll();  //todo: put on timer?
             }
         });
-        mLocHelper.onCreate();
-        mLocHelper.onStart();
-        mLocHelper.onResume();
+        _locHelper.onCreate();
+        _locHelper.onStart();
+        _locHelper.onResume();
     }
 
-    private Presence createPresence(Location l, String s) {
-
-        LatLng latLng = new LatLng(l.getLatitude(), l.getLongitude());
-        String pid = OeBaseActivity.id(this.getApplicationContext());
-        //todo: allow per-map overrides
-        String label = _kvHelper.get(getString(R.string.pref_username), "nobody");
-        String snippit = _kvHelper.get(getString(R.string.pref_snippit), "sigh...");
+    private Presence createPresence(Location l, String spacename) {
         int ttl = _kvHelper.getInt(getString(R.string.pref_ttl), DEFAULT_TTL);
-        Presence p = PresenceFactory.createPresence(pid, latLng, label, snippit, s, ttl);
+        return createPresence(l, spacename, ttl);
+    }
+
+    private Presence createPresence(Location l, String spacename, int ttl) {
+
+        LatLng latLng = null;
+        String label = null;
+        String snippit = null;
+        if (l != null) {
+
+            //todo: allow per-map overrides
+            latLng = new LatLng(l.getLatitude(), l.getLongitude());
+            label = _kvHelper.get(getString(R.string.pref_username), "nobody");
+            snippit = _kvHelper.get(getString(R.string.pref_snippit), "sigh...");
+        }
+        String uid = OeBaseActivity.id(this.getApplicationContext());
+        Presence p = PresenceFactory.createPresence(uid, latLng, label, snippit, spacename, ttl);
         return p;
     }
 
@@ -165,8 +181,8 @@ public class OeMapPresenceService extends Service {
 
     @Override
     public void onDestroy() {
-        mLocHelper.onPause();
-        mLocHelper.onStop();
+        _locHelper.onPause();
+        _locHelper.onStop();
         super.onDestroy();
     }
 
@@ -209,7 +225,12 @@ public class OeMapPresenceService extends Service {
         if (CMD_RM_SPACE.equals(reason)) {
 
             String spacename = extras.getString(KEY_SPACENAME);
+
             _spaceHelper.deleteSpacename(spacename);
+
+            Presence p = createPresence(null, spacename, Presence.NONE);
+
+            sendPresence(p);
 
             if (!_spaceHelper.hasSpaceNames()) {
                 stopRunning();
@@ -230,11 +251,29 @@ public class OeMapPresenceService extends Service {
 
     private void pollSpace(String s) {
 
+        /*
+        - get a list of all uids already in store
+        - add a new presence from the server, removing the uid from the old list as you go
+        - any uids left in the list are deletes, create a delete presence and bcast it
+
+        todo: this protocol is insane, clean it up so that it self cleans and is always
+        in-sync with the server
+         */
+
         HttpClient client = new DefaultHttpClient();
-        HttpGet get = new HttpGet("http://10.0.0.2:8080/presence?space=" + s);
+        HttpGet get = new HttpGet(PRESENCE_URL + "?space=" + s);
         get.addHeader("Content-Type", "application/json");
         get.addHeader("Accept", "application/json");
         try {
+            Set<String> oldUids = null;
+            Set<Presence> prepres = _dbHelper.getAllPrecenses(s);
+            if (prepres != null) {
+                oldUids = new HashSet<String>();
+                for (Presence p : prepres) {
+                    oldUids.add(p.getUID());
+                }
+            }
+            _dbHelper.deletePresencesWithSpaceName(s); //todo: expensive
             HttpResponse response = client.execute(get);
             InputStream content = response.getEntity().getContent();
             BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
@@ -249,12 +288,21 @@ public class OeMapPresenceService extends Service {
             for (int i = 0; i < array.length(); i++) {
 
                 Presence p = PresenceFactory.createPresence(array.getJSONObject(i));
+
+                if (oldUids != null) {
+                    oldUids.remove(p.getUID());
+                }
+
                 if (!OeMapActivity.id(this).equals(p.getUID())) {
-                    OeLog.d("pollSpace got someone else's presence!");
+                    // got someone else's presence
                     _dbHelper.replacePresence(p);
                     broadcastIntent(p);
-                } else {
-                    OeLog.d("pollSpace got my own pres: " + r); //todo: don't send own
+                }
+            }
+            if (oldUids != null) {
+                for (String uid : oldUids) {
+                    Presence p = PresenceFactory.createPresence(uid, null, null, null, s,Presence.NONE);
+                    broadcastIntent(p);
                 }
             }
 
@@ -305,7 +353,7 @@ public class OeMapPresenceService extends Service {
             String r = null;
             Presence p = presences[0];
             HttpClient client = new DefaultHttpClient();
-            HttpPut put = new HttpPut("http://10.0.0.2:8080/presence");
+            HttpPut put = new HttpPut(PRESENCE_URL);
             put.addHeader("Content-Type", "application/json");
             put.addHeader("Accept", "application/json");
             try {
