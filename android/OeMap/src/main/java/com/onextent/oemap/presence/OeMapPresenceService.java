@@ -46,7 +46,8 @@ import java.util.Set;
 
 public class OeMapPresenceService extends Service {
 
-    private static final String PRESENCE_URL =  "http://10.0.0.2:8080/presence";
+    //private static final String PRESENCE_URL =  "http://10.0.0.2:8080/presence";
+    private static final String PRESENCE_URL =  "http://oemap.onextent.com:8080/presence";
 
     public static final int DEFAULT_TTL = Presence.MEDIUM;
 
@@ -61,7 +62,7 @@ public class OeMapPresenceService extends Service {
     public static final String CMD_RM_SPACE  = "rm_space";
     public static final String KEY_REASON    = "reason";
     public static final String KEY_SPACENAME = "spacename";
-    public static final String KEY_SPACENAMES = "spacenames";
+    //public static final String KEY_SPACENAMES = "spacenames";
     public static final String KEY_UID       = "uid";
 
     private AsyncTask       _currentTask        = null;
