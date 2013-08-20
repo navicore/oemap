@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 
+import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.presence.Presence;
 import com.onextent.oemap.presence.PresenceFactory;
 
@@ -38,10 +39,13 @@ public class PresenceHelper {
                     PresenceProvider.IPresence.UID + "='" + presence.getUID() + "'", null);
     }
 
-    //todo: ejs not sure if this deletes all
-    //todo: ejs not sure if this deletes all
-    //todo: ejs not sure if this deletes all
-    //todo: ejs not sure if this deletes all
+    public void deletePresencesWithSpaceNameNotMine(String spacename) {
+        String me = OeMapActivity.id(_context);
+        _context.getContentResolver().delete(PresenceProvider.CONTENT_URI,
+                PresenceProvider.IPresence.SPACE + "='" + spacename +
+                        "' AND " + PresenceProvider.IPresence.UID + " != '" + me + "'", null);
+    }
+
     public void deletePresencesWithSpaceName(String spacename) {
         _context.getContentResolver().delete(PresenceProvider.CONTENT_URI,
                 PresenceProvider.IPresence.SPACE + "='" + spacename + "'", null);

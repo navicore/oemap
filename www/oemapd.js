@@ -24,15 +24,21 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function(err, db) {
         //todo: count= (nearest n people (within dist))
         var count = req.query.count
                            
-        if (!spc)
-            return res.send('Error 404: No space requested');
+        if (!spc) {
+            res.statusCode = 400;
+            return res.send('Error 400: No space requested');
+        }
         console.log('get presence for ' + spc)
         db.collection('presences').find({"space": spc}).toArray(function(err, doc) {
-            console.log(doc)
-            if (err)
-                return res.send('Error 404: Error: ' + err);
-            if (!doc || doc.length < 1)
+
+            if(err) throw err;
+
+            if (!doc || doc.length < 1) {
+                res.statusCode = 404;
                 return res.send('Error 404: No presences found');
+            }
+
+            res.statusCode = 200;
             return res.json(doc);
         })
         return
@@ -43,13 +49,15 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function(err, db) {
 
         console.log('put presence uid: ' + req.body.uid + " space: " + req.body.space)
         if (!req.body) {
-            return res.send('Error 404: No presence in put');
+            res.statusCode = 400;
+            return res.send('Error 400: No presence in put');
         }
         var ttl = req.body.ttl
         if (ttl == 0) {
           db.collection('presences').remove(
                 {"uid": req.body.uid, "space": req.body.space}, 
                 function(err, doc) {
+                    if(err) throw err;
                     //todo: handle err
                     //todo: make pid uid and overwrite map dupes
                 })
@@ -76,6 +84,7 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function(err, db) {
                 req.body, 
                 {"upsert": true}, 
                 function(err, doc) {
+                    if(err) throw err;
                     //todo: handle err
                     //todo: make pid uid and overwrite map dupes
                 }
@@ -85,6 +94,7 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function(err, db) {
     });
 
     app.get('*', function(req, res) {
+        res.statusCode = 404;
         return res.send('OeMap Page Not Found', 404);
     });
 

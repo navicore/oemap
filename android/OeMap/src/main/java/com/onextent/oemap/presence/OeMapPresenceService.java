@@ -40,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -51,7 +52,7 @@ public class OeMapPresenceService extends Service {
 
     private SpaceHelper    _spaceHelper;
     private LocationHelper _locHelper;
-    private PresenceHelper _dbHelper = null;
+    private PresenceHelper _presenceHelper = null;
     private KvHelper       _kvHelper = null;
 
     public static final String CMD_POLL = "poll";
@@ -75,7 +76,7 @@ public class OeMapPresenceService extends Service {
         super.onCreate();
 
         _spaceHelper = new SpaceHelper(this);
-        _dbHelper = new PresenceHelper(this);
+        _presenceHelper = new PresenceHelper(this);
         _kvHelper = new KvHelper(this);
 
         createNotification();
@@ -128,12 +129,13 @@ public class OeMapPresenceService extends Service {
     private void broadcast(Location l) {
 
         String uid = OeBaseActivity.id(this);
-        OeLog.d("broadcast for uid: " + uid);
         for (String s : _spaceHelper.getAllSpaceNames()) {
+
+            OeLog.d("broadcast for uid: " + uid + " on space: " + s);
 
             Presence p = createPresence(l, s);
 
-            _dbHelper.replacePresence(p);
+            _presenceHelper.replacePresence(p);
 
             broadcastIntent(p);
 
@@ -153,7 +155,7 @@ public class OeMapPresenceService extends Service {
 
     private void sendPresence(Presence p) {
 
-        if (_currentTask == null) //don't queue up if server is slow or down
+        //if (_currentTask == null) //don't queue up if server is slow or down
             new Send().execute(p);
     }
 
@@ -263,19 +265,19 @@ public class OeMapPresenceService extends Service {
          */
 
         HttpClient client = new DefaultHttpClient();
-        HttpGet get = new HttpGet(PRESENCE_URL + "?space=" + s);
-        get.addHeader("Content-Type", "application/json");
-        get.addHeader("Accept", "application/json");
         try {
+            HttpGet get = new HttpGet(PRESENCE_URL + "?space=" + URLEncoder.encode(s, "UTF8"));
+            get.addHeader("Content-Type", "application/json");
+            get.addHeader("Accept", "application/json");
             Set<String> oldUids = null;
-            Set<Presence> prepres = _dbHelper.getAllPrecenses(s);
+            Set<Presence> prepres = _presenceHelper.getAllPrecenses(s);
             if (prepres != null) {
                 oldUids = new HashSet<String>();
                 for (Presence p : prepres) {
                     oldUids.add(p.getUID());
                 }
             }
-            _dbHelper.deletePresencesWithSpaceName(s); //todo: expensive
+            _presenceHelper.deletePresencesWithSpaceNameNotMine(s); //todo: too expensive and insanely clumsy
             HttpResponse response = client.execute(get);
             InputStream content = response.getEntity().getContent();
             BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
@@ -285,35 +287,49 @@ public class OeMapPresenceService extends Service {
             while ((line = buffer.readLine()) != null) {
                 sb.append(line + "\n");
             }
-            String r = sb.toString();
-            JSONArray array = new JSONArray(r);
-            for (int i = 0; i < array.length(); i++) {
-
-                Presence p = PresenceFactory.createPresence(array.getJSONObject(i));
-
-                if (oldUids != null) {
-                    oldUids.remove(p.getUID());
-                }
-
-                if (!OeMapActivity.id(this).equals(p.getUID())) {
-                    // got someone else's presence
-                    _dbHelper.replacePresence(p);
-                    broadcastIntent(p);
-                }
+            String json = sb.toString();
+            int code = response.getStatusLine().getStatusCode();
+            switch (code) {
+                case 200:
+                    OeLog.d("processing 200 get:/n" + json);
+                    processPollJson(s, json, oldUids);
+                    break;
+                case 404: //none found
+                    break;
+                default:
+                    OeLog.w("got status line status code: " + response.getStatusLine().getStatusCode() + "/n" + json);
             }
-            if (oldUids != null) {
-                for (String uid : oldUids) {
-                    Presence p = PresenceFactory.createPresence(uid, null, null, null, s,Presence.NONE);
-                    broadcastIntent(p);
-                }
-            }
-
         } catch (UnsupportedEncodingException e) {
             OeLog.e(e.toString(), e);
         } catch (IOException e) {
             OeLog.e(e.toString(), e);
         } catch (JSONException e) {
-            OeLog.e(e.toString(), e);
+            OeLog.e("error polling map " + s + ": " + e.toString(), e);
+        }
+    }
+
+    private void processPollJson(String space, String json, Set<String> oldUids) throws JSONException {
+
+        JSONArray array = new JSONArray(json);
+        for (int i = 0; i < array.length(); i++) {
+
+            Presence p = PresenceFactory.createPresence(array.getJSONObject(i));
+
+            if (oldUids != null) {
+                oldUids.remove(p.getUID());
+            }
+
+            if (!OeMapActivity.id(this).equals(p.getUID())) {
+                // got someone else's presence
+                _presenceHelper.replacePresence(p);
+                broadcastIntent(p);
+            }
+        }
+        if (oldUids != null) {
+            for (String uid : oldUids) {
+                Presence p = PresenceFactory.createPresence(uid, null, null, null, space ,Presence.NONE);
+                broadcastIntent(p);
+            }
         }
     }
 

@@ -2,7 +2,7 @@
 <resources>
 
     <string-array name="menu_names_array">
-        <item>New Public Map</item>
+        <item>Join Map</item>
         <item>New Private Map</item>
         <item>Share Map</item>
         <item>List Cohorts</item>
@@ -29,7 +29,7 @@
 
     <string name="app_name">Cahoots</string>
     <string name="app_not_available">Sorry, there\'s no web browser available</string>
-    <string name="bundle_mapname">mapname</string>
+    <string name="bundle_spacename">mapname</string>
 
     <string name="db_name_preferences">oemap_prefs_db</string>
     <string name="db_name_presence">oemap_presences_db</string>

@@ -30,21 +30,21 @@ import java.util.Set;
 
 public class OeMapFragment extends MapFragment  {
 
-    private Map<String, Holder> _markers = new HashMap<String, Holder>();
+    Map<String, Holder> _markers = new HashMap<String, Holder>();
 
-    private PresenceHelper _dbHelper = null;
-    private KvHelper _prefs = null;
-    private LatLng _currLoc;
-    private Marker mMyMarker;
+    private PresenceHelper  _dbHelper = null;
+    private KvHelper        _prefs = null;
+    private LatLng          _currLoc;
+    private Marker          _myMarker;
 
-    private boolean mMapIsInit = false;
+    private boolean _mapIsInit = false;
 
-    private OeMapActivity home;
+    private OeMapActivity _home;
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        home = (OeMapActivity) activity;
+        _home = (OeMapActivity) activity;
     }
 
     private void init() {
@@ -70,7 +70,7 @@ public class OeMapFragment extends MapFragment  {
         map.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(lat, lng)));
         map.moveCamera(CameraUpdateFactory.zoomTo(zoom));
 
-        boolean zoomCtl = _prefs.getBoolean(home.getString(R.string.pref_show_zoom_ctl), true);
+        boolean zoomCtl = _prefs.getBoolean(_home.getString(R.string.pref_show_zoom_ctl), true);
         settings.setZoomControlsEnabled(zoomCtl);
     }
 
@@ -80,7 +80,7 @@ public class OeMapFragment extends MapFragment  {
         String mName = null;
         Bundle args = getArguments();
         if (args != null)
-            mName = args.getString(getString(R.string.bundle_mapname));
+            mName = args.getString(getString(R.string.bundle_spacename));
         return mName;
     }
 
@@ -124,7 +124,7 @@ public class OeMapFragment extends MapFragment  {
 
     private boolean isMyPresence(Presence p) {
 
-        return (home.id().equals(p.getUID()));
+        return (_home.id().equals(p.getUID()));
     }
 
 
@@ -193,7 +193,7 @@ public class OeMapFragment extends MapFragment  {
         _dbHelper = new PresenceHelper(getActivity());
         _prefs = new KvHelper(getActivity());
 
-        home.setMapFragTag(getTag());
+        _home.setMapFragTag(getTag());
 
         _presenceReceiverFilter = new IntentFilter(getString(R.string.presence_service_update_intent));
     }
@@ -236,11 +236,11 @@ public class OeMapFragment extends MapFragment  {
     private void setMyMarker() {
 
         if (_currLoc == null) return;
-        if (mMyMarker == null) return;
-        mMyMarker.setPosition(_currLoc);
+        if (_myMarker == null) return;
+        _myMarker.setPosition(_currLoc);
     }
 
-    private class Holder {
+    public static class Holder {
         public final long time;
         public final Marker marker;
 
@@ -268,11 +268,11 @@ public class OeMapFragment extends MapFragment  {
         }
     }
 
-    private void updateMarker(Presence p) {
+    public Marker updateMarker(Presence p) {
 
         boolean isMine = isMyPresence(p);
         GoogleMap map = getMap();
-        if (map == null) return;
+        if (map == null) return null;
 
         Holder h = null;
         h = _markers.get(p.getUID());
@@ -292,13 +292,14 @@ public class OeMapFragment extends MapFragment  {
             h = new Holder(m);
             _markers.put(p.getUID(), h);
             if (isMine) {
-                mMyMarker = m;
+                _myMarker = m;
             }
         } else {
             h.marker.setPosition(p.getLocation());
             h.marker.setTitle(p.getLabel());
             h.marker.setSnippet(p.getSnippet());
         }
+        return h.marker;
     }
 
     public boolean setLocation() {
@@ -313,11 +314,15 @@ public class OeMapFragment extends MapFragment  {
 
         setMyMarker();
 
-        if (!mMapIsInit) {
-            mMapIsInit = true;
+        if (!_mapIsInit) {
+            _mapIsInit = true;
             setMapOptions();
         }
         return true;
+    }
+
+    public Map<String, Holder> getMarkers() {
+        return _markers;
     }
 }
 

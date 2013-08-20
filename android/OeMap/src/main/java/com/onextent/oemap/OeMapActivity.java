@@ -37,14 +37,16 @@ import java.util.List;
 
 public class OeMapActivity extends OeBaseActivity {
 
-    public static final int NEW_PUBLIC_MAP = 0;
+    public static final int NEW_PUBLIC_MAP  = 0;
     public static final int NEW_PRIVATE_MAP = 1;
-    public static final int LIST_COHORTS_POS = 2;
-    public static final int SHARE_MAP_POS = 3;
-    public static final int QUIT_MAP_POS = 4;
-    public static final int SEPARATOR_POS = 5;
+    public static final int SHARE_MAP_POS   = 2;
+    public static final int LIST_COHORTS_POS= 3;
+    public static final int QUIT_MAP_POS    = 4;
+    public static final int SEPARATOR_POS   = 5;
+
     private static final String MAP_FRAG_TAG = "oemap";
     private static final int MAX_HISTORY = 20;
+
     private DrawerLayout mDrawerLayout;
     private DrawerAdapter _drawerAdapter = null;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -53,7 +55,7 @@ public class OeMapActivity extends OeBaseActivity {
     private ListView mDrawerList;
     private ArrayList<String> mDrawerNamesList;
     private String mMapFragTag;
-    private PresenceHelper _dbHelper = null;
+    private PresenceHelper _prefHelper = null;
     private KvHelper _prefs = null;
     private ListDbHelper _history_store = null;
     private ArrayAdapter<String> _spacenames_adapter = null;
@@ -81,7 +83,7 @@ public class OeMapActivity extends OeBaseActivity {
         mMapFragTag = tag;
     }
 
-    private OeMapFragment getMapFrag() {
+    public OeMapFragment getMapFrag() {
         FragmentManager fragmentManager = getFragmentManager();
         if (mMapFragTag != null) {
             return (OeMapFragment) fragmentManager.findFragmentByTag(MAP_FRAG_TAG);
@@ -128,6 +130,16 @@ public class OeMapActivity extends OeBaseActivity {
         FragmentManager fm = getFragmentManager();
         DialogFragment d = new NewPrivateMapDialog();
         d.show(fm, "new_priv_map_dialog");
+    }
+
+    private void showMarkerDialog() {
+        FragmentManager fm = getFragmentManager();
+        DialogFragment d = new MarkerDialog();
+        Bundle args = new Bundle();
+        String spacename = _prefs.get(getString(R.string.state_current_mapname), null);
+        args.putString(getString(R.string.bundle_spacename), spacename);
+        d.setArguments(args);
+        d.show(fm, "list_markers_dialog");
     }
 
     private void showNewMapDialog() {
@@ -196,6 +208,9 @@ public class OeMapActivity extends OeBaseActivity {
                 break;
             case SHARE_MAP_POS:
                 break;
+            case LIST_COHORTS_POS:
+                showMarkerDialog();
+                break;
             case QUIT_MAP_POS:
                 quitMap();
                 break;
@@ -246,7 +261,7 @@ public class OeMapActivity extends OeBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.oe_map_activity);
 
-        _dbHelper = new PresenceHelper(this);
+        _prefHelper = new PresenceHelper(this);
         _prefs = new KvHelper(this);
         _history_store = new ListDbHelper(this, "oemap_history_store");
 
@@ -537,12 +552,12 @@ public class OeMapActivity extends OeBaseActivity {
 
             switch (pos) {
                 case NEW_PRIVATE_MAP:
-                case LIST_COHORTS_POS:
                 case SHARE_MAP_POS:
                 case SEPARATOR_POS:
                     return false;
                 case QUIT_MAP_POS:
                     return OeMapActivity.this.aMapIsActive();
+                case LIST_COHORTS_POS:
                 case NEW_PUBLIC_MAP:
                 default:
                     return true;
