@@ -1,0 +1,5 @@
+#!/bin/bash
+
+export NODE_ENV=production
+/usr/bin/node /home/esweeney/git/oemap/www/oemapd.js
+
