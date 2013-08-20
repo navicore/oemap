@@ -8,19 +8,17 @@
               >
 
     <ScrollView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
             android:id="@+id/scrollView"
-            android:layout_gravity="left|center_vertical"
             >
 
         <LinearLayout
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:orientation="vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
                 >
 
             <LinearLayout
@@ -29,6 +27,7 @@
                     android:orientation="horizontal"
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="8dp"
+                    android:layout_gravity="left|center"
                     >
 
                 <TextView
@@ -48,6 +47,7 @@
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:text=""
+                        android:inputType="text"
                         android:hint="@string/prefs_username_hint"
                         android:id="@+id/pref_username"
                         android:layout_gravity="left|center"
@@ -64,6 +64,7 @@
                     android:orientation="horizontal"
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="8dp"
+                    android:layout_gravity="left|center"
                     >
 
                 <TextView
@@ -123,40 +124,6 @@
                         />
 
             </LinearLayout>
-
-            <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    >
-
-                <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text=""
-                        android:layout_gravity="left|center"
-                        android:editable="false"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_weight="80"
-                        />
-
-                <Button
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/pref_done_button_label"
-                        android:id="@+id/pref_done_button"
-                        android:layout_gravity="left"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_weight="20"
-                        />
-
-            </LinearLayout>
-
 
         </LinearLayout>
 
