@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
+import android.widget.RemoteViews;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.onextent.android.activity.OeBaseActivity;
@@ -42,35 +45,31 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class OeMapPresenceService extends Service {
 
-    //private static final String PRESENCE_URL =  "http://10.0.0.2:8080/presence";
-    private static final String PRESENCE_URL =  "http://oemap.onextent.com:8080/presence";
-
     public static final int DEFAULT_TTL = Presence.MEDIUM;
-
-    private SpaceHelper    _spaceHelper;
-    private LocationHelper _locHelper;
-    private PresenceHelper _presenceHelper = null;
-    private KvHelper       _kvHelper = null;
-
     public static final String CMD_POLL = "poll";
     public static final String CMD_BOOT = "boot";
     public static final String CMD_ADD_SPACE = "add_space";
-    public static final String CMD_RM_SPACE  = "rm_space";
-    public static final String KEY_REASON    = "reason";
+    public static final String CMD_RM_SPACE = "rm_space";
+    public static final String KEY_REASON = "reason";
     public static final String KEY_SPACENAME = "spacename";
     //public static final String KEY_SPACENAMES = "spacenames";
-    public static final String KEY_UID       = "uid";
-
-    private AsyncTask       _currentTask        = null;
-    private AsyncTask       _currentPollTask    = null;
-
-    private boolean         _running      = false;
-    private Notification    _notification = null;
-    private SharedPreferences _prefs      = null;
+    public static final String KEY_UID = "uid";
+    //private static final String PRESENCE_URL =  "http://10.0.0.2:8080/presence";
+    private static final String PRESENCE_URL = "http://oemap.onextent.com:8080/presence";
+    private SpaceHelper _spaceHelper;
+    private LocationHelper _locHelper;
+    private PresenceHelper _presenceHelper = null;
+    private KvHelper _kvHelper = null;
+    private AsyncTask _currentTask = null;
+    private AsyncTask _currentPollTask = null;
+    private boolean _running = false;
+    private Notification _notification = null;
+    private SharedPreferences _prefs = null;
 
     @Override
     public void onCreate() {
@@ -80,7 +79,7 @@ public class OeMapPresenceService extends Service {
         _presenceHelper = new PresenceHelper(this);
         _kvHelper = new KvHelper(this);
 
-        createNotification();
+        updateNotification();
         _locHelper = new LocationHelper(new LocationHelper.LHContext() {
             @Override
             public Context getContext() {
@@ -157,22 +156,21 @@ public class OeMapPresenceService extends Service {
     private void sendPresence(Presence p) {
 
         //if (_currentTask == null) //don't queue up if server is slow or down
-            new Send().execute(p);
+        new Send().execute(p);
     }
 
-    private void createNotification() {
+    private void createNotification(String msg) {
         Intent intent = new Intent(this, OeMapActivity.class);
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
         _notification = new Notification.Builder(this)
                 .setContentIntent(pIntent)
-                .setContentTitle("OeMap").setContentText("OeMap is broadcasting your location.")
+                .setContentTitle("OeMap is Broadcasting").setContentText(msg)
                 .setSmallIcon(R.drawable.ic_launcher).getNotification();
 
         _notification.flags |= Notification.FLAG_NO_CLEAR;
     }
 
     private void showNotification() {
-        //todo: list the maps in the notification
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.notify(0, _notification);
     }
@@ -213,19 +211,18 @@ public class OeMapPresenceService extends Service {
             OeLog.d("booting");
             handleBoot();
 
-        }
-        else if (CMD_ADD_SPACE.equals(reason)) {
+        } else if (CMD_ADD_SPACE.equals(reason)) {
 
             String spacename = extras.getString(KEY_SPACENAME);
 
             ContentValues values = new ContentValues();
             values.put(SpaceProvider.Spaces.NAME, spacename);
             Uri r = getContentResolver().insert(SpaceProvider.CONTENT_URI, values);
+            updateNotification();
 
             startRunning();
 
-        }
-        else if (CMD_RM_SPACE.equals(reason)) {
+        } else if (CMD_RM_SPACE.equals(reason)) {
 
             String spacename = extras.getString(KEY_SPACENAME);
 
@@ -238,7 +235,7 @@ public class OeMapPresenceService extends Service {
             if (!_spaceHelper.hasSpaceNames()) {
                 stopRunning();
             }
-
+            updateNotification();
         }
 
         if (CMD_POLL.equals(reason)) {
@@ -246,11 +243,29 @@ public class OeMapPresenceService extends Service {
             if (_spaceHelper.hasSpaceNames()) {
                 wakeup();
             }
-        }
-
-        else {
+        } else {
 
             OeLog.w("unknown reason intent");
+        }
+    }
+
+    private void updateNotification() {
+
+        hideNotification();
+        List<String> l = _spaceHelper.getAllSpaceNames();
+        if (l != null && l.size() > 0) {
+
+        StringBuffer b = new StringBuffer("broadcasting your location to:");
+        int sz = l.size();
+        for (int i = 0; i < sz; i++ ) {
+            String s = l.get(i);
+            b.append(" ");
+            b.append(s);
+            if (i < (sz -1))  b.append(",");
+        }
+
+        createNotification(b.toString());
+        showNotification();
         }
     }
 
@@ -328,7 +343,7 @@ public class OeMapPresenceService extends Service {
         }
         if (oldUids != null) {
             for (String uid : oldUids) {
-                Presence p = PresenceFactory.createPresence(uid, null, null, null, space ,Presence.NONE);
+                Presence p = PresenceFactory.createPresence(uid, null, null, null, space, Presence.NONE);
                 broadcastIntent(p);
             }
         }
@@ -347,7 +362,7 @@ public class OeMapPresenceService extends Service {
     }
 
     private void wakeup() {
-        showNotification();
+        updateNotification();
         poll(); //do one now
         Location l = _locHelper.getLastLocation();
         if (l != null)
