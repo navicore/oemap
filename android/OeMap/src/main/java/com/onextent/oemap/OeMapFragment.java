@@ -32,7 +32,7 @@ public class OeMapFragment extends MapFragment  {
 
     Map<String, Holder> _markers = new HashMap<String, Holder>();
 
-    private PresenceHelper  _dbHelper = null;
+    private PresenceHelper _presenceHelper = null;
     private KvHelper        _prefs = null;
     private LatLng          _currLoc;
     private Marker          _myMarker;
@@ -99,7 +99,7 @@ public class OeMapFragment extends MapFragment  {
             if (mName != null && mName.equals(spacename)) {
                 OeLog.d("PresenceReceiver.onReceive updating current map with uid: " + uid + " spacename: " + spacename );
                 try {
-                    Presence p = _dbHelper.getPresence(uid, spacename);
+                    Presence p = _presenceHelper.getPresence(uid, spacename);
                     if (p == null) {
                         OeLog.d("PresenceReceiver.onReceive deleting presence: " + intent);
                         removeMarker(PresenceFactory.createPresence(uid, null, null, null, spacename, Presence.NONE));
@@ -144,7 +144,7 @@ public class OeMapFragment extends MapFragment  {
 
         String spacename = getName();
         try {
-            Set<Presence> markers = _dbHelper.getAllPrecenses(spacename);
+            Set<Presence> markers = _presenceHelper.getAllPrecenses(spacename);
             if (markers != null)
             for (Presence p : markers) {
                 setMarker(p);
@@ -152,7 +152,6 @@ public class OeMapFragment extends MapFragment  {
         } catch (JSONException e) {
             OeLog.e("loadMarkers error: " + e, e);
         }
-
     }
 
     @Override
@@ -162,6 +161,13 @@ public class OeMapFragment extends MapFragment  {
         setMapOptions();
         loadMarkers();
         getActivity().registerReceiver(_presenceReceiver, _presenceReceiverFilter);
+        getMap().setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+
+                _home.showMarkerDialog();
+            }
+        });
     }
 
     @Override
@@ -190,12 +196,13 @@ public class OeMapFragment extends MapFragment  {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        _dbHelper = new PresenceHelper(getActivity());
+        _presenceHelper = new PresenceHelper(getActivity());
         _prefs = new KvHelper(getActivity());
 
         _home.setMapFragTag(getTag());
 
         _presenceReceiverFilter = new IntentFilter(getString(R.string.presence_service_update_intent));
+
     }
 
     private void setMapType() {

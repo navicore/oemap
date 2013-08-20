@@ -132,7 +132,7 @@ public class OeMapActivity extends OeBaseActivity {
         d.show(fm, "new_priv_map_dialog");
     }
 
-    private void showMarkerDialog() {
+    public void showMarkerDialog() {
         FragmentManager fm = getFragmentManager();
         DialogFragment d = new MarkerDialog();
         Bundle args = new Bundle();
