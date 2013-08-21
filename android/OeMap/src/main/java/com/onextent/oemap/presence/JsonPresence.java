@@ -127,8 +127,8 @@ public class JsonPresence implements Presence {
 
     @Override
     public int hashCode() {
-        //return super.hashCode();
-        return getSpaceName().hashCode() +  getUID().hashCode() + 5000;
+        //return getSpaceName().hashCode() +  getUID().hashCode() + 5000;
+        return super.hashCode();
     }
 }
 

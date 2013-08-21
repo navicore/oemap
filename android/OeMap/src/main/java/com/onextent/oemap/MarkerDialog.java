@@ -36,9 +36,10 @@ public class MarkerDialog extends DialogFragment {
         try {
             Set<Presence> presences = prefHelper.getAllPrecenses(space);
             if (presences != null)
-            for (Presence p : presences) {
-                presList.add(p);
-            }
+                for (Presence p : presences) {
+                    presList.add(p);
+                }
+            OeLog.d("ejs found " + presList.size() + " presences ******************");
             array = new String[presList.size()];
             for (int i = 0; i < presList.size(); i++) {
                 array[i] = presList.get(i).getLabel();
@@ -60,6 +61,7 @@ public class MarkerDialog extends DialogFragment {
                            h.marker.remove();
                            Marker m = f.updateMarker(p);
                            m.showInfoWindow();
+                           f.setLocation(p);
                        }
                    }
            }

@@ -227,6 +227,7 @@ public class OeMapPresenceService extends Service {
             String spacename = extras.getString(KEY_SPACENAME);
 
             _spaceHelper.deleteSpacename(spacename);
+            _presenceHelper.deletePresencesWithSpaceName(spacename);
 
             Presence p = createPresence(null, spacename, Presence.NONE);
 
@@ -293,7 +294,6 @@ public class OeMapPresenceService extends Service {
                     oldUids.add(p.getUID());
                 }
             }
-            _presenceHelper.deletePresencesWithSpaceNameNotMine(s); //todo: too expensive and insanely clumsy
             HttpResponse response = client.execute(get);
             InputStream content = response.getEntity().getContent();
             BufferedReader buffer = new BufferedReader(new InputStreamReader(content));
@@ -326,6 +326,7 @@ public class OeMapPresenceService extends Service {
 
     private void processPollJson(String space, String json, Set<String> oldUids) throws JSONException {
 
+        _presenceHelper.deletePresencesWithSpaceNameNotMine(space); //todo: too expensive and insanely clumsy
         JSONArray array = new JSONArray(json);
         for (int i = 0; i < array.length(); i++) {
 

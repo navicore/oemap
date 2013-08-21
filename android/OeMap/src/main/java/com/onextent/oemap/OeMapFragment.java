@@ -142,12 +142,37 @@ public class OeMapFragment extends MapFragment  {
 
     private void loadMarkers() {
 
+        /**
+         *
+         *
+         * ejs todo:
+         *
+         * THE BUG IS that I can read them one by one when the bcast comes in
+         * but the getAll isn't finding them just by map name alone.  Huh.
+         *
+         * need a map-only index?
+         * need a map-only index?
+         * need a map-only index?
+         * need a map-only index?
+         * need a map-only index?
+         *
+         * bug is only when you join multiple maps big hint for index fix
+         * bug is only when you join multiple maps big hint for index fix
+         * bug is only when you join multiple maps big hint for index fix
+         * bug is only when you join multiple maps big hint for index fix
+         *
+         *
+         *
+         */
+
         String spacename = getName();
         try {
             Set<Presence> markers = _presenceHelper.getAllPrecenses(spacename);
-            if (markers != null)
-            for (Presence p : markers) {
-                setMarker(p);
+            if (markers != null) {
+                OeLog.d("ejs found " + markers.size() + " markers ******************");
+                for (Presence p : markers) {
+                    setMarker(p);
+                }
             }
         } catch (JSONException e) {
             OeLog.e("loadMarkers error: " + e, e);
@@ -307,6 +332,14 @@ public class OeMapFragment extends MapFragment  {
             h.marker.setSnippet(p.getSnippet());
         }
         return h.marker;
+    }
+
+    public void setLocation(Presence p) {
+
+        GoogleMap map = getMap();
+        if (map == null)  return;
+
+        map.animateCamera(CameraUpdateFactory.newLatLng(p.getLocation()));
     }
 
     public boolean setLocation() {

@@ -27,6 +27,7 @@ import com.onextent.android.activity.OeBaseActivity;
 import com.onextent.android.util.ListDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.OeMapPresenceService;
+import com.onextent.oemap.presence.SearchDialog;
 import com.onextent.oemap.provider.KvHelper;
 import com.onextent.oemap.provider.PresenceHelper;
 import com.onextent.oemap.provider.SpaceProvider;
@@ -122,8 +123,8 @@ public class OeMapActivity extends OeBaseActivity {
 
     private void startSettingsDialog() {
 
-        DialogFragment ald = new OeMapPreferencesDialog();
-        ald.show(getFragmentManager(), "OeMap Preferences Dialog");
+        DialogFragment f = new OeMapPreferencesDialog();
+        f.show(getFragmentManager(), "OeMap Preferences Dialog");
     }
 
     private void showNewPrivateMapDialog() {
@@ -316,7 +317,14 @@ public class OeMapActivity extends OeBaseActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setTitle("");
     }
+
+    @Override
+    public void setTitle(CharSequence s) {
+        super.setTitle("");
+    }
+
 
     private void setActiveMapsSpinner() {
 
@@ -431,6 +439,9 @@ public class OeMapActivity extends OeBaseActivity {
         boolean checked;
         // Handle your other action bar items...
         switch (item.getItemId()) {
+            case R.id.action_search:
+                startSearchDialog();
+                break;
             case R.id.action_refresh:
                 OeMapFragment f = getMapFrag();
                 if (f != null) {
@@ -479,6 +490,12 @@ public class OeMapActivity extends OeBaseActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void startSearchDialog() {
+
+        DialogFragment f = new SearchDialog();
+        f.show(getFragmentManager(), "OeMap Search Dialog");
     }
 
     private void setShowTrafficOption(boolean b) {

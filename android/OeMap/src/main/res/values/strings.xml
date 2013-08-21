@@ -82,6 +82,7 @@
     <string name="state_lng">state_lng</string>
     <string name="state_zoom_level">state_zoom_level</string>
     <string name="pref_ttl">pref_ttl</string>
+    <string name="action_search_title">Search</string>
 
 </resources>
 
