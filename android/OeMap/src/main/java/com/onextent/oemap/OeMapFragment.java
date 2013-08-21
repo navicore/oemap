@@ -190,7 +190,7 @@ public class OeMapFragment extends MapFragment  {
             @Override
             public void onMapLongClick(LatLng latLng) {
 
-                _home.showMarkerDialog();
+                _home.showSpaceSettingsDialog();
             }
         });
     }

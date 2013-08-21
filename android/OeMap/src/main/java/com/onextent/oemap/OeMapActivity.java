@@ -39,8 +39,8 @@ import java.util.List;
 public class OeMapActivity extends OeBaseActivity {
 
     public static final int NEW_PUBLIC_MAP  = 0;
-    public static final int NEW_PRIVATE_MAP = 1;
-    public static final int SHARE_MAP_POS   = 2;
+    public static final int SHARE_MAP_POS   = 1;
+    public static final int EDIT_MAP_POS    = 2;
     public static final int LIST_COHORTS_POS= 3;
     public static final int QUIT_MAP_POS    = 4;
     public static final int SEPARATOR_POS   = 5;
@@ -113,7 +113,7 @@ public class OeMapActivity extends OeBaseActivity {
         }
         int pos = _spacenames.indexOf(mapname);
         getActionBar().setSelectedNavigationItem(pos);
-        updateMapNames(mapname);
+        updateSpaceNames(mapname);
     }
 
     @Override
@@ -129,10 +129,19 @@ public class OeMapActivity extends OeBaseActivity {
 
     private void showNewPrivateMapDialog() {
         FragmentManager fm = getFragmentManager();
-        DialogFragment d = new NewPrivateMapDialog();
+        DialogFragment d = new NewPrivateSpaceDialog();
         d.show(fm, "new_priv_map_dialog");
     }
 
+    public void showSpaceSettingsDialog() {
+        FragmentManager fm = getFragmentManager();
+        DialogFragment d = new SpaceSettingsDialog();
+        Bundle args = new Bundle();
+        String spacename = _prefs.get(getString(R.string.state_current_mapname), null);
+        args.putString(getString(R.string.bundle_spacename), spacename);
+        d.setArguments(args);
+        d.show(fm, "space_settings_dialog");
+    }
     public void showMarkerDialog() {
         FragmentManager fm = getFragmentManager();
         DialogFragment d = new MarkerDialog();
@@ -143,13 +152,13 @@ public class OeMapActivity extends OeBaseActivity {
         d.show(fm, "list_markers_dialog");
     }
 
-    private void showNewMapDialog() {
+    private void showNewSpaceDialog() {
         FragmentManager fm = getFragmentManager();
-        DialogFragment d = new NewMapDialog();
-        d.show(fm, "new_map_dialog");
+        DialogFragment d = new NewSpaceDialog();
+        d.show(fm, "new_space_dialog");
     }
 
-    private void updateMapNames(String n) {
+    private void updateSpaceNames(String n) {
         _prefs.replace(getString(R.string.state_current_mapname), n);
         _history_store.replace(n);
 
@@ -160,7 +169,7 @@ public class OeMapActivity extends OeBaseActivity {
         _drawerAdapter.notifyDataSetChanged();
     }
 
-    void enableNewMap(String newMapName) {
+    void enableNewSpace(String newMapName) {
         setMapFrag(newMapName);
         Intent i = new Intent(this, OeMapPresenceService.class);
         i.putExtra(OeMapPresenceService.KEY_REASON, OeMapPresenceService.CMD_ADD_SPACE);
@@ -168,8 +177,8 @@ public class OeMapActivity extends OeBaseActivity {
         startService(i);
     }
 
-    void onFinishNewMapDialog(String newMapName) {
-        enableNewMap(newMapName);
+    void onFinishNewSpaceDialog(String newMapName) {
+        enableNewSpace(newMapName);
         Toast.makeText(this, "New map '" + newMapName + "' created.", Toast.LENGTH_SHORT).show();
     }
 
@@ -179,7 +188,7 @@ public class OeMapActivity extends OeBaseActivity {
         startService(i);
     }
 
-    private void quitMap() {
+    private void quitSpace() {
 
         String spacename = _prefs.get(getString(R.string.state_current_mapname), null);
         setMapFrag(getString(R.string.null_map_name));
@@ -202,23 +211,23 @@ public class OeMapActivity extends OeBaseActivity {
 
         switch (position) {
             case NEW_PUBLIC_MAP:
-                showNewMapDialog();
-                break;
-            case NEW_PRIVATE_MAP:
-                showNewPrivateMapDialog();
+                showNewSpaceDialog();
                 break;
             case SHARE_MAP_POS:
+                break;
+            case EDIT_MAP_POS:
+                showSpaceSettingsDialog();
                 break;
             case LIST_COHORTS_POS:
                 showMarkerDialog();
                 break;
             case QUIT_MAP_POS:
-                quitMap();
+                quitSpace();
                 break;
             default:
                 //setMapFrag((String) mDrawerNamesList.get(position));
                 String m = mDrawerNamesList.get(position);
-                enableNewMap(m);
+                enableNewSpace(m);
                 break;
         }
 
@@ -334,7 +343,7 @@ public class OeMapActivity extends OeBaseActivity {
         Cursor c = getContentResolver().query(SpaceProvider.CONTENT_URI,
                 SpaceProvider.Spaces.PROJECTION_ALL, null, null,
                 SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
-        int pos = c.getColumnIndex(SpaceProvider.Spaces.NAME);
+        int pos = c.getColumnIndex(SpaceProvider.Spaces._ID);
         while (c.moveToNext()) {
             String n = c.getString(pos);
             _spacenames.add(n);
@@ -568,7 +577,6 @@ public class OeMapActivity extends OeBaseActivity {
         public boolean isEnabled(int pos) {
 
             switch (pos) {
-                case NEW_PRIVATE_MAP:
                 case SHARE_MAP_POS:
                 case SEPARATOR_POS:
                     return false;
@@ -576,6 +584,7 @@ public class OeMapActivity extends OeBaseActivity {
                     return OeMapActivity.this.aMapIsActive();
                 case LIST_COHORTS_POS:
                 case NEW_PUBLIC_MAP:
+                case EDIT_MAP_POS:
                 default:
                     return true;
             }

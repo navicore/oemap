@@ -215,9 +215,17 @@ public class OeMapPresenceService extends Service {
 
             String spacename = extras.getString(KEY_SPACENAME);
 
-            ContentValues values = new ContentValues();
-            values.put(SpaceProvider.Spaces.NAME, spacename);
-            Uri r = getContentResolver().insert(SpaceProvider.CONTENT_URI, values);
+            //ContentValues values = new ContentValues();
+            //values.put(SpaceProvider.Spaces._ID, spacename);
+            //Uri r = getContentResolver().insert(SpaceProvider.CONTENT_URI, values);
+
+            //ejs todo: is this thnig really NOT runnign when it is supposed to be not running?
+            //ejs todo: is this thnig really NOT runnign when it is supposed to be not running?
+            //ejs todo: is this thnig really NOT runnign when it is supposed to be not running?
+            //ejs todo: is this thnig really NOT runnign when it is supposed to be not running?
+            //ejs todo: is this thnig really NOT runnign when it is supposed to be not running?
+            //ejs todo: is this thnig really NOT runnign when it is supposed to be not running?
+
             updateNotification();
 
             startRunning();
@@ -433,7 +441,7 @@ public class OeMapPresenceService extends Service {
             Cursor c = getContentResolver().query(SpaceProvider.CONTENT_URI,
                     SpaceProvider.Spaces.PROJECTION_ALL, null, null,
                     SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
-            int pos = c.getColumnIndex(SpaceProvider.Spaces.NAME);
+            int pos = c.getColumnIndex(SpaceProvider.Spaces._ID);
             while (c.moveToNext()) {
                 String s = c.getString(pos);
                 OeLog.d("Poll.doInBackground " + s + " ...");

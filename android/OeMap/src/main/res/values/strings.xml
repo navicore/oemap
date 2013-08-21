@@ -3,8 +3,8 @@
 
     <string-array name="menu_names_array">
         <item>Join Map</item>
-        <item>New Private Map</item>
         <item>Share Map</item>
+        <item>Edit Map</item>
         <item>List Cohorts</item>
         <item>Quit Map</item>
         <item>------</item>
@@ -43,7 +43,7 @@
     <string name="latitude_longitude">%1$.8f, %2$.8f</string>
     <string name="map_name_fld_text">Map Name</string>
     <string name="msg_still_looking">still looking for your current location...</string>
-    <string name="new_map_dialog_title">New Map</string>
+    <string name="new_map_dialog_title">Join Map</string>
     <string name="new_priv_map_dialog_title">New Private Map</string>
     <string name="null_map_location_message">Join or create a map to find your location.</string>
     <string name="null_map_name">none</string>

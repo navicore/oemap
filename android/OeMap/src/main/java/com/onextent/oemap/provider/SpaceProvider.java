@@ -31,12 +31,12 @@ public class SpaceProvider extends ContentProvider {
     }
 
     public static interface Spaces extends BaseColumns {
-        static String NAME              = SpaceDbHelper.SPACE_NAME;
+        static String LEASE             = SpaceDbHelper.LEASE;
         static String CONTENT_PATH      = SpaceDbHelper.SPACE_TABLE;
         static String CONTENT_TYPE      = ContentResolver.CURSOR_DIR_BASE_TYPE + "/com.onextent.oemap.provider.spaces";
         static String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/com.onextent.oemap.provider.spaces";
-        static String[] PROJECTION_ALL  = {_ID, NAME};
-        static String SORT_ORDER_DEFAULT = NAME + " ASC";
+        static String[] PROJECTION_ALL  = {_ID, LEASE};
+        static String SORT_ORDER_DEFAULT = _ID + " ASC";
     }
 
     @Override
@@ -132,6 +132,5 @@ public class SpaceProvider extends ContentProvider {
     public int update(Uri uri, ContentValues contentValues, String s, String[] strings) {
         return 0;
     }
-
 }
 

@@ -9,13 +9,14 @@ import com.onextent.oemap.R;
 
 public class SpaceDbHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 6;
 
     public static final String SPACE_TABLE = "spaces";
-    public static final String SPACE_NAME = "spacename";
+    //public static final String SPACE_NAME = "spacename";
+    public static final String LEASE = "lease";
 
     private static final String SQL_CREATE = "CREATE TABLE " +
-        SPACE_TABLE + " (_id INTEGER PRIMARY KEY, " + SPACE_NAME + " TEXT)";
+        SPACE_TABLE + " (_id TEXT PRIMARY KEY, " + LEASE + " INTEGER)";
 
     public SpaceDbHelper(Context context) {
         super(context, context.getString(R.string.db_name_spaces), null, DATABASE_VERSION);
@@ -31,6 +32,7 @@ public class SpaceDbHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i2) {
 
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + SPACE_TABLE + ";");
+        onCreate(sqLiteDatabase);
     }
 }
 
