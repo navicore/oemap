@@ -18,6 +18,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.OeMapPresenceService;
 import com.onextent.oemap.presence.Presence;
+import com.onextent.oemap.presence.PresenceException;
 import com.onextent.oemap.presence.PresenceFactory;
 import com.onextent.oemap.provider.KvHelper;
 import com.onextent.oemap.provider.PresenceHelper;
@@ -95,27 +96,32 @@ public class OeMapFragment extends MapFragment  {
 
             String mName = getName();
             String uid = intent.getExtras().getString(OeMapPresenceService.KEY_UID);
+
+            if (uid == null) {
+                //this is not an update, bail
+                return;
+            }
+
             String spacename = intent.getExtras().getString(OeMapPresenceService.KEY_SPACENAME);
+
             if (mName != null && mName.equals(spacename)) {
-                OeLog.d("PresenceReceiver.onReceive updating current map with uid: " + uid + " spacename: " + spacename );
                 try {
                     Presence p = _presenceHelper.getPresence(uid, spacename);
                     if (p == null) {
-                        OeLog.d("PresenceReceiver.onReceive deleting presence: " + intent);
-                        removeMarker(PresenceFactory.createPresence(uid, null, null, null, spacename, Presence.NONE));
+                        removeMarker(PresenceFactory.createPresence(uid, spacename));
                     } else {
                         if (isMyPresence(p)) {
-                            OeLog.d("PresenceReceiver.onReceive presence is my own");
                             _currLoc = p.getLocation();
                             if (!_loc_is_init) {
                                 _loc_is_init = true;//set map the first time we get a loc
                                 setLocation();
-                                //home.updateMapNamesFromHistory();
                             }
                         }
                         setMarker(p);
                     }
                 } catch (JSONException e) {
+                    OeLog.e("PresenceReceiver.onReceive error: " + e, e);
+                } catch (PresenceException e) {
                     OeLog.e("PresenceReceiver.onReceive error: " + e, e);
                 }
             }
@@ -169,12 +175,13 @@ public class OeMapFragment extends MapFragment  {
         try {
             Set<Presence> markers = _presenceHelper.getAllPrecenses(spacename);
             if (markers != null) {
-                OeLog.d("ejs found " + markers.size() + " markers ******************");
                 for (Presence p : markers) {
                     setMarker(p);
                 }
             }
         } catch (JSONException e) {
+            OeLog.e("loadMarkers error: " + e, e);
+        } catch (PresenceException e) {
             OeLog.e("loadMarkers error: " + e, e);
         }
     }
@@ -190,7 +197,7 @@ public class OeMapFragment extends MapFragment  {
             @Override
             public void onMapLongClick(LatLng latLng) {
 
-                _home.showSpaceSettingsDialog();
+                _home.showLeaseDialog();
             }
         });
     }

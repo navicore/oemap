@@ -24,9 +24,19 @@ public class OeLog {
         Log.w(TAG, m);
     }
 
+    public static void w(Throwable err) {
+
+        Log.w(TAG, err.toString(), err);
+    }
+
     public static void w(String m, Throwable err) {
 
         Log.w(TAG, m, err);
+    }
+
+    public static void e(Throwable e) {
+
+        Log.e(TAG, e.toString(), e);
     }
 
     public static void e(String m) {

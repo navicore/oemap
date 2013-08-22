@@ -11,6 +11,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.Presence;
+import com.onextent.oemap.presence.PresenceException;
 import com.onextent.oemap.provider.PresenceHelper;
 
 import org.json.JSONException;
@@ -45,7 +46,9 @@ public class MarkerDialog extends DialogFragment {
                 array[i] = presList.get(i).getLabel();
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            OeLog.e(e);
+        } catch (PresenceException e) {
+            OeLog.e(e);
         }
         ArrayAdapter<String> a = new ArrayAdapter<String>(getActivity(), android.R.layout.select_dialog_item, array);
 

@@ -1,6 +1,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+            android:id="@+id/action_members"
+            android:title="@string/action_members_title"
+            android:showAsAction="ifRoom"
+            android:icon="@android:drawable/ic_menu_info_details"
+            />
+
+    <item
             android:id="@+id/action_refresh"
             android:title="@string/action_refresh"
             android:showAsAction="always"
@@ -8,46 +15,67 @@
             />
 
     <item
+            android:id="@+id/action_share"
+            android:title="@string/action_share_title"
+            android:showAsAction="ifRoom"
+            android:icon="@android:drawable/ic_menu_share"
+            />
+
+    <item
+            android:id="@+id/action_lease"
+            android:title="@string/action_lease_title"
+            android:showAsAction="ifRoom"
+            android:icon="@android:drawable/ic_menu_my_calendar"
+            />
+    <!-- I don't know what search in the context within one map means
+    item
             android:id="@+id/action_search"
             android:title="@string/action_search_title"
-            android:showAsAction="always"
+            android:showAsAction="ifRoom"
             android:icon="@android:drawable/ic_menu_search"
-            />
-    <!-- ejs todo: put these in a submenu on small screens -->
+            / -->
 
-    <group
-            android:checkableBehavior="single"
+    <item
+            android:id="@+id/action_map_settings_submenu"
+            android:title="Map Settings"
             android:showAsAction="never|withText"
             >
-        <item
-                android:id="@+id/map_type_normal"
-                android:checked="false"
-                android:title="Normal"/>
-        <item
-                android:id="@+id/map_type_terrain"
-                android:checked="false"
-                android:title="Terrain"/>
-        <item
-                android:id="@+id/map_type_satellite"
-                android:checked="false"
-                android:title="Satellite"/>
-    </group>
+        <menu>
+            <group
+                    android:checkableBehavior="single"
+                    android:showAsAction="never|withText"
+                    >
+                <item
+                        android:id="@+id/map_type_normal"
+                        android:checked="false"
+                        android:title="Normal"/>
+                <item
+                        android:id="@+id/map_type_terrain"
+                        android:checked="false"
+                        android:title="Terrain"/>
+                <item
+                        android:id="@+id/map_type_satellite"
+                        android:checked="false"
+                        android:title="Satellite"/>
+            </group>
 
-    <group
-            android:checkableBehavior="all"
-            android:showAsAction="never|withText"
-            >
-        <item
-                android:id="@+id/menu_show_traffic"
-                android:checked="false"
-                android:title="@string/pref_show_traffic_title"
-                />
-        <item
-                android:id="@+id/menu_show_indoors"
-                android:checked="false"
-                android:title="@string/pref_show_indoors_title"
-                />
-    </group>
+            <group
+                    android:checkableBehavior="all"
+                    android:showAsAction="never|withText"
+                    >
+                <item
+                        android:id="@+id/menu_show_traffic"
+                        android:checked="false"
+                        android:title="@string/pref_show_traffic_title"
+                        />
+                <item
+                        android:id="@+id/menu_show_indoors"
+                        android:checked="false"
+                        android:title="@string/pref_show_indoors_title"
+                        />
+            </group>
+        </menu>
+    </item>
 
     <item
             android:id="@+id/action_settings"

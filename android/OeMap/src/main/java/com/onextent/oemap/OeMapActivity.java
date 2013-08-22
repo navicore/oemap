@@ -1,10 +1,14 @@
 package com.onextent.oemap;
 
 import android.app.ActionBar;
+import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -38,16 +42,16 @@ import java.util.List;
 
 public class OeMapActivity extends OeBaseActivity {
 
-    public static final int NEW_PUBLIC_MAP  = 0;
-    public static final int SHARE_MAP_POS   = 1;
-    public static final int EDIT_MAP_POS    = 2;
-    public static final int LIST_COHORTS_POS= 3;
-    public static final int QUIT_MAP_POS    = 4;
-    public static final int SEPARATOR_POS   = 5;
+    public static final int NEW_PUBLIC_MAP = 0;
+    //public static final int SHARE_MAP_POS = 1;
+    public static final int FIND_MAP_POS = 1;
+    //public static final int EDIT_MAP_POS = 2;
+    //public static final int LIST_COHORTS_POS = 3;
+    public static final int QUIT_MAP_POS = 2;
+    public static final int SEPARATOR_POS = 3;
 
     private static final String MAP_FRAG_TAG = "oemap";
     private static final int MAX_HISTORY = 20;
-
     private DrawerLayout mDrawerLayout;
     private DrawerAdapter _drawerAdapter = null;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -61,6 +65,8 @@ public class OeMapActivity extends OeBaseActivity {
     private ListDbHelper _history_store = null;
     private ArrayAdapter<String> _spacenames_adapter = null;
     private List<String> _spacenames = null;
+    private BroadcastReceiver _presenceReceiver = new PresenceReceiver();
+    private IntentFilter _presenceReceiverFilter = null;
 
     private boolean aMapIsActive() {
         String m = _prefs.get(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
@@ -92,7 +98,7 @@ public class OeMapActivity extends OeBaseActivity {
         return null;
     }
 
-    private void setMapFrag(String mapname) {
+    public void setMapFrag(String mapname) {
 
         MapFragment fragment = null;  //creating a new frag per map, optimise later
 
@@ -133,7 +139,7 @@ public class OeMapActivity extends OeBaseActivity {
         d.show(fm, "new_priv_map_dialog");
     }
 
-    public void showSpaceSettingsDialog() {
+    public void showLeaseDialog() {
         FragmentManager fm = getFragmentManager();
         DialogFragment d = new SpaceSettingsDialog();
         Bundle args = new Bundle();
@@ -142,6 +148,7 @@ public class OeMapActivity extends OeBaseActivity {
         d.setArguments(args);
         d.show(fm, "space_settings_dialog");
     }
+
     public void showMarkerDialog() {
         FragmentManager fm = getFragmentManager();
         DialogFragment d = new MarkerDialog();
@@ -152,10 +159,18 @@ public class OeMapActivity extends OeBaseActivity {
         d.show(fm, "list_markers_dialog");
     }
 
-    private void showNewSpaceDialog() {
+    private void showNewSpaceDialogWithName(String space) {
         FragmentManager fm = getFragmentManager();
         DialogFragment d = new NewSpaceDialog();
+        if (space != null) {
+            Bundle b = new Bundle();
+            b.putString(getString(R.string.bundle_spacename), space);
+            d.setArguments(b);
+        }
         d.show(fm, "new_space_dialog");
+    }
+    private void showNewSpaceDialog() {
+        showNewSpaceDialogWithName(null);
     }
 
     private void updateSpaceNames(String n) {
@@ -194,6 +209,7 @@ public class OeMapActivity extends OeBaseActivity {
         setMapFrag(getString(R.string.null_map_name));
         _spacenames.remove(spacename);
         _spacenames_adapter.notifyDataSetChanged();
+        _prefs.replace(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
         //todo: helper method that sets location for none
 
         Intent i = new Intent(this, OeMapPresenceService.class);
@@ -213,14 +229,17 @@ public class OeMapActivity extends OeBaseActivity {
             case NEW_PUBLIC_MAP:
                 showNewSpaceDialog();
                 break;
-            case SHARE_MAP_POS:
+            //case SHARE_MAP_POS:
+            //    break;
+            case FIND_MAP_POS:
+                showSearchDialog();
                 break;
-            case EDIT_MAP_POS:
-                showSpaceSettingsDialog();
-                break;
-            case LIST_COHORTS_POS:
-                showMarkerDialog();
-                break;
+            //case EDIT_MAP_POS:
+            //    showLeaseDialog();
+            //    break;
+            //case LIST_COHORTS_POS:
+            //    showMarkerDialog();
+            //    break;
             case QUIT_MAP_POS:
                 quitSpace();
                 break;
@@ -327,13 +346,14 @@ public class OeMapActivity extends OeBaseActivity {
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setTitle("");
+
+        _presenceReceiverFilter = new IntentFilter(getString(R.string.presence_service_quit_space_intent));
     }
 
     @Override
     public void setTitle(CharSequence s) {
         super.setTitle("");
     }
-
 
     private void setActiveMapsSpinner() {
 
@@ -448,9 +468,15 @@ public class OeMapActivity extends OeBaseActivity {
         boolean checked;
         // Handle your other action bar items...
         switch (item.getItemId()) {
-            case R.id.action_search:
-                startSearchDialog();
+            case R.id.action_lease:
+                showLeaseDialog();
                 break;
+            case R.id.action_members:
+                showMarkerDialog();
+                break;
+            //case R.id.action_search:
+            //    showSearchDialog();
+            //    break;
             case R.id.action_refresh:
                 OeMapFragment f = getMapFrag();
                 if (f != null) {
@@ -495,13 +521,14 @@ public class OeMapActivity extends OeBaseActivity {
                 setShowInDoorsOption(!checked);
                 break;
             case R.id.action_about:
+                showAboutDialog();
             default:
         }
 
         return super.onOptionsItemSelected(item);
     }
 
-    private void startSearchDialog() {
+    private void showSearchDialog() {
 
         DialogFragment f = new SearchDialog();
         f.show(getFragmentManager(), "OeMap Search Dialog");
@@ -545,11 +572,13 @@ public class OeMapActivity extends OeBaseActivity {
         setMapFrag(mapname);
         updateMapNamesFromHistory();
         wakePresenceService();
+        registerReceiver(_presenceReceiver, _presenceReceiverFilter);
     }
 
     @Override
     public void onPause() {
 
+        unregisterReceiver(_presenceReceiver);
         saveHistory();
         clearMapNamesHistory();
         super.onPause();
@@ -577,14 +606,14 @@ public class OeMapActivity extends OeBaseActivity {
         public boolean isEnabled(int pos) {
 
             switch (pos) {
-                case SHARE_MAP_POS:
+                //case SHARE_MAP_POS:
                 case SEPARATOR_POS:
                     return false;
                 case QUIT_MAP_POS:
                     return OeMapActivity.this.aMapIsActive();
-                case LIST_COHORTS_POS:
+                //case LIST_COHORTS_POS:
                 case NEW_PUBLIC_MAP:
-                case EDIT_MAP_POS:
+                //case EDIT_MAP_POS:
                 default:
                     return true;
             }
@@ -602,6 +631,88 @@ public class OeMapActivity extends OeBaseActivity {
             if (position != SEPARATOR_POS) //ejs skip separator todo: disable!!!
                 selectItem(position);
         }
+
+
+    }
+
+    private class PresenceReceiver extends BroadcastReceiver {
+
+        private boolean _loc_is_init = false;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            String uid = intent.getExtras().getString(OeMapPresenceService.KEY_UID);
+
+            if (uid != null) {
+                //this is not an space delete, bail
+                return;
+            }
+
+            String spacename = intent.getExtras().getString(OeMapPresenceService.KEY_SPACENAME);
+
+            OeMapFragment f = getMapFrag();
+            String currSpace = f.getName();
+            //String currSpace = _prefs.get(getString(R.string.state_current_mapname), null);
+
+            if (spacename != null && spacename.equals(currSpace)) {
+                //ejs todo: if the user is using this still, give the m the op to re-subscribe
+                setMapFrag(getString(R.string.null_map_name));
+                showRejoinDialog(spacename);
+            }
+            _spacenames.remove(spacename);
+            _spacenames_adapter.notifyDataSetChanged();
+        }
+    }
+
+    private void showRejoinDialog(final String space) {
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                this);
+
+        // set title
+        alertDialogBuilder.setTitle("You have left map '" + space + "'");
+
+        // set dialog message
+        alertDialogBuilder
+                .setMessage("Do you wish to rejoin the map?")
+                .setCancelable(false)
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        showNewSpaceDialogWithName(space);
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
+    }
+
+    private void showAboutDialog() {
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                this);
+
+        // set title
+        alertDialogBuilder.setTitle("About OeMap");
+
+        // set dialog message
+        alertDialogBuilder
+                .setMessage("OeMap was created by Ed Sweeney.  Contact Ed at info@onextent.com.  Thanks for using OeMap!")
+                .setCancelable(false);
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
     }
 }
 

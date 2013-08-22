@@ -4,19 +4,13 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.app.TaskStackBuilder;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.location.Location;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
-import android.widget.RemoteViews;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.onextent.android.activity.OeBaseActivity;
@@ -44,32 +38,37 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class OeMapPresenceService extends Service {
 
-    public static final int DEFAULT_TTL = Presence.MEDIUM;
+    public static final int    DEFAULT_TTL = Presence.MEDIUM;
+
     public static final String CMD_POLL = "poll";
     public static final String CMD_BOOT = "boot";
     public static final String CMD_ADD_SPACE = "add_space";
     public static final String CMD_RM_SPACE = "rm_space";
+
     public static final String KEY_REASON = "reason";
     public static final String KEY_SPACENAME = "spacename";
-    //public static final String KEY_SPACENAMES = "spacenames";
+
     public static final String KEY_UID = "uid";
+
     //private static final String PRESENCE_URL =  "http://10.0.0.2:8080/presence";
     private static final String PRESENCE_URL = "http://oemap.onextent.com:8080/presence";
-    private SpaceHelper _spaceHelper;
-    private LocationHelper _locHelper;
-    private PresenceHelper _presenceHelper = null;
-    private KvHelper _kvHelper = null;
-    private AsyncTask _currentTask = null;
-    private AsyncTask _currentPollTask = null;
-    private boolean _running = false;
-    private Notification _notification = null;
-    private SharedPreferences _prefs = null;
+
+    private SpaceHelper     _spaceHelper;
+    private LocationHelper  _locHelper;
+    private PresenceHelper  _presenceHelper = null;
+    private KvHelper        _kvHelper = null;
+
+    private AsyncTask       _currentTask = null;
+    private AsyncTask       _currentPollTask = null;
+    private boolean         _running = false;
+    private Notification    _notification = null;
 
     @Override
     public void onCreate() {
@@ -92,6 +91,7 @@ public class OeMapPresenceService extends Service {
                 poll();  //todo: put on timer?
             }
         });
+
         _locHelper.setCallback(new LocationHelper.Callback() {
 
             @Override
@@ -104,26 +104,70 @@ public class OeMapPresenceService extends Service {
         _locHelper.onResume();
     }
 
-    private Presence createPresence(Location l, String spacename) {
+    private Presence createPresence(Location l, String spacename) throws PresenceException {
         int ttl = _kvHelper.getInt(getString(R.string.pref_ttl), DEFAULT_TTL);
         return createPresence(l, spacename, ttl);
     }
 
-    private Presence createPresence(Location l, String spacename, int ttl) {
+    private Presence createPresence(Location l, String spacename, int ttl) throws PresenceException {
 
         LatLng latLng = null;
         String label = null;
         String snippit = null;
+
         if (l != null) {
 
-            //todo: allow per-map overrides
             latLng = new LatLng(l.getLatitude(), l.getLongitude());
+
             label = _kvHelper.get(getString(R.string.pref_username), "nobody");
+
             snippit = _kvHelper.get(getString(R.string.pref_snippit), "sigh...");
         }
+
+        Date lease = _spaceHelper.getLease(spacename);
         String uid = OeBaseActivity.id(this.getApplicationContext());
-        Presence p = PresenceFactory.createPresence(uid, latLng, label, snippit, spacename, ttl);
+        Presence p = PresenceFactory.createPresence(uid, latLng, label, snippit, spacename, ttl, lease);
+
         return p;
+    }
+
+    private void quitSpace(String s) {
+
+        _spaceHelper.deleteSpacename(s);
+
+        _presenceHelper.deletePresencesWithSpaceName(s);
+
+        _kvHelper.replace(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
+
+        updateNotification();
+
+        broadcastQuitSpaceIntent(s);
+
+        try {
+
+            Presence  p = createPresence(null, s, Presence.NONE);
+
+            new Send().execute(p);
+
+        } catch (PresenceException e) {
+            OeLog.e(e);
+        }
+    }
+
+    private void updatePresenceEverywhere(String s, Location l) {
+
+        Presence p = null;
+        try {
+            p = createPresence(l, s);
+            _presenceHelper.replacePresence(p);
+
+            broadcastIntent(p);
+
+            new Send().execute(p);
+
+        } catch (PresenceException e) {
+            OeLog.e(e);
+        }
     }
 
     private void broadcast(Location l) {
@@ -131,16 +175,23 @@ public class OeMapPresenceService extends Service {
         String uid = OeBaseActivity.id(this);
         for (String s : _spaceHelper.getAllSpaceNames()) {
 
-            OeLog.d("broadcast for uid: " + uid + " on space: " + s);
+            Date lease = _spaceHelper.getLease(s);
+            if (lease != null && lease.getTime() <= System.currentTimeMillis()) {
 
-            Presence p = createPresence(l, s);
+                quitSpace(s);
 
-            _presenceHelper.replacePresence(p);
+            } else {
 
-            broadcastIntent(p);
-
-            sendPresence(p);
+                updatePresenceEverywhere(s, l);
+            }
         }
+    }
+
+    private void broadcastQuitSpaceIntent(String s) {
+
+        Intent intent = new Intent(getString(R.string.presence_service_quit_space_intent));
+        intent.putExtra(KEY_SPACENAME, s);
+        sendBroadcast(intent);
     }
 
     private void broadcastIntent(Presence p) {
@@ -148,16 +199,9 @@ public class OeMapPresenceService extends Service {
         Intent intent = new Intent(getString(R.string.presence_service_update_intent));
         intent.putExtra(KEY_UID, p.getUID());
         intent.putExtra(KEY_SPACENAME, p.getSpaceName());
-        OeLog.d("    sending action: " + intent.getAction() + " for uid: " + p.getUID() +
-                " and space: " + p.getSpaceName());
         sendBroadcast(intent);
     }
 
-    private void sendPresence(Presence p) {
-
-        //if (_currentTask == null) //don't queue up if server is slow or down
-        new Send().execute(p);
-    }
 
     private void createNotification(String msg) {
         Intent intent = new Intent(this, OeMapActivity.class);
@@ -204,11 +248,9 @@ public class OeMapPresenceService extends Service {
         if (intent == null) return;
         Bundle extras = intent.getExtras();
         String reason = extras.getString(KEY_REASON);
-        OeLog.d("cmd reason: " + reason);
 
         if (CMD_BOOT.equals(reason)) {
 
-            OeLog.d("booting");
             handleBoot();
 
         } else if (CMD_ADD_SPACE.equals(reason)) {
@@ -237,9 +279,15 @@ public class OeMapPresenceService extends Service {
             _spaceHelper.deleteSpacename(spacename);
             _presenceHelper.deletePresencesWithSpaceName(spacename);
 
-            Presence p = createPresence(null, spacename, Presence.NONE);
+            Presence p = null;
+            try {
 
-            sendPresence(p);
+                p = createPresence(null, spacename, Presence.NONE);
+                new Send().execute(p);
+
+            } catch (PresenceException e) {
+                OeLog.e(e);
+            }
 
             if (!_spaceHelper.hasSpaceNames()) {
                 stopRunning();
@@ -315,7 +363,6 @@ public class OeMapPresenceService extends Service {
             int code = response.getStatusLine().getStatusCode();
             switch (code) {
                 case 200:
-                    OeLog.d("processing 200 get:/n" + json);
                     processPollJson(s, json, oldUids);
                     break;
                 case 404: //none found
@@ -324,15 +371,17 @@ public class OeMapPresenceService extends Service {
                     OeLog.w("got status line status code: " + response.getStatusLine().getStatusCode() + "/n" + json);
             }
         } catch (UnsupportedEncodingException e) {
-            OeLog.e(e.toString(), e);
+            OeLog.e(e);
         } catch (IOException e) {
-            OeLog.e(e.toString(), e);
+            OeLog.e(e);
         } catch (JSONException e) {
-            OeLog.e("error polling map " + s + ": " + e.toString(), e);
+            OeLog.e(e);
+        } catch (PresenceException e) {
+            OeLog.e(e);
         }
     }
 
-    private void processPollJson(String space, String json, Set<String> oldUids) throws JSONException {
+    private void processPollJson(String space, String json, Set<String> oldUids) throws JSONException, PresenceException {
 
         _presenceHelper.deletePresencesWithSpaceNameNotMine(space); //todo: too expensive and insanely clumsy
         JSONArray array = new JSONArray(json);
@@ -352,7 +401,7 @@ public class OeMapPresenceService extends Service {
         }
         if (oldUids != null) {
             for (String uid : oldUids) {
-                Presence p = PresenceFactory.createPresence(uid, null, null, null, space, Presence.NONE);
+                Presence p = PresenceFactory.createPresence(uid, null, null, null, space, Presence.NONE, null);
                 broadcastIntent(p);
             }
         }
@@ -444,7 +493,6 @@ public class OeMapPresenceService extends Service {
             int pos = c.getColumnIndex(SpaceProvider.Spaces._ID);
             while (c.moveToNext()) {
                 String s = c.getString(pos);
-                OeLog.d("Poll.doInBackground " + s + " ...");
                 pollSpace(s);
             }
             c.close();

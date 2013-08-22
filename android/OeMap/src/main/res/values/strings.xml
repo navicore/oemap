@@ -3,9 +3,10 @@
 
     <string-array name="menu_names_array">
         <item>Join Map</item>
-        <item>Share Map</item>
-        <item>Edit Map</item>
-        <item>List Cohorts</item>
+        <!--  item>Share Map</item -->
+        <item>Find Map</item>
+        <!-- item>Edit Map</item -->
+        <!-- item>List Cohorts</item -->
         <item>Quit Map</item>
         <item>------</item>
     </string-array>
@@ -74,6 +75,7 @@
     <string name="presence_service_key_uid">uid</string>
     <string name="presence_service_name">OeMap Presence Service</string>
     <string name="presence_service_update_intent">com.onextent.oemap.presenceServiceUpdate</string>
+    <string name="presence_service_quit_space_intent">com.onextent.oemap.presenceServiceQuitSpace</string>
 
     <string name="state_current_mapname">state_current_mapname</string>
     <string name="state_history">state_history</string>
@@ -83,6 +85,9 @@
     <string name="state_zoom_level">state_zoom_level</string>
     <string name="pref_ttl">pref_ttl</string>
     <string name="action_search_title">Search</string>
+    <string name="action_members_title">Map Membes</string>
+    <string name="action_share_title">Share Map</string>
+    <string name="action_lease_title">Adjust Map Quit Time</string>
 
 </resources>
 

@@ -7,10 +7,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
+
 public class JsonPresence implements Presence {
 
     private static final String KEY_UID = "uid";
-
     private static final String KEY_LOC = "location";
     private static final String KEY_CRD = "coordinates";
     private static final String KEY_LBL = "label";
@@ -18,46 +24,73 @@ public class JsonPresence implements Presence {
     private static final String KEY_SPC = "space";
     private static final String KEY_TIM = "time";
     private static final String KEY_TTL = "ttl";
+    private static final String KEY_EXP = "exp";
     private static final int LATITUDE_IDX = 1;
     private static final int LONGITUDE_IDX = 0;
-    private final String _uid, _label, _snippet;
-    private final LatLng _location;
-    private final long  _create_time;
-    private final int   _time_to_live;
-    private final String _spacename;
+    static final private SimpleDateFormat _dateFormatGmt = new SimpleDateFormat("dd:MM:yyyy HH:mm:ss");
 
-    JsonPresence(JSONObject jobj) throws JSONException {
-
-        _uid = jobj.getString(KEY_UID);
-
-        //see http://www.geojson.org for standard.  for some reason lon comes before lat
-        if (jobj.has(KEY_LOC)) {
-            JSONObject loc = jobj.getJSONObject(KEY_LOC);
-            JSONArray coords = loc.getJSONArray(KEY_CRD);
-            _location = new LatLng(coords.getDouble(LATITUDE_IDX), coords.getDouble(LONGITUDE_IDX));
-        } else {
-            _location = null;
-        }
-
-        _label          = jobj.getString(KEY_LBL);
-        _snippet        = jobj.getString(KEY_SNP);
-        _spacename      = jobj.getString(KEY_SPC);
-        _create_time    = jobj.getLong(KEY_TIM);
-        _time_to_live   = jobj.getInt(KEY_TTL);
+    static {
+        _dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    JsonPresence(String json) throws JSONException {
+    private final String _uid, _label, _snippet;
+    private final LatLng _location;
+    private final long _create_time;
+    private final int _time_to_live;
+    private final String _spacename;
+    private final Date _lease;
+
+    JsonPresence(JSONObject jobj) throws PresenceException {
+
+        try {
+            _uid = jobj.getString(KEY_UID);
+
+            //see http://www.geojson.org for standard.  for some reason lon comes before lat
+            if (jobj.has(KEY_LOC)) {
+                JSONObject loc = jobj.getJSONObject(KEY_LOC);
+                JSONArray coords = loc.getJSONArray(KEY_CRD);
+                _location = new LatLng(coords.getDouble(LATITUDE_IDX), coords.getDouble(LONGITUDE_IDX));
+            } else {
+                _location = null;
+            }
+
+            _label = jobj.getString(KEY_LBL);
+            _snippet = jobj.getString(KEY_SNP);
+            _spacename = jobj.getString(KEY_SPC);
+            _create_time = jobj.getLong(KEY_TIM);
+            _time_to_live = jobj.getInt(KEY_TTL);
+            if (jobj.has(KEY_EXP)) {
+
+                String gmt = jobj.getString(KEY_EXP);
+                Calendar gmtc = ISO8601.toCalendar(gmt);
+                _lease = gmtc.getTime();
+            } else {
+                _lease = null;
+            }
+        } catch (JSONException e) {
+            throw new PresenceException(e);
+        } catch (ParseException e) {
+            throw new PresenceException(e);
+        }
+    }
+
+    JsonPresence(String json) throws PresenceException, JSONException {
         this(new JSONObject(json));
     }
 
-    JsonPresence(String pid, LatLng l, String lbl, String snippet, String spacename, int ttl) {
-        _uid            = pid;
-        _location       = l;
-        _label          = lbl;
-        _snippet        = snippet;
-        _spacename      = spacename;
-        _create_time    = System.currentTimeMillis();
-        _time_to_live   = ttl;
+    JsonPresence(String uid, LatLng l, String lbl, String snippet, String spacename, int ttl, Date lease) {
+        _uid = uid;
+        _lease = lease;
+        _location = l;
+        _label = lbl;
+        _snippet = snippet;
+        _spacename = spacename;
+        _create_time = System.currentTimeMillis();
+        _time_to_live = ttl;
+    }
+
+    public JsonPresence(String uid, String spacename) {
+        this(uid, null, null, null, spacename, Presence.NONE, null);
     }
 
     @Override
@@ -117,6 +150,11 @@ public class JsonPresence implements Presence {
             jobj.put(KEY_SPC, _spacename);
             jobj.put(KEY_TIM, _create_time);
             jobj.put(KEY_TTL, _time_to_live);
+            if (_lease != null) {
+                Calendar calendar = GregorianCalendar.getInstance();
+                calendar.setTime(_lease);
+                jobj.put(KEY_EXP, ISO8601.fromCalendar(calendar));
+            }
 
             return jobj.toString();
         } catch (JSONException e) {
@@ -129,6 +167,46 @@ public class JsonPresence implements Presence {
     public int hashCode() {
         //return getSpaceName().hashCode() +  getUID().hashCode() + 5000;
         return super.hashCode();
+    }
+
+    /**
+     * Helper class for handling ISO 8601 strings of the following format:
+     * "2008-03-01T13:00:00+01:00". It also supports parsing the "Z" timezone.
+     */
+    public static final class ISO8601 {
+        /**
+         * Transform Calendar to ISO 8601 string.
+         */
+        public static String fromCalendar(final Calendar calendar) {
+            Date date = calendar.getTime();
+            String formatted = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
+                    .format(date);
+            return formatted.substring(0, 22) + ":" + formatted.substring(22);
+        }
+
+        /**
+         * Get current date and time formatted as ISO 8601 string.
+         */
+        public static String now() {
+            return fromCalendar(GregorianCalendar.getInstance());
+        }
+
+        /**
+         * Transform ISO 8601 string to Calendar.
+         */
+        public static Calendar toCalendar(final String iso8601string)
+                throws ParseException, ParseException {
+            Calendar calendar = GregorianCalendar.getInstance();
+            String s = iso8601string.replace("Z", "+00:00");
+            try {
+                s = s.substring(0, 22) + s.substring(23);
+            } catch (IndexOutOfBoundsException e) {
+                throw new ParseException("Invalid length", 0);
+            }
+            Date date = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ").parse(s);
+            calendar.setTime(date);
+            return calendar;
+        }
     }
 }
 

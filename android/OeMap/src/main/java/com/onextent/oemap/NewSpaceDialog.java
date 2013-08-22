@@ -86,6 +86,12 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog implements TextView.
 
         mEditText.requestFocus();
         mEditText.setOnEditorActionListener(this);
+
+        Bundle b = getArguments();
+        if (b != null && b.containsKey(getString(R.string.bundle_spacename))) {
+            String n = b.getString(getString(R.string.bundle_spacename));
+            mEditText.setText(n);
+        }
     }
 
     private void setupButton(View view) {

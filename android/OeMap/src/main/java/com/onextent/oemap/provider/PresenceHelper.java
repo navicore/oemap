@@ -6,6 +6,7 @@ import android.database.Cursor;
 
 import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.presence.Presence;
+import com.onextent.oemap.presence.PresenceException;
 import com.onextent.oemap.presence.PresenceFactory;
 
 import org.json.JSONException;
@@ -51,7 +52,7 @@ public class PresenceHelper {
                 PresenceProvider.IPresence.SPACE + "='" + spacename + "'", null);
     }
 
-    public Presence getPresence(String uid, String spacename) throws JSONException {
+    public Presence getPresence(String uid, String spacename) throws JSONException, PresenceException {
 
         Cursor c = null;
         Presence p = null;
@@ -73,7 +74,7 @@ public class PresenceHelper {
         return p;
     }
 
-    public Set<Presence> getAllPrecenses(String spacename) throws JSONException {
+    public Set<Presence> getAllPrecenses(String spacename) throws JSONException, PresenceException {
         Cursor c = null;
         Set<Presence> l = null;
         try {
