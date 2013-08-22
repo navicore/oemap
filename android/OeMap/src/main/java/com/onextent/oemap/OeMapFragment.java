@@ -13,6 +13,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.onextent.android.util.OeLog;
@@ -197,7 +198,8 @@ public class OeMapFragment extends MapFragment  {
             @Override
             public void onMapLongClick(LatLng latLng) {
 
-                _home.showLeaseDialog();
+                //_home.showLeaseDialog();
+                _home.showMarkerDialog();
             }
         });
     }
@@ -356,7 +358,20 @@ public class OeMapFragment extends MapFragment  {
         GoogleMap map = getMap();
         if (map == null)  return false;
 
-        map.animateCamera(CameraUpdateFactory.newLatLng(_currLoc));
+        boolean autozoom = _prefs.getBoolean(getString(R.string.pref_autozoom), true);
+
+        if (autozoom) {
+
+            LatLngBounds.Builder bc = new LatLngBounds.Builder();
+            for (Holder h : _markers.values()) {
+                bc.include(h.marker.getPosition());
+            }
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bc.build(),50));
+
+        } else {
+            map.animateCamera(CameraUpdateFactory.newLatLng(_currLoc));
+        }
+
         map.setMyLocationEnabled(true);
 
         setMyMarker();

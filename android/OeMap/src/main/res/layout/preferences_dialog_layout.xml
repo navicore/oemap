@@ -104,27 +104,6 @@
                     >
             </LinearLayout>
 
-            <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    >
-
-                <CheckBox
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/pref_show_zoom_control_fld_text"
-                        android:id="@+id/pref_show_zoom_control"
-                        android:layout_gravity="left"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginRight="8dp"
-                        android:layout_weight="50"
-                        />
-
-            </LinearLayout>
-
         </LinearLayout>
 
     </ScrollView>

@@ -22,25 +22,34 @@ import java.util.Set;
 
 public class MarkerDialog extends DialogFragment {
 
+    // ejs todo: rewrite with a search box above the list to filter items out
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+
         String space = null;
+
         Bundle args = getArguments();
         if (args != null)
             space = args.getString(getString(R.string.bundle_spacename));
         if (space == null) throw new NullPointerException("no mapname");
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
         String[] array = null; //ejs todo: clean up, this is insane
+
         final OeMapActivity activity = (OeMapActivity) getActivity();
+
         PresenceHelper prefHelper = new PresenceHelper(getActivity());
+
         final List<Presence> presList = new ArrayList<Presence>();
+
         try {
             Set<Presence> presences = prefHelper.getAllPrecenses(space);
             if (presences != null)
                 for (Presence p : presences) {
                     presList.add(p);
                 }
-            OeLog.d("ejs found " + presList.size() + " presences ******************");
             array = new String[presList.size()];
             for (int i = 0; i < presList.size(); i++) {
                 array[i] = presList.get(i).getLabel();

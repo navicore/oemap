@@ -424,6 +424,10 @@ public class OeMapActivity extends OeBaseActivity {
         boolean showIndoors = _prefs.getBoolean(getString(R.string.pref_show_indoors), false);
         MenuItem inDoorsItem = menu.findItem(R.id.menu_show_indoors);
         inDoorsItem.setChecked(showIndoors);
+
+        boolean showZoom = _prefs.getBoolean(getString(R.string.pref_show_zoom_ctl), true);
+        MenuItem zoomItem = menu.findItem(R.id.menu_show_zoom_controls);
+        zoomItem.setChecked(showZoom);
     }
 
     @Override
@@ -471,7 +475,7 @@ public class OeMapActivity extends OeBaseActivity {
             case R.id.action_lease:
                 showLeaseDialog();
                 break;
-            case R.id.action_members:
+            case R.id.action_search:
                 showMarkerDialog();
                 break;
             //case R.id.action_search:
@@ -520,6 +524,16 @@ public class OeMapActivity extends OeBaseActivity {
                 item.setChecked(!checked);
                 setShowInDoorsOption(!checked);
                 break;
+            case R.id.menu_show_zoom_controls:
+                checked = item.isChecked();
+                item.setChecked(!checked);
+                setShowZoomCtls(!checked);
+                break;
+            case R.id.menu_autozoom:
+                checked = item.isChecked();
+                item.setChecked(!checked);
+                setShowAutoZoom(!checked);
+                break;
             case R.id.action_about:
                 showAboutDialog();
             default:
@@ -532,6 +546,20 @@ public class OeMapActivity extends OeBaseActivity {
 
         DialogFragment f = new SearchDialog();
         f.show(getFragmentManager(), "OeMap Search Dialog");
+    }
+
+    private void setShowAutoZoom(boolean b) {
+
+        _prefs.replaceBoolean(getString(R.string.pref_autozoom), b);
+    }
+
+    private void setShowZoomCtls(boolean b) {
+
+        GoogleMap m = getMap();
+        if (m != null) {
+            m.getUiSettings().setZoomControlsEnabled(b);
+        }
+        _prefs.replaceBoolean(getString(R.string.pref_show_zoom_ctl), b);
     }
 
     private void setShowTrafficOption(boolean b) {

@@ -41,7 +41,7 @@ public class OeMapPreferencesDialog extends DialogFragment {
             EditText snippitEdit = (EditText) _view.findViewById(R.id.pref_snippit);
             snippitEdit.setText(snippit);
 
-            setShowZoomCtlCb();
+            //setShowZoomCtlCb();
 
         } catch (Exception e) {
             OeLog.e(e.toString(), e);
@@ -63,6 +63,7 @@ public class OeMapPreferencesDialog extends DialogFragment {
         super.onPause();
     }
 
+    /*
     private void setShowZoomCtlCb() {
 
         boolean zoom = _prefs.getBoolean(getString(R.string.pref_show_zoom_ctl), true);
@@ -78,8 +79,8 @@ public class OeMapPreferencesDialog extends DialogFragment {
                 a.getMap().getUiSettings().setZoomControlsEnabled(b);
             }
         });
-
     }
+    */
 
     @Override
     public void onDestroyView() {

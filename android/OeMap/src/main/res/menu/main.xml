@@ -1,10 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-            android:id="@+id/action_members"
-            android:title="@string/action_members_title"
+            android:id="@+id/action_search"
+            android:title="@string/action_search_title"
             android:showAsAction="ifRoom"
-            android:icon="@android:drawable/ic_menu_info_details"
+            android:icon="@android:drawable/ic_menu_search"
             />
 
     <item
@@ -24,16 +24,9 @@
     <item
             android:id="@+id/action_lease"
             android:title="@string/action_lease_title"
-            android:showAsAction="ifRoom"
-            android:icon="@android:drawable/ic_menu_my_calendar"
+            android:showAsAction="never|withText"
+            android:icon="@android:drawable/ic_menu_today"
             />
-    <!-- I don't know what search in the context within one map means
-    item
-            android:id="@+id/action_search"
-            android:title="@string/action_search_title"
-            android:showAsAction="ifRoom"
-            android:icon="@android:drawable/ic_menu_search"
-            / -->
 
     <item
             android:id="@+id/action_map_settings_submenu"
@@ -72,6 +65,16 @@
                         android:id="@+id/menu_show_indoors"
                         android:checked="false"
                         android:title="@string/pref_show_indoors_title"
+                        />
+                <item
+                        android:id="@+id/menu_show_zoom_controls"
+                        android:checked="true"
+                        android:title="@string/pref_show_zoom_controls_title"
+                        />
+                <item
+                        android:id="@+id/menu_autozoom"
+                        android:checked="true"
+                        android:title="@string/pref_autozoom_title"
                         />
             </group>
         </menu>
