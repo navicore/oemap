@@ -388,10 +388,11 @@ public class OeMapFragment extends MapFragment  {
             for (Holder h : _markers.values()) {
                 bc.include(h.marker.getPosition());
             }
+            map.animateCamera(CameraUpdateFactory.zoomTo(1));
             map.animateCamera(CameraUpdateFactory.newLatLngBounds(bc.build(),50));
-            if (!allMarkersAreVisible()) {
-                map.animateCamera(CameraUpdateFactory.newLatLng(_currLoc));
-            }
+            //if (!allMarkersAreVisible()) { //this code seems to undo the above instead of just shift
+            //    map.moveCamera(CameraUpdateFactory.newLatLng(_currLoc));
+            //}
 
         } else {
             map.animateCamera(CameraUpdateFactory.newLatLng(_currLoc));
