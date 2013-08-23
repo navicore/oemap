@@ -9,14 +9,19 @@ import com.onextent.oemap.R;
 
 public class SpaceDbHelper extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 8;
 
     public static final String SPACE_TABLE = "spaces";
-    //public static final String SPACE_NAME = "spacename";
-    public static final String LEASE = "lease";
+
+    public static final String LEASE            = "lease";
+    public static final String SIZE_IN_METERS   = "nmeters";
 
     private static final String SQL_CREATE = "CREATE TABLE " +
-        SPACE_TABLE + " (_id TEXT PRIMARY KEY, " + LEASE + " INTEGER)";
+        SPACE_TABLE +
+            " (_id TEXT PRIMARY KEY, " +
+            LEASE + " INTEGER," +
+            SIZE_IN_METERS + " INTEGER" +
+            ")";
 
     public SpaceDbHelper(Context context) {
         super(context, context.getString(R.string.db_name_spaces), null, DATABASE_VERSION);

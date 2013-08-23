@@ -24,6 +24,18 @@ public class SpaceHelper {
         _context = context;
     }
 
+    public void insert(Space space) {
+
+        ContentValues values = new ContentValues();
+        values.put(SpaceProvider.Spaces._ID, space.getName());
+        values.put(SpaceProvider.Spaces.SIZE_IN_METERS, space.getNMeters());
+        if (space.getLease() != null) {
+
+            long l = space.getLease().getTime();
+            values.put(SpaceProvider.Spaces.LEASE, l);
+        }
+        Uri r = _context.getContentResolver().insert(SpaceProvider.CONTENT_URI, values);
+    }
     public void insert(String space, Date lease) {
 
         ContentValues values = new ContentValues();
@@ -71,6 +83,58 @@ public class SpaceHelper {
             if (l <= 0) return null;
             Date d = new Date(l);
             return d;
+
+        } catch (Exception ex) {
+            OeLog.w(ex.toString(), ex);
+            return null;
+        } finally {
+            if (c != null) c.close();
+        }
+    }
+    public static class Space {
+        private Date _lease;
+        private final String _name;
+        private int _nmeters;
+        Space(Date l, String n, int met) {
+            _lease = l;
+            _name = n;
+            _nmeters = met;
+        }
+
+        public Date getLease() {
+            return _lease;
+        }
+        public void setLease(Date l) {
+            _lease = l;
+        }
+        public String getName() {
+            return _name;
+        }
+        public int getNMeters() {
+            return _nmeters;
+        }
+        public void setNMeters(int n) {
+            _nmeters = n;
+        }
+    }
+
+    public Space getSpace(String n) {
+
+        Cursor c = null;
+        try {
+
+            c = _context.getContentResolver().query(SpaceProvider.CONTENT_URI,SpaceProvider.Spaces.PROJECTION_ALL,
+                    SpaceProvider.Spaces._ID + "='" + n + "'", null, SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
+            if (c.getCount() <= 0) return null;
+            c.moveToFirst();
+            int lpos = c.getColumnIndex(SpaceProvider.Spaces.LEASE);
+            int metpos = c.getColumnIndex(SpaceProvider.Spaces.SIZE_IN_METERS);
+            long l = c.getLong(lpos);
+            if (l <= 0) return null;
+            Date d = new Date(l);
+            int met = c.getInt(metpos);
+            Space space = new Space(d, n, met);
+            return space;
 
         } catch (Exception ex) {
             OeLog.w(ex.toString(), ex);

@@ -163,13 +163,17 @@ public class OeMapPresenceService extends Service {
 
             broadcastIntent(p);
 
-            new Send().execute(p);
+            if (_lastPushTime < System.currentTimeMillis() - QUIT_TIME) {
+                new Send().execute(p);
+                _lastPushTime = System.currentTimeMillis();
+            }
 
         } catch (PresenceException e) {
             OeLog.e(e);
         }
     }
 
+    private long _lastPushTime = 0;
     private void broadcast(Location l) {
 
         String uid = OeBaseActivity.id(this);
@@ -381,7 +385,15 @@ public class OeMapPresenceService extends Service {
         }
     }
 
+    private long _lastPollTime = 0;
+    private static final long QUIT_TIME = 1000 * 15; //no more than 4 a minute
+
     private void processPollJson(String space, String json, Set<String> oldUids) throws JSONException, PresenceException {
+
+        if (_lastPollTime > System.currentTimeMillis() - QUIT_TIME) {
+            return;
+        }
+        _lastPushTime = System.currentTimeMillis();
 
         _presenceHelper.deletePresencesWithSpaceNameNotMine(space); //todo: too expensive and insanely clumsy
         JSONArray array = new JSONArray(json);
@@ -444,6 +456,8 @@ public class OeMapPresenceService extends Service {
 
         @Override
         protected String doInBackground(Presence... presences) {
+            try {
+
             String r = null;
             Presence p = presences[0];
             HttpClient client = new DefaultHttpClient();
@@ -468,6 +482,10 @@ public class OeMapPresenceService extends Service {
                 r = e.toString();
             }
             return r;
+            } catch (Throwable err) {
+                OeLog.w(err);
+                return err.toString();
+            }
         }
 
         @Override
@@ -487,6 +505,8 @@ public class OeMapPresenceService extends Service {
     private class Poll extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... _) {
+            try {
+
             Cursor c = getContentResolver().query(SpaceProvider.CONTENT_URI,
                     SpaceProvider.Spaces.PROJECTION_ALL, null, null,
                     SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
@@ -497,6 +517,10 @@ public class OeMapPresenceService extends Service {
             }
             c.close();
             return null;
+            } catch (Throwable err) {
+                OeLog.w(err);
+                return err.toString();
+            }
         }
 
         @Override

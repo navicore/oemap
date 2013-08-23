@@ -28,9 +28,16 @@
             android:icon="@android:drawable/ic_menu_today"
             />
 
+    <!-- item
+            android:id="@+id/action_map_size"
+            android:title="@string/action_map_size_title"
+            android:showAsAction="never|withText"
+            android:icon="@android:drawable/ic_menu_crop"
+            / -->
+
     <item
             android:id="@+id/action_map_settings_submenu"
-            android:title="Map Settings"
+            android:title="@string/pref_map_features_title"
             android:showAsAction="never|withText"
             >
         <menu>
@@ -41,15 +48,15 @@
                 <item
                         android:id="@+id/map_type_normal"
                         android:checked="false"
-                        android:title="Normal"/>
+                        android:title="@string/pref_feature_normal_title"/>
                 <item
                         android:id="@+id/map_type_terrain"
                         android:checked="false"
-                        android:title="Terrain"/>
+                        android:title="@string/pref_feature_terrain_title"/>
                 <item
                         android:id="@+id/map_type_satellite"
                         android:checked="false"
-                        android:title="Satellite"/>
+                        android:title="@string/pref_feature_satellite_title"/>
             </group>
 
             <group

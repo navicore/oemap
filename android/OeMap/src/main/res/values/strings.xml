@@ -90,6 +90,12 @@
     <string name="action_search_title">Search</string>
     <string name="action_share_title">Share Map</string>
     <string name="action_lease_title">Change Quit Time</string>
+    <string name="action_map_size_title">Map Size</string>
+    <string name="pref_feature_terrain_title">Terrain</string>
+    <string name="pref_feature_satellite_title">Satellite</string>
+    <string name="pref_feature_normal_title">Normal</string>
+    <string name="pref_map_features_title">Map Features</string>
+    <string name="pref_map_size">pref_map_size</string>
 
 </resources>
 

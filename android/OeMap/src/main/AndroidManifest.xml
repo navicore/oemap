@@ -83,7 +83,7 @@
                 />
         <provider
                 android:authorities="com.onextent.oemap.provider.PresenceProvider"
-                android:multiprocess="true"
+                android:multiprocess="false"
                 android:name=".provider.PresenceProvider"
                 />
         <provider

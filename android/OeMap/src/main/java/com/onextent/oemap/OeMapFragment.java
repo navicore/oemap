@@ -115,7 +115,7 @@ public class OeMapFragment extends MapFragment  {
                             _currLoc = p.getLocation();
                             if (!_loc_is_init) {
                                 _loc_is_init = true;//set map the first time we get a loc
-                                setLocation();
+                                setLocation(false);
                             }
                         }
                         setMarker(p);
@@ -352,6 +352,10 @@ public class OeMapFragment extends MapFragment  {
     }
 
     public boolean setLocation() {
+        return setLocation(true);
+    }
+
+    public boolean setLocation(boolean tryAutoZoom) {
 
         if (_currLoc == null) return false; //not yet
 
@@ -359,8 +363,7 @@ public class OeMapFragment extends MapFragment  {
         if (map == null)  return false;
 
         boolean autozoom = _prefs.getBoolean(getString(R.string.pref_autozoom), true);
-
-        if (autozoom) {
+        if (tryAutoZoom && autozoom) {
 
             LatLngBounds.Builder bc = new LatLngBounds.Builder();
             for (Holder h : _markers.values()) {

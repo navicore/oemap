@@ -32,10 +32,11 @@ public class SpaceProvider extends ContentProvider {
 
     public static interface Spaces extends BaseColumns {
         static String LEASE             = SpaceDbHelper.LEASE;
+        static String SIZE_IN_METERS    = SpaceDbHelper.SIZE_IN_METERS;
         static String CONTENT_PATH      = SpaceDbHelper.SPACE_TABLE;
         static String CONTENT_TYPE      = ContentResolver.CURSOR_DIR_BASE_TYPE + "/com.onextent.oemap.provider.spaces";
         static String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/com.onextent.oemap.provider.spaces";
-        static String[] PROJECTION_ALL  = {_ID, LEASE};
+        static String[] PROJECTION_ALL  = {_ID, LEASE, SIZE_IN_METERS};
         static String SORT_ORDER_DEFAULT = _ID + " ASC";
     }
 

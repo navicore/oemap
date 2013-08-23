@@ -38,7 +38,7 @@ public class BaseSpaceSettingsDialog extends DialogFragment {
         if (l == null) {
             seek.setProgress(MAX_PROGRESS);
         } else {
-            seek.setProgress(DEFAULT_PROGRESS);
+            seek.setProgress(dateToProgress(l));
         }
     }
 

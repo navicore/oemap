@@ -18,7 +18,7 @@ import com.onextent.oemap.provider.SpaceHelper;
 
 import java.text.SimpleDateFormat;
 
-public class NewSpaceDialog extends BaseSpaceSettingsDialog implements TextView.OnEditorActionListener {
+public class NewSpaceDialog extends BaseSpaceSettingsDialog {
 
     private EditText mEditText;
 
@@ -85,7 +85,7 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog implements TextView.
         mEditText = (EditText) view.findViewById(R.id.txt_map_name);
 
         mEditText.requestFocus();
-        mEditText.setOnEditorActionListener(this);
+        //mEditText.setOnEditorActionListener(this);
 
         Bundle b = getArguments();
         if (b != null && b.containsKey(getString(R.string.bundle_spacename))) {
@@ -119,6 +119,8 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog implements TextView.
         });
     }
 
+    /*
+
     @Override
     public boolean onEditorAction(TextView textView, int actionId, KeyEvent keyEvent) {
 
@@ -132,5 +134,6 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog implements TextView.
 
         return false;
     }
+     */
 }
 

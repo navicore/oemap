@@ -34,10 +34,12 @@ import com.onextent.oemap.presence.OeMapPresenceService;
 import com.onextent.oemap.presence.SearchDialog;
 import com.onextent.oemap.provider.KvHelper;
 import com.onextent.oemap.provider.PresenceHelper;
+import com.onextent.oemap.provider.SpaceHelper;
 import com.onextent.oemap.provider.SpaceProvider;
 import com.onextent.oemap.settings.OeMapPreferencesDialog;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class OeMapActivity extends OeBaseActivity {
@@ -229,23 +231,16 @@ public class OeMapActivity extends OeBaseActivity {
             case NEW_PUBLIC_MAP:
                 showNewSpaceDialog();
                 break;
-            //case SHARE_MAP_POS:
-            //    break;
             case FIND_MAP_POS:
                 showSearchDialog();
                 break;
-            //case EDIT_MAP_POS:
-            //    showLeaseDialog();
-            //    break;
-            //case LIST_COHORTS_POS:
-            //    showMarkerDialog();
-            //    break;
             case QUIT_MAP_POS:
                 quitSpace();
                 break;
             default:
-                //setMapFrag((String) mDrawerNamesList.get(position));
                 String m = mDrawerNamesList.get(position);
+                SpaceHelper h = new SpaceHelper(this);
+                h.insert(m, new Date(System.currentTimeMillis() + 4 * 60 * 60 * 1000));//todo: global default lease
                 enableNewSpace(m);
                 break;
         }
@@ -478,9 +473,6 @@ public class OeMapActivity extends OeBaseActivity {
             case R.id.action_search:
                 showMarkerDialog();
                 break;
-            //case R.id.action_search:
-            //    showSearchDialog();
-            //    break;
             case R.id.action_refresh:
                 OeMapFragment f = getMapFrag();
                 if (f != null) {

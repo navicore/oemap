@@ -57,7 +57,10 @@ public class JsonPresence implements Presence {
             _label = jobj.getString(KEY_LBL);
             _snippet = jobj.getString(KEY_SNP);
             _spacename = jobj.getString(KEY_SPC);
-            _create_time = jobj.getLong(KEY_TIM);
+            if (jobj.has(KEY_TIM))
+                _create_time = jobj.getLong(KEY_TIM);
+            else
+                _create_time = 0;
             _time_to_live = jobj.getInt(KEY_TTL);
             if (jobj.has(KEY_EXP)) {
 
