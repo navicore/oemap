@@ -85,7 +85,6 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
         mEditText = (EditText) view.findViewById(R.id.txt_map_name);
 
         mEditText.requestFocus();
-        //mEditText.setOnEditorActionListener(this);
 
         Bundle b = getArguments();
         if (b != null && b.containsKey(getString(R.string.bundle_spacename))) {
@@ -106,6 +105,10 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
                 if (name != null && name.length() > 0) {
 
                     SpaceHelper h = new SpaceHelper(getActivity());
+                    SpaceHelper.Space oldSpace = h.getSpace(name);
+                    if (oldSpace != null) {
+                        h.deleteSpacename(name);
+                    }
                     h.insert(name, quiteDate);
                     activity.onFinishNewSpaceDialog(mEditText.getText().toString());
                     dismiss();

@@ -254,6 +254,16 @@ public class OeMapFragment extends MapFragment  {
     }
 
     private void setMapOptions() {
+
+        if (_currLoc == null) {
+            //not yet
+            float lng = _prefs.getFloat(getString(R.string.state_lng), 0);
+            float lat = _prefs.getFloat(getString(R.string.state_lat), 0);
+            _currLoc = new LatLng(lat, lng);
+        } else {
+            _currLoc = _currLoc;
+        };
+
         setTrafficEnabled();
         setMapType();
         setIndoorsEnabled();
@@ -366,13 +376,13 @@ public class OeMapFragment extends MapFragment  {
 
     public boolean setLocation(boolean tryAutoZoom) {
 
-        if (_currLoc == null) return false; //not yet
+        if (_currLoc == null) return false;
 
         GoogleMap map = getMap();
         if (map == null)  return false;
 
         boolean autozoom = _prefs.getBoolean(getString(R.string.pref_autozoom), true);
-        if (tryAutoZoom && autozoom) {
+        if (tryAutoZoom && autozoom && !_markers.isEmpty()) {
 
             LatLngBounds.Builder bc = new LatLngBounds.Builder();
             for (Holder h : _markers.values()) {

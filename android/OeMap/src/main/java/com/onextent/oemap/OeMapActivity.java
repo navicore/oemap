@@ -240,8 +240,12 @@ public class OeMapActivity extends OeBaseActivity {
             default:
                 String m = mDrawerNamesList.get(position);
                 SpaceHelper h = new SpaceHelper(this);
-                h.insert(m, new Date(System.currentTimeMillis() + 4 * 60 * 60 * 1000));//todo: global default lease
-                enableNewSpace(m);
+                SpaceHelper.Space space = h.getSpace(m);
+                if (space == null) {
+                    showNewSpaceDialogWithName(m);
+                } else {
+                    enableNewSpace(m);
+                }
                 break;
         }
 
