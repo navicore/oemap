@@ -355,6 +355,15 @@ public class OeMapFragment extends MapFragment  {
         return setLocation(true);
     }
 
+    private boolean allMarkersAreVisible() {
+        GoogleMap m = getMap();
+        if (m != null)
+        for (Holder h : _markers.values()) {
+            if (!m.getProjection().getVisibleRegion().latLngBounds.contains(h.marker.getPosition())) return false;
+        }
+        return true;
+    }
+
     public boolean setLocation(boolean tryAutoZoom) {
 
         if (_currLoc == null) return false; //not yet
@@ -370,6 +379,9 @@ public class OeMapFragment extends MapFragment  {
                 bc.include(h.marker.getPosition());
             }
             map.animateCamera(CameraUpdateFactory.newLatLngBounds(bc.build(),50));
+            if (!allMarkersAreVisible()) {
+                map.animateCamera(CameraUpdateFactory.newLatLng(_currLoc));
+            }
 
         } else {
             map.animateCamera(CameraUpdateFactory.newLatLng(_currLoc));

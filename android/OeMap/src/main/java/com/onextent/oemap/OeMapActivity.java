@@ -334,6 +334,7 @@ public class OeMapActivity extends OeBaseActivity {
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
+        makeSureActiveMapIsInStore();
         setActiveMapsSpinner();
 
         ActionBar actionBar = getActionBar();
@@ -348,6 +349,20 @@ public class OeMapActivity extends OeBaseActivity {
     @Override
     public void setTitle(CharSequence s) {
         super.setTitle("");
+    }
+
+    private void makeSureActiveMapIsInStore() {
+
+        //make sure the mapname is still in the spacedb it may get deleted on upgrade
+        String currMapName = _prefs.get(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
+        if (currMapName != null) {
+            SpaceHelper h = new SpaceHelper(this);
+            SpaceHelper.Space s = h.getSpace(currMapName);
+            if (s == null) {
+                h.insert(currMapName, new Date(System.currentTimeMillis() + 4 * 60 * 60 * 1000));
+                enableNewSpace(currMapName);// must have gotten munched in a db upgrade
+            }
+        }
     }
 
     private void setActiveMapsSpinner() {
@@ -588,8 +603,6 @@ public class OeMapActivity extends OeBaseActivity {
     public void onResume() {
         super.onResume();
 
-        String mapname = _prefs.get(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
-        setMapFrag(mapname);
         updateMapNamesFromHistory();
         wakePresenceService();
         registerReceiver(_presenceReceiver, _presenceReceiverFilter);

@@ -22,7 +22,7 @@ for i in range(size):
   presence = {}
   presence['uid'] = '1234567890_TEST_' + str(i)
   presence['label'] = names[i]
-  presence['snippit'] = 'having fun!'
+  presence['snippit'] = 'having a world of fun!'
   presence['ttl'] = 2
   now = int(round(time.time() * 1000))
   presence['time'] = now
