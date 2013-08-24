@@ -20,14 +20,19 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function(err, db) {
         
         var spc = req.query.space
         var lat = req.query.lat
+	if (lat) {
+            lat = parseFloat(lat)
+        }
         var lon = req.query.lon
+	if (lon) {
+            lon = parseFloat(lon)
+        }
         var count = req.query.max
 	if (!count) {
             count = 100
         } else {
             count = parseInt(count, 10)
         }
-        //count = 10 //test
         var dist = req.query.dist
 	if (!dist) {
             dist = 1609 * 120
