@@ -19,17 +19,17 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function(err, db) {
     app.get('/presence', function(req, res) {
         
         var spc = req.query.space
-        //todo: dist= (in meters)
-        var dist = req.query.dist
-        //todo: count= (nearest n people (within dist))
-        var count = req.query.count
+        var lat = req.query.lat
+        var lon = req.query.lon
+        var max = req.query.max
                            
         if (!spc) {
             res.statusCode = 400;
             return res.send('Error 400: No space requested');
         }
-        console.log('get presence for ' + spc)
-        db.collection('presences').find({"space": spc}).toArray(function(err, doc) {
+        console.log('get ' + max +' presences for ' + spc + ' near ' + lat + "/" + lon)
+        
+        db.collection('presences').find({"space": spc}).limit(max).toArray(function(err, doc) {
 
             if(err) throw err;
 

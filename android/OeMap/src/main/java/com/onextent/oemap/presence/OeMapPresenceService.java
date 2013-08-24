@@ -59,6 +59,11 @@ public class OeMapPresenceService extends Service {
 
     //private static final String PRESENCE_URL =  "http://10.0.0.2:8080/presence";
     private static final String PRESENCE_URL = "http://oemap.onextent.com:8080/presence";
+    private static final String PRESENCE_PARAM_SPACE = "space";
+    private static final String PRESENCE_PARAM_LATITUDE = "lat";
+    private static final String PRESENCE_PARAM_LONGITUDE = "lon";
+    private static final String PRESENCE_PARAM_MAX = "max";
+    private static final int    PRESENCE_PARAM_DEFAULT_MAX_COUNT = 30;
 
     private SpaceHelper     _spaceHelper;
     private LocationHelper  _locHelper;
@@ -69,6 +74,7 @@ public class OeMapPresenceService extends Service {
     private AsyncTask       _currentPollTask = null;
     private boolean         _running = false;
     private Notification    _notification = null;
+    private Location _lastLocation = null;
 
     @Override
     public void onCreate() {
@@ -87,6 +93,7 @@ public class OeMapPresenceService extends Service {
 
             @Override
             public void updateLocation(Location l) {
+                _lastLocation = l;
                 broadcast(l);
                 poll();  //todo: put on timer?
             }
@@ -332,7 +339,9 @@ public class OeMapPresenceService extends Service {
 
     private void pollSpace(String s) {
 
-        OeLog.d("ejs pollSpace space: " + s);
+        if (_lastLocation == null) return; //not yet
+
+        OeLog.d("pollSpace space: " + s);
         /*
         - get a list of all uids already in store
         - add a new presence from the server, removing the uid from the old list as you go
@@ -344,7 +353,12 @@ public class OeMapPresenceService extends Service {
 
         HttpClient client = new DefaultHttpClient();
         try {
-            HttpGet get = new HttpGet(PRESENCE_URL + "?space=" + URLEncoder.encode(s, "UTF8"));
+            HttpGet get = new HttpGet(PRESENCE_URL + "?"+
+                    PRESENCE_PARAM_SPACE+"=" + URLEncoder.encode(s, "UTF8") +
+                    "&" + PRESENCE_PARAM_LATITUDE+"=" + URLEncoder.encode(String.valueOf(_lastLocation.getLatitude()), "UTF8") +
+                    "&" + PRESENCE_PARAM_LONGITUDE+"=" + URLEncoder.encode(String.valueOf(_lastLocation.getLongitude()), "UTF8") +
+                    "&" + PRESENCE_PARAM_MAX + "=" + PRESENCE_PARAM_DEFAULT_MAX_COUNT
+            );
             get.addHeader("Content-Type", "application/json");
             get.addHeader("Accept", "application/json");
             Set<String> oldUids = null;
@@ -391,7 +405,7 @@ public class OeMapPresenceService extends Service {
 
     private void processPollJson(String space, String json, Set<String> oldUids) throws JSONException, PresenceException {
 
-        OeLog.d("ejs processPollJson space: " + space);
+        OeLog.d("processPollJson space: " + space);
         //_presenceHelper.deletePresencesWithSpaceNameNotMine(space); //todo: too expensive and insanely clumsy
         JSONArray array = new JSONArray(json);
         for (int i = 0; i < array.length(); i++) {
@@ -409,11 +423,11 @@ public class OeMapPresenceService extends Service {
             }
         }
         if (oldUids != null) {
-            OeLog.d("ejs processPollJson cleanup old uids");
+            OeLog.d("processPollJson cleanup old uids");
             for (String uid : oldUids) {
                 Presence p = PresenceFactory.createPresence(uid, null, null, null, space, Presence.NONE, null);
                 _presenceHelper.deletePresence(p);
-                //broadcastIntent(p);
+                broadcastIntent(p); //causes current map to remove markers
             }
         }
     }
@@ -424,7 +438,7 @@ public class OeMapPresenceService extends Service {
             return;
         }
         _lastPollTime = System.currentTimeMillis();
-        OeLog.d("ejs poll");
+        OeLog.d("poll");
 
         if (_currentPollTask == null) //don't queue up if server is slow or down
             new Poll().execute();
@@ -511,7 +525,7 @@ public class OeMapPresenceService extends Service {
         @Override
         protected String doInBackground(Void... _) {
 
-            OeLog.d("ejs doInBackground Poll");
+            OeLog.d("doInBackground Poll");
             try {
 
             Cursor c = getContentResolver().query(SpaceProvider.CONTENT_URI,
