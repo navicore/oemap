@@ -16,6 +16,8 @@ import java.util.List;
 
 public class SpaceHelper {
 
+    public static final int    PRESENCE_PARAM_DEFAULT_MAX_COUNT = 30;
+    public static final int    PRESENCE_PARAM_DEFAULT_DIST = 1609 * 120;
     private static final String[] PROJECTION = SpaceProvider.Spaces.PROJECTION_ALL;
 
     private final Context _context;
@@ -29,6 +31,7 @@ public class SpaceHelper {
         ContentValues values = new ContentValues();
         values.put(SpaceProvider.Spaces._ID, space.getName());
         values.put(SpaceProvider.Spaces.SIZE_IN_METERS, space.getNMeters());
+        values.put(SpaceProvider.Spaces.SIZE_IN_POINTS, space.getMaxPoints());
         if (space.getLease() != null) {
 
             long l = space.getLease().getTime();
@@ -94,11 +97,15 @@ public class SpaceHelper {
     public static class Space {
         private Date _lease;
         private final String _name;
-        private int _nmeters;
-        Space(Date l, String n, int met) {
+        private int _nmeters, _max;
+        public Space(Date l, String n, int met, int max) {
             _lease = l;
             _name = n;
             _nmeters = met;
+            if (max <= 0)
+                _max = PRESENCE_PARAM_DEFAULT_MAX_COUNT;
+            else
+                _max = max;
         }
 
         public Date getLease() {
@@ -113,8 +120,14 @@ public class SpaceHelper {
         public int getNMeters() {
             return _nmeters;
         }
-        public void setNMeters(int n) {
-            _nmeters = n;
+        //public void setNMeters(int n) {
+        //    _nmeters = n;
+        //}
+        public int getMaxPoints() {
+            return _max;
+        }
+        public void setMaxPoints(int max) {
+            _max = max;
         }
     }
 
@@ -135,7 +148,10 @@ public class SpaceHelper {
             int metpos = c.getColumnIndex(SpaceProvider.Spaces.SIZE_IN_METERS);
             int met = c.getInt(metpos);
 
-            Space space = new Space(d, n, met);
+            int maxpos = c.getColumnIndex(SpaceProvider.Spaces.SIZE_IN_POINTS);
+            int max = c.getInt(maxpos);
+
+            Space space = new Space(d, n, met, max);
 
             return space;
 

@@ -47,5 +47,42 @@
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"/>
 
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            >
+        <TextView
+                android:text="Nearest People to Show"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:padding="8dp"
+                />
+
+        <EditText
+                android:id="@+id/max_presence_edit_fld"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:inputType="time"
+                android:ems="10"
+                android:layout_margin="8dp"
+                android:padding="8dp"
+                android:editable="false"
+                android:enabled="false"/>
+
+    </LinearLayout>
+
+    <SeekBar
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/max_presence_edit_SeekBar"
+            android:layout_gravity="center"
+            android:max="50"
+            android:progress="10"
+            android:layout_margin="8dp"
+            android:padding="8dp"
+            />
+
 </LinearLayout>
 

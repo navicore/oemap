@@ -1,26 +1,17 @@
 package com.onextent.oemap;
 
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.os.Bundle;
 import android.text.format.DateUtils;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
+import com.onextent.android.util.OeLog;
 import com.onextent.oemap.provider.SpaceHelper;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
 
@@ -33,13 +24,11 @@ public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
         Bundle args = getArguments();
         if (args != null)
             _space = args.getString(getString(R.string.bundle_spacename));
-        //if (space != null) {
-        //    Dialog d = getDialog();
-        //    if (d != null) d.setTitle(space + " quite time");
-        //}
+
         View view = inflater.inflate(R.layout.space_settings_dialog, container);
 
         setupSeekBar(view);
+        setupMaxPresenceSeekBar(view);
 
         getDialog().getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
@@ -47,6 +36,35 @@ public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
         return view;
+    }
+
+    protected void setupMaxPresenceSeekBar(View view) {
+
+        SeekBar seek = (SeekBar) view.findViewById(R.id.max_presence_edit_SeekBar);
+        final EditText maxText = (EditText) view.findViewById(R.id.max_presence_edit_fld);
+        final SpaceHelper h = new SpaceHelper(getActivity());
+        final SpaceHelper.Space s = h.getSpace(_space);
+        int max = SpaceHelper.PRESENCE_PARAM_DEFAULT_MAX_COUNT;
+        if (s != null) {
+            max = s.getMaxPoints();
+        } else {
+
+            OeLog.d("ejs s is NULL!!!!!!!!!!!! for space: " + _space);
+        }
+        OeLog.d("ejs max init as:" + max);
+        ProgressCallback cb = new ProgressCallback() {
+            @Override
+            public void setProgress(int progress) {
+                OeLog.d("ejs max setProgress as:" + progress);
+                if (s != null) {
+                    s.setMaxPoints(progress);
+                    h.deleteSpacename(_space);
+                    h.insert(s);
+                    OeLog.d("ejs max saved as " + progress);
+                }
+            }
+        };
+        setMaxChangeListener(maxText, seek, max, cb);
     }
 
     @Override

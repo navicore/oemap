@@ -14,6 +14,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.onextent.oemap.provider.KvHelper;
 import com.onextent.oemap.provider.SpaceHelper;
 
 import java.text.SimpleDateFormat;
@@ -39,8 +40,24 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
         setupNameEdit(view);
         setupButton(view);
         setupSeekBar(view);
+        setupMaxPresenceSeekBar(view);
 
         return view;
+    }
+
+    private int _max_points = SpaceHelper.PRESENCE_PARAM_DEFAULT_MAX_COUNT;
+
+    protected void setupMaxPresenceSeekBar(View view) {
+
+        SeekBar seek = (SeekBar) view.findViewById(R.id.max_presence_SeekBar);
+        final EditText maxText = (EditText) view.findViewById(R.id.max_presence_fld);
+        ProgressCallback cb = new ProgressCallback() {
+            @Override
+            public void setProgress(int progress) {
+                _max_points = progress;
+            }
+        };
+        setMaxChangeListener(maxText, seek, SpaceHelper.PRESENCE_PARAM_DEFAULT_MAX_COUNT, cb);
     }
 
     private void setupSeekBar(View view) {
@@ -105,11 +122,17 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
                 if (name != null && name.length() > 0) {
 
                     SpaceHelper h = new SpaceHelper(getActivity());
-                    SpaceHelper.Space oldSpace = h.getSpace(name);
-                    if (oldSpace != null) {
+                    SpaceHelper.Space s = h.getSpace(name);
+                    if (s == null) {
+                        s = new SpaceHelper.Space(quiteDate, name,
+                                SpaceHelper.PRESENCE_PARAM_DEFAULT_DIST, _max_points);
+                        h.insert(s);
+                    } else {
                         h.deleteSpacename(name);
+                        s.setLease(quiteDate);
+                        s.setMaxPoints(_max_points);
+                        h.insert(s);
                     }
-                    h.insert(name, quiteDate);
                     activity.onFinishNewSpaceDialog(mEditText.getText().toString());
                     dismiss();
                 } else {

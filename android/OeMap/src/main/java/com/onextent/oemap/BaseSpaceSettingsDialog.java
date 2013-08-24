@@ -1,10 +1,13 @@
 package com.onextent.oemap;
 
 import android.app.DialogFragment;
+import android.view.View;
 import android.widget.EditText;
 import android.widget.SeekBar;
 
 import com.onextent.android.util.OeLog;
+import com.onextent.oemap.presence.OeMapPresenceService;
+import com.onextent.oemap.provider.KvHelper;
 import com.onextent.oemap.provider.SpaceHelper;
 
 import java.text.SimpleDateFormat;
@@ -91,4 +94,48 @@ public class BaseSpaceSettingsDialog extends DialogFragment {
             quiteDate = null;
         }
     }
+
+    private static final int DEFAULT_MAX_PRESENCE_PROGRESS = SpaceHelper.PRESENCE_PARAM_DEFAULT_MAX_COUNT;
+    private int _max = DEFAULT_MAX_PRESENCE_PROGRESS;
+    private String _max_txt = _max + " people";
+
+    protected interface ProgressCallback {
+        void setProgress(int progress);
+    }
+    protected void setMaxChangeListener(final EditText maxText, SeekBar seek, int progress, final ProgressCallback cb) {
+
+        seek.setProgress(progress);
+        setMax(progress);
+        maxText.setText(_max_txt);
+        seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                setMax(i);
+                if (_max_txt != null) {
+
+                    maxText.setText(_max_txt);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+                maxText.setText(_max_txt);
+
+                cb.setProgress(_max);
+            }
+        });
+    }
+
+    private void setMax(int i) {
+        _max = i;
+        _max_txt = _max + " people";
+    }
+
 }

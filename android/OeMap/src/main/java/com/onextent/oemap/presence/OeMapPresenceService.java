@@ -63,7 +63,6 @@ public class OeMapPresenceService extends Service {
     private static final String PRESENCE_PARAM_LATITUDE = "lat";
     private static final String PRESENCE_PARAM_LONGITUDE = "lon";
     private static final String PRESENCE_PARAM_MAX = "max";
-    private static final int    PRESENCE_PARAM_DEFAULT_MAX_COUNT = 30;
 
     private SpaceHelper     _spaceHelper;
     private LocationHelper  _locHelper;
@@ -351,13 +350,16 @@ public class OeMapPresenceService extends Service {
         in-sync with the server
          */
 
+        SpaceHelper.Space space = _spaceHelper.getSpace(s);
+        int max = space.getMaxPoints();
+
         HttpClient client = new DefaultHttpClient();
         try {
             HttpGet get = new HttpGet(PRESENCE_URL + "?"+
                     PRESENCE_PARAM_SPACE+"=" + URLEncoder.encode(s, "UTF8") +
                     "&" + PRESENCE_PARAM_LATITUDE+"=" + URLEncoder.encode(String.valueOf(_lastLocation.getLatitude()), "UTF8") +
                     "&" + PRESENCE_PARAM_LONGITUDE+"=" + URLEncoder.encode(String.valueOf(_lastLocation.getLongitude()), "UTF8") +
-                    "&" + PRESENCE_PARAM_MAX + "=" + PRESENCE_PARAM_DEFAULT_MAX_COUNT
+                    "&" + PRESENCE_PARAM_MAX + "=" + max
             );
             get.addHeader("Content-Type", "application/json");
             get.addHeader("Accept", "application/json");
@@ -525,12 +527,12 @@ public class OeMapPresenceService extends Service {
         @Override
         protected String doInBackground(Void... _) {
 
-            OeLog.d("doInBackground Poll");
             try {
 
             Cursor c = getContentResolver().query(SpaceProvider.CONTENT_URI,
                     SpaceProvider.Spaces.PROJECTION_ALL, null, null,
                     SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
+            OeLog.d("doInBackground Poll cursor size: " + c.getCount());
             int pos = c.getColumnIndex(SpaceProvider.Spaces._ID);
             while (c.moveToNext()) {
                 String s = c.getString(pos);

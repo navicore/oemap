@@ -23,7 +23,7 @@
 
     <item
             android:id="@+id/action_lease"
-            android:title="@string/action_lease_title"
+            android:title="@string/action_map_settings_title"
             android:showAsAction="never|withText"
             android:icon="@android:drawable/ic_menu_today"
             />
