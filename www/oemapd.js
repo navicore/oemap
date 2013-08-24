@@ -1,8 +1,8 @@
 var express = require('express'),
-              app = express(),
-                    cons = require('consolidate'),
-                           crypto = require('crypto'),
-                                    MongoClient = require('mongodb').MongoClient;
+    app = express(),
+    cons = require('consolidate'),
+    crypto = require('crypto'),
+    MongoClient = require('mongodb').MongoClient;
 
 app.engine('html', cons.swig);
 app.set('view engine', 'html');
@@ -21,16 +21,46 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function(err, db) {
         var spc = req.query.space
         var lat = req.query.lat
         var lon = req.query.lon
-        var max = req.query.max
+        var count = req.query.max
+	if (!count) {
+            count = 100
+        } else {
+            count = parseInt(count, 10)
+        }
+        //count = 10 //test
+        var dist = req.query.dist
+	if (!dist) {
+            dist = 1609 * 120
+        } else {
+            dist = parseInt(dist, 10)
+        }
                            
         if (!spc) {
             res.statusCode = 400;
             return res.send('Error 400: No space requested');
         }
-        console.log('get ' + max +' presences for ' + spc + ' near ' + lat + "/" + lon)
-        
-        db.collection('presences').find({"space": spc}).limit(max).toArray(function(err, doc) {
+        console.log('get ' + count +' presences for ' + spc + ' near ' + lat + "/" + lon + " within " + dist + " meters")
+      
+        var query = {'space': spc} 
 
+/*
+        if (lat && lon) {
+             var geoq ={
+                         $near: 
+                           {
+                             $geometry:
+                               {
+                                 type: "Point",
+                                 coordinates: [lon,lat]
+                               },
+                             $maxDistance: dist
+                           }
+                       }
+              query['location'] = geoq
+        }
+*/
+        db.collection('presences').find(query)
+            .limit(count).toArray(function(err, doc) {
             if(err) throw err;
 
             if (!doc || doc.length < 1) {
