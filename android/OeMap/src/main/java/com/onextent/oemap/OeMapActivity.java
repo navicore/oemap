@@ -359,7 +359,6 @@ public class OeMapActivity extends OeBaseActivity {
         if (currMapName != null && !currMapName.equals("") && !currMapName.equals(getString(R.string.null_map_name))) {
             SpaceHelper h = new SpaceHelper(this);
             SpaceHelper.Space s = h.getSpace(currMapName);
-            OeLog.d("ejs spacename: " + currMapName + " found " + s);
             if (s == null || s.getLease().getTime() < System.currentTimeMillis()) {
                 //expired
                 h.deleteSpacename(currMapName);
@@ -393,32 +392,24 @@ public class OeMapActivity extends OeBaseActivity {
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
         _spacenames_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        int curPos = _spacenames.indexOf(getMapName());
-        actionBar.setSelectedNavigationItem(curPos);
-
         // Set up the dropdown list navigation in the action bar.
         actionBar.setListNavigationCallbacks(_spacenames_adapter, new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int i, long l) {
-                //seems to get called at rotation and startup but gets seleted wrong on rotation
-                //seems to get called at rotation and startup but gets seleted wrong on rotation
-                //seems to get called at rotation and startup but gets seleted wrong on rotation
-                //seems to get called at rotation and startup but gets seleted wrong on rotation
-                //seems to get called at rotation and startup but gets seleted wrong on rotation
-                //seems to get called at rotation and startup but gets seleted wrong on rotation
-                //seems to get called at rotation and startup but gets seleted wrong on rotation
-                //seems to get called at rotation and startup but gets seleted wrong on rotation
-                //seems to get called at rotation and startup but gets seleted wrong on rotation
-                //seems to get called at rotation and startup but gets seleted wrong on rotation
-                //seems to get called at rotation and startup but gets seleted wrong on rotation
-                //seems to get called at rotation and startup but gets seleted wrong on rotation
                 String n = _spacenames.get(i);
-                OeLog.d("onNavigationItemSelcted: " + n);
-                //if (n.equals(getMapName())) return false;
+                OeLog.d("onNavigationItemSelcted pos " + i + " item id: " + l + " name: " + n);
                 setMapFrag(n);
                 return false;
             }
         });
+        setActionBarToCurrentMap();
+    }
+
+    private void setActionBarToCurrentMap() {
+
+        String n = getMapName();
+        int curPos = _spacenames.indexOf(n);
+        getActionBar().setSelectedNavigationItem(curPos);
     }
 
     private void setMapTyp(int t) {
@@ -681,9 +672,7 @@ public class OeMapActivity extends OeBaseActivity {
                     return false;
                 case QUIT_MAP_POS:
                     return OeMapActivity.this.aMapIsActive();
-                //case LIST_COHORTS_POS:
                 case NEW_PUBLIC_MAP:
-                //case EDIT_MAP_POS:
                 default:
                     return true;
             }
@@ -698,7 +687,7 @@ public class OeMapActivity extends OeBaseActivity {
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView parent, View view, int position, long id) {
-            if (position != SEPARATOR_POS) //ejs skip separator todo: disable!!!
+            if (position != SEPARATOR_POS) //ejs skip separator
                 selectItem(position);
         }
 
