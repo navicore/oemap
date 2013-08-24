@@ -43,7 +43,6 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function(err, db) {
       
         var query = {'space': spc} 
 
-/*
         if (lat && lon) {
              var geoq ={
                          $near: 
@@ -58,7 +57,7 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function(err, db) {
                        }
               query['location'] = geoq
         }
-*/
+
         db.collection('presences').find(query)
             .limit(count).toArray(function(err, doc) {
             if(err) throw err;
