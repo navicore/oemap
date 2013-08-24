@@ -166,11 +166,12 @@ public class JsonPresence implements Presence {
         }
     }
 
+    /*
     @Override
     public int hashCode() {
-        //return getSpaceName().hashCode() +  getUID().hashCode() + 5000;
-        return super.hashCode();
+        return getSpaceName().hashCode() +  getUID().hashCode() + 5000;
     }
+     */
 
     /**
      * Helper class for handling ISO 8601 strings of the following format:

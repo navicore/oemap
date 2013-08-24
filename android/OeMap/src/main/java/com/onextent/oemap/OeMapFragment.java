@@ -27,6 +27,7 @@ import com.onextent.oemap.provider.PresenceHelper;
 import org.json.JSONException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -174,7 +175,7 @@ public class OeMapFragment extends MapFragment  {
 
         String spacename = getName();
         try {
-            Set<Presence> markers = _presenceHelper.getAllPrecenses(spacename);
+            List<Presence> markers = _presenceHelper.getAllPrecenses(spacename);
             if (markers != null) {
                 for (Presence p : markers) {
                     setMarker(p);

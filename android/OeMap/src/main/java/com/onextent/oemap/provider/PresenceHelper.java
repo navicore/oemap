@@ -11,7 +11,9 @@ import com.onextent.oemap.presence.PresenceFactory;
 
 import org.json.JSONException;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class PresenceHelper {
@@ -37,7 +39,9 @@ public class PresenceHelper {
 
     public void deletePresence(Presence presence) {
         _context.getContentResolver().delete(PresenceProvider.CONTENT_URI,
-                    PresenceProvider.IPresence.UID + "='" + presence.getUID() + "'", null);
+                    PresenceProvider.IPresence.UID + "='" + presence.getUID() +
+                            "' AND " + PresenceProvider.IPresence.SPACE + "='" +
+                            presence.getSpaceName() + "'", null);
     }
 
     public void deletePresencesWithSpaceNameNotMine(String spacename) {
@@ -74,9 +78,33 @@ public class PresenceHelper {
         return p;
     }
 
-    public Set<Presence> getAllPrecenses(String spacename) throws JSONException, PresenceException {
+    public List<Presence> getAllPrecenses() throws JSONException, PresenceException {
         Cursor c = null;
-        Set<Presence> l = null;
+        List<Presence> l = null;
+        try {
+
+            c = _context.getContentResolver().query(PresenceProvider.CONTENT_URI,
+                    PresenceProvider.IPresence.PROJECTION_ALL,
+                    null, null, null);
+            if (c.getCount() > 0) {
+                int col = c.getColumnIndex(PresenceProvider.IPresence.DATA);
+                while (c.moveToNext()) {
+
+                    if (l == null)
+                        l = new ArrayList<Presence>();
+                    String json = c.getString(col);
+                    Presence p = PresenceFactory.createPresence(json);
+                    l.add(p);
+                }
+            }
+        } finally {
+            if (c != null) c.close();
+        }
+        return l;
+    }
+    public List<Presence> getAllPrecenses(String spacename) throws JSONException, PresenceException {
+        Cursor c = null;
+        List<Presence> l = null;
         try {
 
             c = _context.getContentResolver().query(PresenceProvider.CONTENT_URI,
@@ -87,7 +115,7 @@ public class PresenceHelper {
                 while (c.moveToNext()) {
 
                     if (l == null)
-                        l = new HashSet<Presence>();
+                        l = new ArrayList<Presence>();
                     String json = c.getString(col);
                     Presence p = PresenceFactory.createPresence(json);
                     l.add(p);

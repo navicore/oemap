@@ -39,7 +39,6 @@ import com.onextent.oemap.provider.SpaceProvider;
 import com.onextent.oemap.settings.OeMapPreferencesDialog;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class OeMapActivity extends OeBaseActivity {
@@ -338,7 +337,7 @@ public class OeMapActivity extends OeBaseActivity {
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-        makeSureActiveMapIsInStore();
+        activeMapIsInStore();
         setActiveMapsSpinner();
 
         ActionBar actionBar = getActionBar();
@@ -355,18 +354,25 @@ public class OeMapActivity extends OeBaseActivity {
         super.setTitle("");
     }
 
-    private void makeSureActiveMapIsInStore() {
+    private boolean activeMapIsInStore() {
 
         //make sure the mapname is still in the spacedb it may get deleted on upgrade
         String currMapName = _prefs.get(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
-        if (currMapName != null) {
+        if (currMapName != null && !currMapName.equals("") && !currMapName.equals(getString(R.string.null_map_name))) {
             SpaceHelper h = new SpaceHelper(this);
             SpaceHelper.Space s = h.getSpace(currMapName);
-            if (s == null) {
-                h.insert(currMapName, new Date(System.currentTimeMillis() + 4 * 60 * 60 * 1000));
-                enableNewSpace(currMapName);// must have gotten munched in a db upgrade
+            OeLog.d("ejs spacename: " + currMapName + " found " + s);
+            if (s == null || s.getLease().getTime() < System.currentTimeMillis()) {
+                //expired
+                h.deleteSpacename(currMapName);
+                _prefs.replace(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
+                return false;
+            } else {
+                return true;
             }
         }
+        _prefs.replace(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
+        return false;
     }
 
     private void setActiveMapsSpinner() {
@@ -690,10 +696,8 @@ public class OeMapActivity extends OeBaseActivity {
 
             OeMapFragment f = getMapFrag();
             String currSpace = f.getName();
-            //String currSpace = _prefs.get(getString(R.string.state_current_mapname), null);
 
             if (spacename != null && spacename.equals(currSpace)) {
-                //ejs todo: if the user is using this still, give the m the op to re-subscribe
                 setMapFrag(getString(R.string.null_map_name));
                 showRejoinDialog(spacename);
             }

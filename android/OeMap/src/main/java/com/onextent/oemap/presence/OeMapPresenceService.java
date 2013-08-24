@@ -332,6 +332,7 @@ public class OeMapPresenceService extends Service {
 
     private void pollSpace(String s) {
 
+        OeLog.d("ejs pollSpace space: " + s);
         /*
         - get a list of all uids already in store
         - add a new presence from the server, removing the uid from the old list as you go
@@ -347,7 +348,7 @@ public class OeMapPresenceService extends Service {
             get.addHeader("Content-Type", "application/json");
             get.addHeader("Accept", "application/json");
             Set<String> oldUids = null;
-            Set<Presence> prepres = _presenceHelper.getAllPrecenses(s);
+            List<Presence> prepres = _presenceHelper.getAllPrecenses(s);
             if (prepres != null) {
                 oldUids = new HashSet<String>();
                 for (Presence p : prepres) {
@@ -390,12 +391,8 @@ public class OeMapPresenceService extends Service {
 
     private void processPollJson(String space, String json, Set<String> oldUids) throws JSONException, PresenceException {
 
-        if (_lastPollTime > System.currentTimeMillis() - QUIT_TIME) {
-            return;
-        }
-        _lastPushTime = System.currentTimeMillis();
-
-        _presenceHelper.deletePresencesWithSpaceNameNotMine(space); //todo: too expensive and insanely clumsy
+        OeLog.d("ejs processPollJson space: " + space);
+        //_presenceHelper.deletePresencesWithSpaceNameNotMine(space); //todo: too expensive and insanely clumsy
         JSONArray array = new JSONArray(json);
         for (int i = 0; i < array.length(); i++) {
 
@@ -412,14 +409,22 @@ public class OeMapPresenceService extends Service {
             }
         }
         if (oldUids != null) {
+            OeLog.d("ejs processPollJson cleanup old uids");
             for (String uid : oldUids) {
                 Presence p = PresenceFactory.createPresence(uid, null, null, null, space, Presence.NONE, null);
-                broadcastIntent(p);
+                _presenceHelper.deletePresence(p);
+                //broadcastIntent(p);
             }
         }
     }
 
     private void poll() {
+
+        if (_lastPollTime > System.currentTimeMillis() - QUIT_TIME) {
+            return;
+        }
+        _lastPollTime = System.currentTimeMillis();
+        OeLog.d("ejs poll");
 
         if (_currentPollTask == null) //don't queue up if server is slow or down
             new Poll().execute();
@@ -505,6 +510,8 @@ public class OeMapPresenceService extends Service {
     private class Poll extends AsyncTask<Void, Void, String> {
         @Override
         protected String doInBackground(Void... _) {
+
+            OeLog.d("ejs doInBackground Poll");
             try {
 
             Cursor c = getContentResolver().query(SpaceProvider.CONTENT_URI,

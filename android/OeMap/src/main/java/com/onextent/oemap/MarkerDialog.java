@@ -3,11 +3,17 @@ package com.onextent.oemap;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.ListAdapter;
+import android.widget.TextView;
 
-import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.Presence;
@@ -15,10 +21,7 @@ import com.onextent.oemap.presence.PresenceException;
 import com.onextent.oemap.provider.PresenceHelper;
 
 import org.json.JSONException;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class MarkerDialog extends DialogFragment {
 
@@ -27,58 +30,89 @@ public class MarkerDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-        String space = null;
+        String s = null;
 
         Bundle args = getArguments();
         if (args != null)
-            space = args.getString(getString(R.string.bundle_spacename));
-        if (space == null) throw new NullPointerException("no mapname");
+            s = args.getString(getString(R.string.bundle_spacename));
+        if (s == null) throw new NullPointerException("no mapname");
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        String[] array = null; //ejs todo: clean up, this is insane
-
         final OeMapActivity activity = (OeMapActivity) getActivity();
 
-        PresenceHelper prefHelper = new PresenceHelper(getActivity());
+        PresenceHelper presenceHelper = new PresenceHelper(getActivity());
 
-        final List<Presence> presList = new ArrayList<Presence>();
+        final String spacename = s;
 
         try {
-            Set<Presence> presences = prefHelper.getAllPrecenses(space);
-            if (presences != null)
-                for (Presence p : presences) {
-                    presList.add(p);
-                }
-            array = new String[presList.size()];
-            for (int i = 0; i < presList.size(); i++) {
-                array[i] = presList.get(i).getLabel();
-            }
+            //final List<Presence> presences = presenceHelper.getAllPrecenses();
+            final List<Presence> presences = presenceHelper.getAllPrecenses(spacename);
+            OeLog.d("ejs size ******************** " + (presences == null ? 0 : presences.size()));
+            ListAdapter presencesAdapter = new MarkerLabelAdapter(presences);
+
+            builder.setTitle("Find Map Member")
+                    .setAdapter(presencesAdapter, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            Presence p = presences.get(which);
+                            if (!p.getSpaceName().equals(spacename)) return;
+                            OeMapFragment f = activity.getMapFrag();
+                            if (f != null) {
+                                OeMapFragment.Holder h = f.getMarkers().remove(p.getUID());
+                                if (h != null) { //move selected marker to the top by adding it last
+                                    h.marker.remove();
+                                    Marker m = f.updateMarker(p);
+                                    m.showInfoWindow();
+                                    f.setLocation(p);
+                                }
+                            }
+                        }
+                    });
         } catch (JSONException e) {
             OeLog.e(e);
         } catch (PresenceException e) {
             OeLog.e(e);
         }
-        ArrayAdapter<String> a = new ArrayAdapter<String>(getActivity(), android.R.layout.select_dialog_item, array);
+        return builder.create();
+    }
 
-        builder.setTitle("Select a Cohort")
-           .setAdapter(a, new DialogInterface.OnClickListener() {
-               public void onClick(DialogInterface dialog, int which) {
+    private class MarkerLabelAdapter extends BaseAdapter {
 
-                   Presence p = presList.get(which);
-                   OeMapFragment f =  activity.getMapFrag();
-                   if (f != null) {
-                       OeMapFragment.Holder h = f.getMarkers().remove(p.getUID());
-                       if (h != null) { //move selected marker to the top by adding it last
-                           h.marker.remove();
-                           Marker m = f.updateMarker(p);
-                           m.showInfoWindow();
-                           f.setLocation(p);
-                       }
-                   }
-           }
-    });
-    return builder.create();
+        private final List<Presence> _presences;
+
+        MarkerLabelAdapter(List<Presence> presences) {
+            _presences = presences;
+        }
+
+        @Override
+        public int getCount() {
+            if (_presences == null) return 0;
+            return _presences.size();
+        }
+
+        @Override
+        public Object getItem(int i) {
+            if (_presences == null) return null;
+            Presence p = _presences.get(i);
+            return p.getLabel();
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return i;
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+
+            LayoutInflater inflater = (LayoutInflater) getActivity()
+            .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            TextView v = (TextView) inflater.inflate(android.R.layout.select_dialog_item, null);
+
+            v.setText(_presences.get(i).getLabel());
+            return v;
+        }
     }
 }
 

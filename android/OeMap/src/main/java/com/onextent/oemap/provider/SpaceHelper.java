@@ -127,13 +127,16 @@ public class SpaceHelper {
                     SpaceProvider.Spaces._ID + "='" + n + "'", null, SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
             if (c.getCount() <= 0) return null;
             c.moveToFirst();
+
             int lpos = c.getColumnIndex(SpaceProvider.Spaces.LEASE);
-            int metpos = c.getColumnIndex(SpaceProvider.Spaces.SIZE_IN_METERS);
             long l = c.getLong(lpos);
-            if (l <= 0) return null;
             Date d = new Date(l);
+
+            int metpos = c.getColumnIndex(SpaceProvider.Spaces.SIZE_IN_METERS);
             int met = c.getInt(metpos);
+
             Space space = new Space(d, n, met);
+
             return space;
 
         } catch (Exception ex) {
