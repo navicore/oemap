@@ -17,3 +17,6 @@ sort -u ./tmp/tmp_names.txt > ./tmp/names.txt
 # dedupe
 sort -u ./tmp/tmp_points.txt > ./tmp/points.txt
 
+# gen the json presence messages
+./generate/build_json.py > ./tmp/presences.json
+
