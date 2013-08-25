@@ -2,8 +2,8 @@
 
 import os
 
-filepath = os.path.dirname(os.path.realpath(__file__))
-names = [line.strip().rstrip(' \xc2\xa0') for line in open(filepath + '/names_seed.txt')]
+filedir = os.path.dirname(os.path.realpath(__file__))
+names = [line.strip().rstrip(' \xc2\xa0') for line in open(filedir + '/names_seed.txt')]
 
 firstNames = []
 lastNames = []

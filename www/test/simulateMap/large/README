@@ -1,0 +1,5 @@
+first run generate.sh
+look at tmp/names.txt and tmp/points.txt
+
+if looking good, ./load.py to load to mongo
+

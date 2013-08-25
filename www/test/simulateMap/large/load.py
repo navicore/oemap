@@ -1,13 +1,16 @@
 #!/usr/bin/python2
+import os
+
+filedir = os.path.dirname(os.path.realpath(__file__))
 
 import requests
 import time
 import json
 
-names = [line.strip().rstrip(' \xc2\xa0') for line in open('names.txt')]
+names = [line.strip().rstrip(' \xc2\xa0') for line in open(filedir + '/tmp/names.txt')]
 coords = []
 
-for p in [line.strip() for line in open('points.txt')]:
+for p in [line.strip() for line in open(filedir + '/points.txt')]:
     coord = p.split(',')
     coord = [float(coord[0]), float(coord[1])]
     coords.append(coord)
@@ -26,7 +29,7 @@ for i in range(size):
   presence['ttl'] = 2
   now = int(round(time.time() * 1000))
   presence['time'] = now
-  presence['space'] = 'test photowalk'
+  presence['space'] = 'big test'
   presence['location'] = {}
   presence['location']['type'] = "Point"
   presence['location']['coordinates'] = [coords[i][1], coords[i][0]]
