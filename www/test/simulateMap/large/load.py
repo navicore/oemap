@@ -10,7 +10,7 @@ import json
 names = [line.strip().rstrip(' \xc2\xa0') for line in open(filedir + '/tmp/names.txt')]
 coords = []
 
-for p in [line.strip() for line in open(filedir + '/points.txt')]:
+for p in [line.strip() for line in open(filedir + '/tmp/points.txt')]:
     coord = p.split(',')
     coord = [float(coord[0]), float(coord[1])]
     coords.append(coord)
@@ -18,6 +18,8 @@ for p in [line.strip() for line in open(filedir + '/points.txt')]:
 size = len(coords)
 if (len(names) < len(coords)): 
     size = len(names)
+
+size = 10 #ejs test #ejs test #ejs test #ejs test
 
 print "sending %s records" % size
 
