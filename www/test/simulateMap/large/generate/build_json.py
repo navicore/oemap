@@ -7,11 +7,11 @@ import requests
 import time
 import json
 
-names = [line.strip().rstrip(' \xc2\xa0') for line in open(filedir + '/tmp/names.txt')]
+names = [line.strip().rstrip(' \xc2\xa0') for line in open(filedir + '/../tmp/names.txt')]
 coords = []
 
 #for p in [line.strip() for line in open(filedir + '/tmp/points.txt')]:
-for line in open(filedir + '/tmp/points.txt'):
+for line in open(filedir + '/../tmp/points.txt'):
     coord = line.split(',')
     coord = [float(coord[0]), float(coord[1])]
     coords.append(coord)
