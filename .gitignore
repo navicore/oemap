@@ -2,6 +2,7 @@
 .gradle/
 .metadata/
 bin/
+tmp/
 build/
 obj/
 gen/
