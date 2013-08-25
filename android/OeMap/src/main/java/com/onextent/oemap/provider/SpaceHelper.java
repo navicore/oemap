@@ -1,11 +1,17 @@
+/*
+ * Copyright (c) 2013. Ed Sweeney.  All Rights Reserved.
+ */
+
 package com.onextent.oemap.provider;
 
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.ContentObserver;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
+import android.os.Handler;
 
 import com.onextent.android.util.OeLog;
 

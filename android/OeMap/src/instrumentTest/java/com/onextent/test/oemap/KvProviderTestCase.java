@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2013. Ed Sweeney.  All Rights Reserved.
+ */
+
 package com.onextent.test.oemap;
 
 import android.content.ContentResolver;
@@ -7,7 +11,6 @@ import android.net.Uri;
 import android.test.AndroidTestCase;
 
 import com.onextent.android.util.OeLog;
-import com.onextent.oemap.provider.KvProvider;
 import com.onextent.oemap.provider.KvProvider;
 
 import org.json.JSONException;

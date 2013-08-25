@@ -1,7 +1,12 @@
+/*
+ * Copyright (c) 2013. Ed Sweeney.  All Rights Reserved.
+ */
+
 package com.onextent.test.oemap;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.onextent.oemap.presence.Presence;
+import com.onextent.oemap.presence.PresenceException;
 import com.onextent.oemap.presence.PresenceFactory;
 
 import junit.framework.TestCase;
@@ -19,8 +24,8 @@ public class PresenceTestCase extends TestCase {
     protected Presence presence1;
     protected double fValue2;
 
-    protected void setUp() {
-       presence1 = PresenceFactory.createPresence(PID, new LatLng(LATITUDE,LONGITUDE), LABEL, SNIPPIT, SPACENAME);
+    protected void setUp() throws PresenceException {
+        presence1 = PresenceFactory.createPresence(PID, new LatLng(LATITUDE, LONGITUDE), LABEL, SNIPPIT, SPACENAME, 2, null);
     }
 
     public void testP1() {

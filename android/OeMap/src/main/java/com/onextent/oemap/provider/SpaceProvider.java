@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2013. Ed Sweeney.  All Rights Reserved.
+ */
+
 package com.onextent.oemap.provider;
 
 import android.content.ContentProvider;
@@ -100,6 +104,7 @@ public class SpaceProvider extends ContentProvider {
             // notify all listeners of changes and return itemUri:
             Uri itemUri = ContentUris.withAppendedId(uri, id);
             getContext().getContentResolver().notifyChange(itemUri, null);
+            getContext().getContentResolver().notifyChange(SpaceProvider.CONTENT_URI, null);
             return itemUri;
         }
         // s.th. went wrong:
@@ -126,13 +131,14 @@ public class SpaceProvider extends ContentProvider {
         // notify all listeners of changes:
         if (delCount > 0) {
             getContext().getContentResolver().notifyChange(uri, null);
+            getContext().getContentResolver().notifyChange(SpaceProvider.CONTENT_URI, null);
         }
         return delCount;
     }
 
     @Override
     public int update(Uri uri, ContentValues contentValues, String s, String[] strings) {
-        return 0;
+        throw new UnsupportedOperationException();
     }
 }
 

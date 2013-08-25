@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2013. Ed Sweeney.  All Rights Reserved.
+ */
+
 package com.onextent.oemap.presence;
 
 import android.app.Notification;
@@ -73,7 +77,7 @@ public class OeMapPresenceService extends Service {
     private AsyncTask       _currentPollTask = null;
     private boolean         _running = false;
     private Notification    _notification = null;
-    private Location _lastLocation = null;
+    private Location        _lastLocation = null;
 
     @Override
     public void onCreate() {
@@ -113,6 +117,11 @@ public class OeMapPresenceService extends Service {
     private Presence createPresence(Location l, String spacename) throws PresenceException {
         int ttl = _kvHelper.getInt(getString(R.string.pref_ttl), DEFAULT_TTL);
         return createPresence(l, spacename, ttl);
+    }
+
+    private void resetDelays() {
+        _lastPollTime = 0;
+        _lastPushTime = 0;
     }
 
     private Presence createPresence(Location l, String spacename, int ttl) throws PresenceException {
@@ -265,22 +274,8 @@ public class OeMapPresenceService extends Service {
 
         } else if (CMD_ADD_SPACE.equals(reason)) {
 
-            String spacename = extras.getString(KEY_SPACENAME);
-
-            //ContentValues values = new ContentValues();
-            //values.put(SpaceProvider.Spaces._ID, spacename);
-            //Uri r = getContentResolver().insert(SpaceProvider.CONTENT_URI, values);
-
-            //ejs todo: is this thnig really NOT runnign when it is supposed to be not running?
-            //ejs todo: is this thnig really NOT runnign when it is supposed to be not running?
-            //ejs todo: is this thnig really NOT runnign when it is supposed to be not running?
-            //ejs todo: is this thnig really NOT runnign when it is supposed to be not running?
-            //ejs todo: is this thnig really NOT runnign when it is supposed to be not running?
-            //ejs todo: is this thnig really NOT runnign when it is supposed to be not running?
-
-            updateNotification();
-
             startRunning();
+            wakeup();
 
         } else if (CMD_RM_SPACE.equals(reason)) {
 
@@ -302,14 +297,13 @@ public class OeMapPresenceService extends Service {
             if (!_spaceHelper.hasSpaceNames()) {
                 stopRunning();
             }
-            updateNotification();
+            wakeup();
         }
 
         if (CMD_POLL.equals(reason)) {
 
-            if (_spaceHelper.hasSpaceNames()) {
-                wakeup();
-            }
+            wakeup();
+
         } else {
 
             OeLog.w("unknown reason intent");
@@ -322,7 +316,7 @@ public class OeMapPresenceService extends Service {
         List<String> l = _spaceHelper.getAllSpaceNames();
         if (l != null && l.size() > 0) {
 
-        StringBuffer b = new StringBuffer("broadcasting your location to:");
+        StringBuffer b = new StringBuffer("posting your location to:");
         int sz = l.size();
         for (int i = 0; i < sz; i++ ) {
             String s = l.get(i);
@@ -453,9 +447,19 @@ public class OeMapPresenceService extends Service {
     }
 
     private void wakeup() {
+
+        if (!_spaceHelper.hasSpaceNames()) {
+            return;
+        }
+
+        resetDelays();
+
         updateNotification();
-        poll(); //do one now
+
+        poll();
+
         Location l = _locHelper.getLastLocation();
+        if (l == null) l = _lastLocation;
         if (l != null)
             broadcast(l);
     }
@@ -478,6 +482,8 @@ public class OeMapPresenceService extends Service {
         @Override
         protected String doInBackground(Presence... presences) {
             try {
+
+            OeLog.d("Send.doInBackground");
 
             String r = null;
             Presence p = presences[0];

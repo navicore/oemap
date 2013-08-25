@@ -1,23 +1,22 @@
+/*
+ * Copyright (c) 2013. Ed Sweeney.  All Rights Reserved.
+ */
+
 package com.onextent.oemap;
 
 import android.app.Dialog;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.onextent.oemap.provider.KvHelper;
 import com.onextent.oemap.provider.SpaceHelper;
-
-import java.text.SimpleDateFormat;
+import com.onextent.oemap.settings.BaseSpaceSettingsDialog;
 
 public class NewSpaceDialog extends BaseSpaceSettingsDialog {
 
@@ -133,7 +132,7 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
                         s.setMaxPoints(_max_points);
                         h.insert(s);
                     }
-                    activity.onFinishNewSpaceDialog(mEditText.getText().toString());
+                    activity.onFinishNewSpaceDialog(name);
                     dismiss();
                 } else {
                     //todo: this feedback is not working at all

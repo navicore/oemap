@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2013. Ed Sweeney.  All Rights Reserved.
+ */
+
 package com.onextent.test.oemap;
 
 import android.content.ContentResolver;
@@ -28,7 +32,7 @@ public class SpaceProviderTestCase extends AndroidTestCase {
         for (String s : SPACENAMES) {
 
             ContentValues values = new ContentValues();
-            values.put(SpaceProvider.Spaces.NAME, s);
+            values.put(SpaceProvider.Spaces._ID, s);
             _resolver.insert(SpaceProvider.CONTENT_URI, values);
         }
     }
@@ -44,12 +48,12 @@ public class SpaceProviderTestCase extends AndroidTestCase {
         final String TEST_VAL = "won!";
 
         ContentValues values = new ContentValues();
-        values.put(SpaceProvider.Spaces.NAME, TEST_VAL);
+        values.put(SpaceProvider.Spaces._ID, TEST_VAL);
         Uri r = _resolver.insert(SpaceProvider.CONTENT_URI, values);
         OeLog.d("insert uri: " + r);
 
         Cursor c = _resolver.query(SpaceProvider.CONTENT_URI, null, null, null, null);
-        int SPACENAME_IDX =  c.getColumnIndex(SpaceProvider.Spaces.NAME);
+        int SPACENAME_IDX =  c.getColumnIndex(SpaceProvider.Spaces._ID);
         while (c.moveToNext()) {
 
             String space = c.getString(SPACENAME_IDX);
@@ -63,15 +67,15 @@ public class SpaceProviderTestCase extends AndroidTestCase {
         final String TEST_VAL = "won";
 
         ContentValues values = new ContentValues();
-        values.put(SpaceProvider.Spaces.NAME, TEST_VAL);
+        values.put(SpaceProvider.Spaces._ID, TEST_VAL);
         _resolver.insert(SpaceProvider.CONTENT_URI, values);
 
         String[] args = {TEST_VAL};
         Cursor c = _resolver.query(SpaceProvider.CONTENT_URI,
-                PROJECTION, SpaceProvider.Spaces.NAME + "=?", args, null);
+                PROJECTION, SpaceProvider.Spaces._ID + "=?", args, null);
         assertEquals(c.getCount(), 1);
         c.moveToFirst();
-        int i = c.getColumnIndex(SpaceProvider.Spaces.NAME);
+        int i = c.getColumnIndex(SpaceProvider.Spaces._ID);
         assertTrue(i >= 0);
         String space = c.getString(i);
 
@@ -84,13 +88,13 @@ public class SpaceProviderTestCase extends AndroidTestCase {
         final String TEST_VAL = "ahh";
 
         ContentValues values = new ContentValues();
-        values.put(SpaceProvider.Spaces.NAME, TEST_VAL);
+        values.put(SpaceProvider.Spaces._ID, TEST_VAL);
         Uri r = _resolver.insert(SpaceProvider.CONTENT_URI, values);
 
         Cursor c = _resolver.query(r, null, null, null, null);
         assertEquals(c.getCount(), 1);
         c.moveToFirst();
-        int i = c.getColumnIndex(SpaceProvider.Spaces.NAME);
+        int i = c.getColumnIndex(SpaceProvider.Spaces._ID);
         assertTrue(i >= 0);
         String space = c.getString(i);
 
@@ -103,9 +107,9 @@ public class SpaceProviderTestCase extends AndroidTestCase {
         final String TEST_VAL = "one";
 
         Cursor c = _resolver.query(SpaceProvider.CONTENT_URI,
-                PROJECTION, SpaceProvider.Spaces.NAME + "='" + TEST_VAL + "'", null, null);
+                PROJECTION, SpaceProvider.Spaces._ID + "='" + TEST_VAL + "'", null, null);
         c.moveToFirst();
-        int i = c.getColumnIndex(SpaceProvider.Spaces.NAME);
+        int i = c.getColumnIndex(SpaceProvider.Spaces._ID);
         assertTrue(i >= 0);
         String space = c.getString(i);
         assertEquals(space, TEST_VAL);
@@ -115,11 +119,11 @@ public class SpaceProviderTestCase extends AndroidTestCase {
         c.close();
 
         ContentValues values = new ContentValues();
-        values.put(SpaceProvider.Spaces.NAME, TEST_VAL);
+        values.put(SpaceProvider.Spaces._ID, TEST_VAL);
         _resolver.delete(SpaceProvider.CONTENT_URI, SpaceProvider.Spaces._ID + "=" + id, null);
 
         c = _resolver.query(SpaceProvider.CONTENT_URI,
-                PROJECTION, SpaceProvider.Spaces.NAME + "='" + TEST_VAL + "'", null, null);
+                PROJECTION, SpaceProvider.Spaces._ID + "='" + TEST_VAL + "'", null, null);
         assertEquals(c.getCount(), 0);
         c.close();
     }

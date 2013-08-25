@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2013. Ed Sweeney.  All Rights Reserved.
+ */
+
 package com.onextent.oemap.presence;
 
 public class PresenceException extends Exception {

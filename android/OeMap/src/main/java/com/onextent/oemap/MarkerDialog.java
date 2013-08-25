@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2013. Ed Sweeney.  All Rights Reserved.
+ */
+
 package com.onextent.oemap;
 
 import android.app.AlertDialog;
@@ -46,9 +50,7 @@ public class MarkerDialog extends DialogFragment {
         final String spacename = s;
 
         try {
-            //final List<Presence> presences = presenceHelper.getAllPrecenses();
             final List<Presence> presences = presenceHelper.getAllPrecenses(spacename);
-            OeLog.d("ejs size ******************** " + (presences == null ? 0 : presences.size()));
             ListAdapter presencesAdapter = new MarkerLabelAdapter(presences);
 
             builder.setTitle("Find Map Member")

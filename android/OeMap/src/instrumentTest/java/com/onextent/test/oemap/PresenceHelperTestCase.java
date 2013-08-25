@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2013. Ed Sweeney.  All Rights Reserved.
+ */
+
 package com.onextent.test.oemap;
 
 import android.database.SQLException;
@@ -5,11 +9,13 @@ import android.test.AndroidTestCase;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.onextent.oemap.presence.Presence;
+import com.onextent.oemap.presence.PresenceException;
 import com.onextent.oemap.presence.PresenceFactory;
 import com.onextent.oemap.provider.PresenceHelper;
 
 import org.json.JSONException;
 
+import java.util.List;
 import java.util.Set;
 
 public class PresenceHelperTestCase extends AndroidTestCase {
@@ -26,16 +32,16 @@ public class PresenceHelperTestCase extends AndroidTestCase {
         super.tearDown();
     }
 
-    public void testInsert() {
+    public void testInsert() throws PresenceException {
 
-        Presence p = PresenceFactory.createPresence("myUid1", new LatLng(30.1, 40.1), "my label", "my snippit", "my map");
+        Presence p = PresenceFactory.createPresence("myUid1", new LatLng(30.1, 40.1), "my label", "my snippit", "my map", 2, null);
 
         _dbHelper.insertPresence(p);
     }
 
-    public void testBadInsert() {
+    public void testBadInsert() throws PresenceException {
 
-        Presence p = PresenceFactory.createPresence("myUid2", new LatLng(30.1, 40.1), "my label", "my snippit", "my map");
+        Presence p = PresenceFactory.createPresence("myUid2", new LatLng(30.1, 40.1), "my label", "my snippit", "my map", 2, null);
 
         _dbHelper.insertPresence(p);
 
@@ -48,9 +54,9 @@ public class PresenceHelperTestCase extends AndroidTestCase {
         assertTrue("double insert", success);
     }
 
-    public void testReplace() {
+    public void testReplace() throws PresenceException {
 
-        Presence p = PresenceFactory.createPresence("myUid3", new LatLng(30.1, 40.1), "my label", "my snippit", "my map");
+        Presence p = PresenceFactory.createPresence("myUid3", new LatLng(30.1, 40.1), "my label", "my snippit", "my map", 2, null);
         _dbHelper.replacePresence(p);
 
         boolean success = false;
@@ -65,12 +71,12 @@ public class PresenceHelperTestCase extends AndroidTestCase {
         _dbHelper.replacePresence(p); //should work now too
     }
 
-    public void testGet() throws JSONException {
+    public void testGet() throws JSONException, PresenceException {
 
         Presence p = _dbHelper.getPresence("myUid4", "my map");
         assertNull("should not have found this presence", p);
 
-        Presence p1 = PresenceFactory.createPresence("myUid4", new LatLng(30.1, 40.1), "my label", "my snippit", "my map");
+        Presence p1 = PresenceFactory.createPresence("myUid4", new LatLng(30.1, 40.1), "my label", "my snippit", "my map", 2, null);
         _dbHelper.insertPresence(p1);
 
         p = _dbHelper.getPresence("myUid4", "my map");
@@ -78,7 +84,7 @@ public class PresenceHelperTestCase extends AndroidTestCase {
         assertEquals("should have matching 'my label': " + p.toString(), p.getLabel(), "my label");
         assertEquals("should have matching 'my snippit': " + p.toString(), p.getSnippet(), "my snippit");
 
-        Presence p2 = PresenceFactory.createPresence("myUid4", new LatLng(30.1, 40.1), "my new label", "my new snippit", "my map");
+        Presence p2 = PresenceFactory.createPresence("myUid4", new LatLng(30.1, 40.1), "my new label", "my new snippit", "my map", 2, null);
         _dbHelper.replacePresence(p2);
         p = _dbHelper.getPresence("myUid4", "my map");
         assertNotNull("should have found this presence", p);
@@ -86,25 +92,25 @@ public class PresenceHelperTestCase extends AndroidTestCase {
         assertEquals("should have matching 'my new snippit': " + p.toString(), p.getSnippet(), "my new snippit");
     }
 
-    public void testGetAll() throws JSONException {
+    public void testGetAll() throws JSONException, PresenceException {
 
-        Presence p = PresenceFactory.createPresence("myUid1", new LatLng(30.1, 40.1), "my label", "my snippit", "my new map");
+        Presence p = PresenceFactory.createPresence("myUid1", new LatLng(30.1, 40.1), "my label", "my snippit", "my new map", 2, null);
         _dbHelper.replacePresence(p);
-        p = PresenceFactory.createPresence("myUid2", new LatLng(30.1, 40.1), "my label", "my snippit", "my new map");
+        p = PresenceFactory.createPresence("myUid2", new LatLng(30.1, 40.1), "my label", "my snippit", "my new map", 2, null);
         _dbHelper.replacePresence(p);
-        p = PresenceFactory.createPresence("myUid3", new LatLng(30.1, 40.1), "my label", "my snippit", "my new map");
+        p = PresenceFactory.createPresence("myUid3", new LatLng(30.1, 40.1), "my label", "my snippit", "my new map", 2, null);
         _dbHelper.replacePresence(p);
-        p = PresenceFactory.createPresence("myUid4", new LatLng(30.1, 40.1), "my label", "my snippit", "my new map");
+        p = PresenceFactory.createPresence("myUid4", new LatLng(30.1, 40.1), "my label", "my snippit", "my new map", 2, null);
         _dbHelper.replacePresence(p);
 
-        Set<Presence> l = _dbHelper.getAllPrecenses("my new map");
+        List<Presence> l = _dbHelper.getAllPrecenses("my new map");
         assertNotNull("should have found these", l);
         assertEquals("wrong number of getAll(map) results: " + l, 4, l.size());
     }
 
-    public void testDelete() throws JSONException {
+    public void testDelete() throws JSONException, PresenceException {
 
-        Presence p1 = PresenceFactory.createPresence("myUid9", new LatLng(30.1, 40.1), "my newest label", "my snippit", "my newest map");
+        Presence p1 = PresenceFactory.createPresence("myUid9", new LatLng(30.1, 40.1), "my newest label", "my snippit", "my newest map", 2, null);
         _dbHelper.replacePresence(p1);
 
         Presence p = _dbHelper.getPresence("myUid9", "my newest map");

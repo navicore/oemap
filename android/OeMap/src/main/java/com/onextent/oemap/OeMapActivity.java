@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2013. Ed Sweeney.  All Rights Reserved.
+ */
+
 package com.onextent.oemap;
 
 import android.app.ActionBar;
@@ -10,7 +14,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -34,8 +38,8 @@ import com.onextent.oemap.presence.OeMapPresenceService;
 import com.onextent.oemap.presence.SearchDialog;
 import com.onextent.oemap.provider.KvHelper;
 import com.onextent.oemap.provider.SpaceHelper;
-import com.onextent.oemap.provider.SpaceProvider;
 import com.onextent.oemap.settings.OeMapPreferencesDialog;
+import com.onextent.oemap.settings.SpaceSettingsDialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,8 +63,6 @@ public class OeMapActivity extends OeBaseActivity {
     private String mMapFragTag;
     private KvHelper _prefs = null;
     private ListDbHelper _history_store = null;
-    private ArrayAdapter<String> _spacenames_adapter = null;
-    private List<String> _spacenames = null;
     private BroadcastReceiver _presenceReceiver = new QuitSpaceReceiver();
     private IntentFilter _presenceReceiverFilter = null;
 
@@ -110,13 +112,8 @@ public class OeMapActivity extends OeBaseActivity {
             ).commit();
         }
 
-        if (!_spacenames.contains(mapname)) {
-            _spacenames.add(mapname);
-            _spacenames_adapter.notifyDataSetChanged();
-        }
-        int pos = _spacenames.indexOf(mapname);
-        getActionBar().setSelectedNavigationItem(pos);
         updateSpaceNames(mapname);
+        setActionBarToCurrentMap();
     }
 
     @Override
@@ -191,6 +188,7 @@ public class OeMapActivity extends OeBaseActivity {
     }
 
     void onFinishNewSpaceDialog(String newMapName) {
+        setMapName(newMapName);
         enableNewSpace(newMapName);
         Toast.makeText(this, "New map '" + newMapName + "' created.", Toast.LENGTH_SHORT).show();
     }
@@ -205,10 +203,8 @@ public class OeMapActivity extends OeBaseActivity {
 
         String spacename = getMapName();
         setMapFrag(getString(R.string.null_map_name));
-        _spacenames.remove(spacename);
-        _spacenames_adapter.notifyDataSetChanged();
         setMapName(getString(R.string.null_map_name));
-        //todo: helper method that sets location for none
+        //todo: helper method that sets a nice UI and location for none
 
         Intent i = new Intent(this, OeMapPresenceService.class);
         i.putExtra(OeMapPresenceService.KEY_REASON, OeMapPresenceService.CMD_RM_SPACE);
@@ -276,6 +272,7 @@ public class OeMapActivity extends OeBaseActivity {
     @Override
     protected void onDestroy() {
         OeLog.d("onDestroy: " + getMapName());
+        _spaceNamesAdapter.onDestroy();
         _history_store.close();
         super.onDestroy();
     }
@@ -293,6 +290,8 @@ public class OeMapActivity extends OeBaseActivity {
         mMenuNames = getResources().getStringArray(R.array.menu_names_array);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
         mTitle = getResources().getString(R.string.app_name);
+
+        _spaceNamesAdapter = new SpaceNamesAdapter(getActionBar().getThemedContext());
 
         mDrawerNamesList = new ArrayList();
         for (String n : mMenuNames) {
@@ -317,18 +316,14 @@ public class OeMapActivity extends OeBaseActivity {
 
             /** Called when a drawer has settled in a completely closed state. */
             public void onDrawerClosed(View view) {
-                //bug?  doesn't show bar on lenovo
                 getActionBar().setDisplayShowTitleEnabled(false);
-                //getActionBar().setTitle(mTitle);
                 int pos = mDrawerList.getCheckedItemPosition();
                 mDrawerList.setItemChecked(pos, false);
             }
 
             /** Called when a drawer has settled in a completely open state. */
             public void onDrawerOpened(View drawerView) {
-                //bug?  doesn't show bar on lenovo
                 getActionBar().setDisplayShowTitleEnabled(true);
-                //getActionBar().setTitle(mDrawerTitle);
             }
         };
 
@@ -372,31 +367,19 @@ public class OeMapActivity extends OeBaseActivity {
         return false;
     }
 
+    private SpaceNamesAdapter _spaceNamesAdapter;
+
     private void setActiveMapsSpinner() {
 
         ActionBar actionBar = getActionBar();
-        _spacenames = null;
-        _spacenames = new ArrayList<String>();
-        Cursor c = getContentResolver().query(SpaceProvider.CONTENT_URI,
-                SpaceProvider.Spaces.PROJECTION_ALL, null, null,
-                SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
-        int pos = c.getColumnIndex(SpaceProvider.Spaces._ID);
-        while (c.moveToNext()) {
-            String n = c.getString(pos);
-            _spacenames.add(n);
-        }
-        c.close();
-        _spacenames_adapter = new ArrayAdapter<String>(actionBar.getThemedContext(),
-                android.R.layout.simple_spinner_item, android.R.id.text1, _spacenames);
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        _spacenames_adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         // Set up the dropdown list navigation in the action bar.
-        actionBar.setListNavigationCallbacks(_spacenames_adapter, new ActionBar.OnNavigationListener() {
+        actionBar.setListNavigationCallbacks(_spaceNamesAdapter, new ActionBar.OnNavigationListener() {
             @Override
             public boolean onNavigationItemSelected(int i, long l) {
-                String n = _spacenames.get(i);
+                String n = (String) _spaceNamesAdapter.getItem(i);
                 OeLog.d("onNavigationItemSelcted pos " + i + " item id: " + l + " name: " + n);
                 setMapFrag(n);
                 return false;
@@ -407,9 +390,16 @@ public class OeMapActivity extends OeBaseActivity {
 
     private void setActionBarToCurrentMap() {
 
-        String n = getMapName();
-        int curPos = _spacenames.indexOf(n);
-        getActionBar().setSelectedNavigationItem(curPos);
+        String currName = getMapName();
+        for (int i = 0; i < _spaceNamesAdapter.getCount(); i++) {
+
+            String n = (String) _spaceNamesAdapter.getItem(i);
+            if (n != null && n.equals(currName)) {
+
+                getActionBar().setSelectedNavigationItem(i);
+                break;
+            }
+        }
     }
 
     private void setMapTyp(int t) {
@@ -718,8 +708,8 @@ public class OeMapActivity extends OeBaseActivity {
                 setMapFrag(getString(R.string.null_map_name));
                 showRejoinDialog(spacename);
             }
-            _spacenames.remove(spacename);
-            _spacenames_adapter.notifyDataSetChanged();
+            //_spacenames.remove(spacename);
+            //_spacenames_adapter.notifyDataSetChanged();
         }
     }
 
