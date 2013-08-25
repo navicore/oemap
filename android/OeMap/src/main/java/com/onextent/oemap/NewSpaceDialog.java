@@ -21,6 +21,7 @@ import com.onextent.oemap.settings.BaseSpaceSettingsDialog;
 public class NewSpaceDialog extends BaseSpaceSettingsDialog {
 
     private EditText mEditText;
+    private int _max_points = SpaceHelper.PRESENCE_PARAM_DEFAULT_MAX_COUNT;
 
     void setTitle() {
         setTitle(getString(R.string.new_map_dialog_title));
@@ -43,8 +44,6 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
 
         return view;
     }
-
-    private int _max_points = SpaceHelper.PRESENCE_PARAM_DEFAULT_MAX_COUNT;
 
     protected void setupMaxPresenceSeekBar(View view) {
 
