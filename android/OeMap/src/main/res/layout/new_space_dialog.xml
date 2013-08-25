@@ -26,7 +26,8 @@
         android:imeOptions="actionDone"
         android:editable="true"
         android:padding="8dp"
-        android:layout_margin="8dp"/>
+        android:layout_margin="8dp"
+        android:hint="enter name of new map"/>
 
     <LinearLayout
             android:orientation="horizontal"
@@ -71,7 +72,7 @@
             android:layout_height="wrap_content"
             >
         <TextView
-                android:text="Nearest People to Show"
+                android:text="@string/pref_map_number_of_nearest_people_title"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"

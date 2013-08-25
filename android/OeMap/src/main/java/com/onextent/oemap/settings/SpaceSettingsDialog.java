@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 
 import com.onextent.android.util.OeLog;
+import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.R;
 import com.onextent.oemap.provider.SpaceHelper;
 
@@ -32,7 +33,7 @@ public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
 
         View view = inflater.inflate(R.layout.space_settings_dialog, container);
 
-        setupSeekBar(view);
+        setupQuitTimeSeekBar(view);
         setupMaxPresenceSeekBar(view);
 
         getDialog().getWindow().setSoftInputMode(
@@ -74,17 +75,16 @@ public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
 
     @Override
     public void onPause() {
-        //ejs todo: save lease
+        OeMapActivity a = (OeMapActivity) getActivity();
+        a.wakePresenceService();
         super.onPause();
     }
 
-    private void setupSeekBar(View view) {
+    private void setupQuitTimeSeekBar(View view) {
 
         SeekBar seek = (SeekBar) view.findViewById(R.id.space_settings_quitTimeSeekBar);
         final EditText time = (EditText) view.findViewById(R.id.space_settings_quitTime);
         //ejs todo: look up quit time and try to guess the progress value
-
-        seek.setProgress(DEFAULT_PROGRESS);
 
         setEditTextDate(time, _space);
         setSeekBarProgress(seek, _space);
@@ -94,9 +94,9 @@ public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 setQuitDate(i);
-                if (progressMsg != null) {
+                if (_progressMsg != null) {
 
-                    time.setText(progressMsg);
+                    time.setText(_progressMsg);
                 }
             }
 
@@ -110,12 +110,12 @@ public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
 
                 SpaceHelper h = new SpaceHelper(getActivity());
                 h.deleteSpacename(_space);
-                if (quiteDate != null) {
+                if (_quitDate != null) {
 
-                    //time.setText(_sdf.format(quiteDate));
+                    //time.setText(_sdf.format(_quitDate));
                     time.setText(DateUtils.getRelativeDateTimeString(getActivity(),
-                            quiteDate.getTime(), DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0));
-                    h.insert(_space, quiteDate);
+                            _quitDate.getTime(), DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0));
+                    h.insert(_space, _quitDate);
 
                 } else {
 

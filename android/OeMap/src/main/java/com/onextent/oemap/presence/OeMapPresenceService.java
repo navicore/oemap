@@ -83,6 +83,8 @@ public class OeMapPresenceService extends Service {
     public void onCreate() {
         super.onCreate();
 
+        OeLog.d("OeMapPresenceService.onCreate");
+
         _spaceHelper = new SpaceHelper(this);
         _presenceHelper = new PresenceHelper(this);
         _kvHelper = new KvHelper(this);
@@ -148,6 +150,8 @@ public class OeMapPresenceService extends Service {
 
     private void quitSpace(String s) {
 
+        OeLog.d("OeMapPresenceService.quitSpace: " + s);
+
         _spaceHelper.deleteSpacename(s);
 
         _presenceHelper.deletePresencesWithSpaceName(s);
@@ -171,6 +175,7 @@ public class OeMapPresenceService extends Service {
 
     private void updatePresenceEverywhere(String s, Location l) {
 
+        OeLog.d("OeMapPresenceService.updatePresenceEverywhere: " + s);
         Presence p = null;
         try {
             p = createPresence(l, s);
@@ -191,11 +196,13 @@ public class OeMapPresenceService extends Service {
     private long _lastPushTime = 0;
     private void broadcast(Location l) {
 
+        OeLog.d("OeMapPresenceService.broadcast (location)");
+
         String uid = OeBaseActivity.id(this);
         for (String s : _spaceHelper.getAllSpaceNames()) {
 
             Date lease = _spaceHelper.getLease(s);
-            if (lease != null && lease.getTime() <= System.currentTimeMillis()) {
+            if (lease != null && lease.getTime() < System.currentTimeMillis()) {
 
                 quitSpace(s);
 

@@ -19,6 +19,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -193,7 +194,7 @@ public class OeMapActivity extends OeBaseActivity {
         Toast.makeText(this, "New map '" + newMapName + "' created.", Toast.LENGTH_SHORT).show();
     }
 
-    private void wakePresenceService() {
+    public void wakePresenceService() {
         Intent i = new Intent(this, OeMapPresenceService.class);
         i.putExtra(OeMapPresenceService.KEY_REASON, OeMapPresenceService.CMD_POLL);
         startService(i);
@@ -326,12 +327,16 @@ public class OeMapActivity extends OeBaseActivity {
                 getActionBar().setDisplayShowTitleEnabled(true);
             }
         };
+        OeLog.d("onCreate 3: " + getMapName());
 
         // Set the drawer toggle as the DrawerListener
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
+        OeLog.d("onCreate 3.0: " + getMapName());
         activeMapIsInStore();
+        OeLog.d("onCreate 3.1: " + getMapName());
         setActiveMapsSpinner();
+        OeLog.d("onCreate 3.2: " + getMapName());
 
         ActionBar actionBar = getActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -340,6 +345,7 @@ public class OeMapActivity extends OeBaseActivity {
         actionBar.setTitle("");
 
         _presenceReceiverFilter = new IntentFilter(getString(R.string.presence_service_quit_space_intent));
+        OeLog.d("onCreate done: " + getMapName());
     }
 
     @Override
@@ -349,22 +355,32 @@ public class OeMapActivity extends OeBaseActivity {
 
     private boolean activeMapIsInStore() {
 
+        boolean ret = false;
         //make sure the mapname is still in the spacedb it may get deleted on upgrade
         String currMapName = getMapName();
         if (currMapName != null && !currMapName.equals("") && !currMapName.equals(getString(R.string.null_map_name))) {
             SpaceHelper h = new SpaceHelper(this);
             SpaceHelper.Space s = h.getSpace(currMapName);
-            if (s == null || s.getLease().getTime() < System.currentTimeMillis()) {
+
+            if (s == null)  {
+
+                OeLog.w("activeMapIsInStore not in store: " + getMapName());
+                ret = false;
+
+            } else if ( s.getLease().getTime() < System.currentTimeMillis() ) {
+
                 //expired
+                String msg = String.valueOf(DateUtils.getRelativeTimeSpanString(this, s.getLease().getTime()));
+                OeLog.d("activeMapIsInStore expiring: " + getMapName() + " lease: " + msg);
                 h.deleteSpacename(currMapName);
-                setMapName(getString(R.string.null_map_name));
-                return false;
+                ret = false;
+
             } else {
-                return true;
+
+                ret = true;
             }
         }
-        setMapName(getString(R.string.null_map_name));
-        return false;
+        return ret;
     }
 
     private SpaceNamesAdapter _spaceNamesAdapter;
@@ -680,8 +696,6 @@ public class OeMapActivity extends OeBaseActivity {
             if (position != SEPARATOR_POS) //ejs skip separator
                 selectItem(position);
         }
-
-
     }
 
     private class QuitSpaceReceiver extends BroadcastReceiver {

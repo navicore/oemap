@@ -22,8 +22,8 @@ import java.util.List;
 
 public class SpaceHelper {
 
-    public static final int    PRESENCE_PARAM_DEFAULT_MAX_COUNT = 30;
-    public static final int    PRESENCE_PARAM_DEFAULT_DIST = 1609 * 120;
+    public static final int PRESENCE_PARAM_DEFAULT_MAX_COUNT = 30;
+    public static final int PRESENCE_PARAM_DEFAULT_DIST = 1609 * 120;
     private static final String[] PROJECTION = SpaceProvider.Spaces.PROJECTION_ALL;
 
     private final Context _context;
@@ -47,14 +47,13 @@ public class SpaceHelper {
     }
     public void insert(String space, Date lease) {
 
-        ContentValues values = new ContentValues();
-        values.put(SpaceProvider.Spaces._ID, space);
-        if (lease != null) {
+        Space s = new Space(lease, space, PRESENCE_PARAM_DEFAULT_DIST, PRESENCE_PARAM_DEFAULT_MAX_COUNT);
+        insert(s);
+    }
+    public void insert(String space) {
 
-            long l = lease.getTime();
-            values.put(SpaceProvider.Spaces.LEASE, l);
-        }
-        Uri r = _context.getContentResolver().insert(SpaceProvider.CONTENT_URI, values);
+        Space s = new Space(null, space, PRESENCE_PARAM_DEFAULT_DIST, PRESENCE_PARAM_DEFAULT_MAX_COUNT);
+        insert(s);
     }
 
     public List<String> getAllSpaceNames() {
@@ -104,10 +103,10 @@ public class SpaceHelper {
         private Date _lease;
         private final String _name;
         private int _nmeters, _max;
-        public Space(Date l, String n, int met, int max) {
-            _lease = l;
+        public Space(Date l, String n, int dist, int max) {
+            setLease(l);
             _name = n;
-            _nmeters = met;
+            _nmeters = dist;
             if (max <= 0)
                 _max = PRESENCE_PARAM_DEFAULT_MAX_COUNT;
             else
@@ -118,7 +117,10 @@ public class SpaceHelper {
             return _lease;
         }
         public void setLease(Date l) {
-            _lease = l;
+            if (l != null)
+                _lease = l;
+            else
+                _lease = new Date(Long.MAX_VALUE);
         }
         public String getName() {
             return _name;

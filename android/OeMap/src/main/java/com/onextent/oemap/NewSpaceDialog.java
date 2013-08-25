@@ -65,15 +65,15 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
         final EditText time = (EditText) view.findViewById(R.id.quitTime);
         seek.setProgress(DEFAULT_PROGRESS);
         setQuitDate(DEFAULT_PROGRESS);
-        time.setText(progressMsg);
+        time.setText(_progressMsg);
         seek.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 setQuitDate(i);
-                if (progressMsg != null) {
+                if (_progressMsg != null) {
 
-                    time.setText(progressMsg);
+                    time.setText(_progressMsg);
                 }
             }
 
@@ -85,9 +85,9 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
 
-                if (quiteDate != null) {
+                if (_quitDate != null) {
 
-                    time.setText(_sdf.format(quiteDate));
+                    time.setText(_sdf.format(_quitDate));
 
                 } else {
 
@@ -123,12 +123,12 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
                     SpaceHelper h = new SpaceHelper(getActivity());
                     SpaceHelper.Space s = h.getSpace(name);
                     if (s == null) {
-                        s = new SpaceHelper.Space(quiteDate, name,
+                        s = new SpaceHelper.Space(_quitDate, name,
                                 SpaceHelper.PRESENCE_PARAM_DEFAULT_DIST, _max_points);
                         h.insert(s);
                     } else {
                         h.deleteSpacename(name);
-                        s.setLease(quiteDate);
+                        s.setLease(_quitDate);
                         s.setMaxPoints(_max_points);
                         h.insert(s);
                     }
