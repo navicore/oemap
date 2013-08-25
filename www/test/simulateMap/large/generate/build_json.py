@@ -1,5 +1,6 @@
 #!/usr/bin/python2
 import os
+import json
 
 filedir = os.path.dirname(os.path.realpath(__file__))
 
@@ -13,13 +14,15 @@ with open(filedir + '/../tmp/names.txt') as namefile, open(filedir + '/../tmp/po
     counter = 0
     for name, c in izip(namefile, pointfile):
 
+	counter += 1
+
         if (name == None): continue
         if (c == None): continue
         coord = c.split(',')
         coord = [float(coord[0]), float(coord[1])]
 
         presence = {}
-        presence['uid'] = '1234567890_TEST_' + str(++counter)
+        presence['uid'] = '1234567890_TEST_' + str(counter)
         presence['label'] = name
         presence['snippit'] = 'having fun in CA'
         presence['ttl'] = 2
@@ -30,5 +33,5 @@ with open(filedir + '/../tmp/names.txt') as namefile, open(filedir + '/../tmp/po
         presence['location']['type'] = "Point"
         presence['location']['coordinates'] = coord
 
-        print presence
+        print json.JSONEncoder().encode(presence)
 
