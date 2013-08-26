@@ -1,6 +1,9 @@
 //
 // make sure to run these on every db init
 //
+//
+
+todo: test with new primary key and no compounds?
 
 //primary compound key
 db.presences.ensureIndex({"uid": 1, "space": 1}, {"unique": true})
@@ -26,7 +29,7 @@ db.presences.ensureIndex(
 )
 
 //support query 'get the nearest n items in map'
-db.presences.ensureIndex({"space": 1, "location": "2dsphere"})
+//db.presences.ensureIndex({"space": 1, "location": "2dsphere"})
 
 //support query 'get the nearest n unique maps'
 db.presences.ensureIndex({"location": "2dsphere"})
