@@ -9,16 +9,20 @@ db.presences.ensureIndex({"uid": 1, "space": 1}, {"unique": true})
 // is different from expire time / quit time.  ttl stops old
 // presences from being used in the case a phone is shut off or
 // out of range.
+
+// 5 minutes
 db.presences.ensureIndex(
-  {"short_ttl_start_time": 1}, {"expireAfterSeconds" : 5 * 60} // 5 minutes
+  {"short_ttl_start_time": 1}, {"expireAfterSeconds" : 5 * 60} 
 )
 
+// 1 hour
 db.presences.ensureIndex(
-  {"medium_ttl_start_time": 1}, {"expireAfterSeconds" : 60 * 60} // 1 hour
+  {"medium_ttl_start_time": 1}, {"expireAfterSeconds" : 60 * 60}
 )
 
+// 1 day
 db.presences.ensureIndex(
-  {"long_ttl_start_time": 1}, {"expireAfterSeconds" : 24* 60 * 60} // 1 day
+  {"long_ttl_start_time": 1}, {"expireAfterSeconds" : 24* 60 * 60} 
 )
 
 //support query 'get the nearest n items in map'

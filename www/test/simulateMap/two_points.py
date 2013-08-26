@@ -3,6 +3,16 @@
 import requests
 import time
 import json
+import sys
+
+if len(sys.argv) < 2:
+    raise Exception('no host')
+host = sys.argv[1]
+
+if len(sys.argv) > 2:
+    port = sys.argv[2]
+else:
+    port = 8080
 
 names = ['Mike Angelo','Ben Friedman']
 coords = [[37.807509, -122.366881], [37.80751,-122.365743]]
@@ -34,7 +44,7 @@ for i in range(size):
   print presence
 
   headers = {'Content-Type': 'application/json'}
-  r = requests.put('http://oemap.onextent.com:8080/presence', data=json.dumps(presence), headers=headers)
+  r = requests.put('http://' + host + ':' + str(port) + '/presence', data=json.dumps(presence), headers=headers)
 
   print r.status_code
   print r.text
