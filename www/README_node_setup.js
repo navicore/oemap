@@ -5,5 +5,7 @@ sudo cp upstart/oemapd.conf /etc/init/oemapd.conf
 sudo touch /var/log/oemapd.log
 sudo chown node /var/log/oemapd.log
 
+npm install
+
 sudo start oemapd
 
