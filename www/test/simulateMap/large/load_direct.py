@@ -11,14 +11,14 @@ def stats():
     global statC, statI, startTime
     statC = statC + 1
     statI = statI + 1
-    if statI == 1000:
+    if statI == 10000:
         now = datetime.datetime.now()
         dur = now - startTime
         r = ''
         if dur.seconds > 0:
             r = str(statI / dur.seconds) + " per second"
         else:
-            r = "1000+ per second"
+            r = "10000+ per second"
         print "processed %s records. rate was %s." % (statC, r)
         statI = 0
         startTime = now
