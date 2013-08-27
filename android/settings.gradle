@@ -1,3 +1,2 @@
-include ':OeMap'
-include ':libraries:GooglePlay'
+include ':OeMap', ':libraries:GooglePlay'
 

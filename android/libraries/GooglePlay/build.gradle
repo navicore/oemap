@@ -11,13 +11,13 @@ buildscript {
 }
 
 dependencies {
-    compile files('libs/android-support-v4.jar')
-    compile files('google-play-services.jar')
+    compile files('../../OeMap/libs/android-support-v4.jar')
+    compile files('libs/google-play-services.jar')
 }
 
 android {
     compileSdkVersion 18
-    buildToolsVersion '17.0.0'
+    buildToolsVersion '18.0.1'
 
     sourceSets {
         main {
