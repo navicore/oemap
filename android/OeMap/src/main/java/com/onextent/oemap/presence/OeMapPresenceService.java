@@ -51,6 +51,7 @@ public class OeMapPresenceService extends Service {
 
     public static final int    DEFAULT_TTL = Presence.MEDIUM;
 
+    public static final String CMD_BCAST = "bcast";
     public static final String CMD_POLL = "poll";
     public static final String CMD_BOOT = "boot";
     public static final String CMD_ADD_SPACE = "add_space";
@@ -89,7 +90,6 @@ public class OeMapPresenceService extends Service {
         _presenceHelper = new PresenceHelper(this);
         _kvHelper = new KvHelper(this);
 
-        updateNotification();
         _locHelper = new LocationHelper(new LocationHelper.LHContext() {
             @Override
             public Context getContext() {
@@ -114,16 +114,13 @@ public class OeMapPresenceService extends Service {
         _locHelper.onCreate();
         _locHelper.onStart();
         _locHelper.onResume();
+
+        updateNotification();
     }
 
     private Presence createPresence(Location l, String spacename) throws PresenceException {
         int ttl = _kvHelper.getInt(getString(R.string.pref_ttl), DEFAULT_TTL);
         return createPresence(l, spacename, ttl);
-    }
-
-    private void resetDelays() {
-        _lastPollTime = 0;
-        _lastPushTime = 0;
     }
 
     private Presence createPresence(Location l, String spacename, int ttl) throws PresenceException {
@@ -157,8 +154,6 @@ public class OeMapPresenceService extends Service {
         _presenceHelper.deletePresencesWithSpaceName(s);
 
         _kvHelper.replace(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
-
-        updateNotification();
 
         broadcastQuitSpaceIntent(s);
 
@@ -283,6 +278,7 @@ public class OeMapPresenceService extends Service {
 
             startRunning();
             wakeup();
+            updateNotification();
 
         } else if (CMD_RM_SPACE.equals(reason)) {
 
@@ -304,12 +300,16 @@ public class OeMapPresenceService extends Service {
             if (!_spaceHelper.hasSpaceNames()) {
                 stopRunning();
             }
+            updateNotification();
             wakeup();
-        }
 
-        if (CMD_POLL.equals(reason)) {
+        } else if (CMD_POLL.equals(reason)) {
 
             wakeup();
+
+        } else if (CMD_BCAST.equals(reason)) {
+
+            broadcast();
 
         } else {
 
@@ -443,8 +443,8 @@ public class OeMapPresenceService extends Service {
         if (_lastPollTime > System.currentTimeMillis() - QUIT_TIME) {
             return;
         }
-        _lastPollTime = System.currentTimeMillis();
         OeLog.d("poll");
+        _lastPollTime = System.currentTimeMillis();
 
         if (_currentPollTask == null) //don't queue up if server is slow or down
             new Poll().execute();
@@ -462,16 +462,17 @@ public class OeMapPresenceService extends Service {
             return;
         }
 
-        resetDelays();
-
-        updateNotification();
+        _lastPollTime = 0;
 
         poll();
+    }
 
+    private void broadcast() {
+
+        _lastPushTime = 0;
         Location l = _locHelper.getLastLocation();
         if (l == null) l = _lastLocation;
-        if (l != null)
-            broadcast(l);
+        if (l != null) broadcast(l);
     }
 
     private void startRunning() {

@@ -196,6 +196,12 @@ public class OeMapActivity extends OeBaseActivity {
         Toast.makeText(this, "New map '" + newMapName + "' created.", Toast.LENGTH_SHORT).show();
     }
 
+    public void wakePresenceBroadcastService() {
+        Intent i = new Intent(this, OeMapPresenceService.class);
+        i.putExtra(OeMapPresenceService.KEY_REASON, OeMapPresenceService.CMD_BCAST);
+        startService(i);
+    }
+
     public void wakePresenceService() {
         Intent i = new Intent(this, OeMapPresenceService.class);
         i.putExtra(OeMapPresenceService.KEY_REASON, OeMapPresenceService.CMD_POLL);
@@ -632,6 +638,7 @@ public class OeMapActivity extends OeBaseActivity {
 
         updateMapNamesFromHistory();
         wakePresenceService();
+        wakePresenceBroadcastService();
         registerReceiver(_presenceReceiver, _presenceReceiverFilter);
     }
 

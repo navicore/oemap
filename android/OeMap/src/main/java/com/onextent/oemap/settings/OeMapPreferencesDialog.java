@@ -45,8 +45,6 @@ public class OeMapPreferencesDialog extends DialogFragment {
             EditText snippitEdit = (EditText) _view.findViewById(R.id.pref_snippit);
             snippitEdit.setText(snippit);
 
-            //setShowZoomCtlCb();
-
         } catch (Exception e) {
             OeLog.e(e.toString(), e);
         }
@@ -56,6 +54,7 @@ public class OeMapPreferencesDialog extends DialogFragment {
 
     @Override
     public void onPause() {
+
         EditText edit = (EditText) _view.findViewById(R.id.pref_username);
         String s = edit.getText().toString();
         _prefs.replace(getString(R.string.pref_username), s);
@@ -64,27 +63,11 @@ public class OeMapPreferencesDialog extends DialogFragment {
         s = edit.getText().toString();
         _prefs.replace(getString(R.string.pref_snippit), s);
 
+        OeMapActivity a = (OeMapActivity) getActivity();
+        a.wakePresenceBroadcastService();
+
         super.onPause();
     }
-
-    /*
-    private void setShowZoomCtlCb() {
-
-        boolean zoom = _prefs.getBoolean(getString(R.string.pref_show_zoom_ctl), true);
-        CheckBox zoomCheckBox = (CheckBox) _view.findViewById(R.id.pref_show_zoom_control);
-        zoomCheckBox.setChecked(zoom);
-
-        zoomCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-
-                _prefs.replaceBoolean(getString(R.string.pref_show_zoom_ctl), b);
-                OeMapActivity a = (OeMapActivity) getActivity();
-                a.getMap().getUiSettings().setZoomControlsEnabled(b);
-            }
-        });
-    }
-    */
 
     @Override
     public void onDestroyView() {

@@ -53,20 +53,16 @@ public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
         int max = SpaceHelper.PRESENCE_PARAM_DEFAULT_MAX_COUNT;
         if (s != null) {
             max = s.getMaxPoints();
-        } else {
-
-            OeLog.d("ejs s is NULL!!!!!!!!!!!! for space: " + _space);
         }
-        OeLog.d("ejs max init as:" + max);
         ProgressCallback cb = new ProgressCallback() {
             @Override
             public void setProgress(int progress) {
-                OeLog.d("ejs max setProgress as:" + progress);
                 if (s != null) {
                     s.setMaxPoints(progress);
                     h.deleteSpacename(_space);
                     h.insert(s);
-                    OeLog.d("ejs max saved as " + progress);
+                    OeMapActivity a = (OeMapActivity) getActivity();
+                    a.wakePresenceService();
                 }
             }
         };
@@ -76,7 +72,6 @@ public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
     @Override
     public void onPause() {
         OeMapActivity a = (OeMapActivity) getActivity();
-        a.wakePresenceService();
         super.onPause();
     }
 
@@ -84,7 +79,6 @@ public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
 
         SeekBar seek = (SeekBar) view.findViewById(R.id.space_settings_quitTimeSeekBar);
         final EditText time = (EditText) view.findViewById(R.id.space_settings_quitTime);
-        //ejs todo: look up quit time and try to guess the progress value
 
         setEditTextDate(time, _space);
         setSeekBarProgress(seek, _space);
@@ -122,6 +116,8 @@ public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
                     time.setText("Until I manually quit");
                     h.insert(_space, null);
                 }
+                OeMapActivity a = (OeMapActivity) getActivity();
+                a.wakePresenceService();
             }
         });
     }

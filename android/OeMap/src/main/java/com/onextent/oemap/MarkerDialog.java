@@ -34,6 +34,9 @@ public class MarkerDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
+        OeMapActivity a = (OeMapActivity) getActivity();
+        a.wakePresenceService();
+
         String s = null;
 
         Bundle args = getArguments();
