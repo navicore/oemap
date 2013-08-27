@@ -3,6 +3,10 @@ Ubuntu 12.04 LTS 64-bit
 useradd USERNAME -m -s /bin/bash
 passwd USERNAME
 
+# for ssh
+# from client machine (your laptop or desktop) to server machine:
+ssh-copy-id -i ~/.ssh/id_rsa.pub esweeney@nashua.onextent.com
+
 sudo adduser --system --shell /bin/bash --gecos 'user for running node.js projects' --group --disabled-password --home /home/node node
 
 apt-get install git
