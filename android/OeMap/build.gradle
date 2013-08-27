@@ -19,12 +19,12 @@ dependencies {
 }
 
 android {
-    compileSdkVersion 17
+    compileSdkVersion 18
     buildToolsVersion "17.0.0"
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 16
+        targetSdkVersion 18
         
         testPackageName "com.onextent.test.oemap"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"

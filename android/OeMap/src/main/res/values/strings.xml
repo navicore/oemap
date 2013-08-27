@@ -3,12 +3,9 @@
 
     <string-array name="menu_names_array">
         <item>Join Map</item>
-        <!--  item>Share Map</item -->
         <item>Find Map</item>
-        <!-- item>Edit Map</item -->
-        <!-- item>List Cohorts</item -->
         <item>Quit Map</item>
-        <item>------</item>
+        <item>+----+</item>
     </string-array>
 
     <string-array name="pref_map_type_entries">
