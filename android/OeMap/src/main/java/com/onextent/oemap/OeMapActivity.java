@@ -6,6 +6,7 @@ package com.onextent.oemap;
 
 import android.app.ActionBar;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.FragmentManager;
 import android.content.BroadcastReceiver;
@@ -20,6 +21,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
 import android.text.format.DateUtils;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -771,10 +773,22 @@ public class OeMapActivity extends OeBaseActivity {
                 .setCancelable(false);
 
         // create alert dialog
-        AlertDialog alertDialog = alertDialogBuilder.create();
+        final AlertDialog d = alertDialogBuilder.create();
+
+        d.setOnKeyListener(new Dialog.OnKeyListener() {
+
+            @Override
+            public boolean onKey(DialogInterface arg0, int keyCode,
+                                 KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    d.dismiss();
+                }
+                return true;
+            }
+        });
 
         // show it
-        alertDialog.show();
+        d.show();
     }
 }
 

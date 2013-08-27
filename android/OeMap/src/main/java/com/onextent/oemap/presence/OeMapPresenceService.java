@@ -353,6 +353,9 @@ public class OeMapPresenceService extends Service {
 
         SpaceHelper.Space space = _spaceHelper.getSpace(s);
         int max = space.getMaxPoints();
+        max +=1;    //don't forget you are the nearest person to yourself in oemap logic.
+                    // if you say 1 person it'll just be you coming back unless the server
+                    // learns to filter out self presence
 
         HttpClient client = new DefaultHttpClient();
         try {

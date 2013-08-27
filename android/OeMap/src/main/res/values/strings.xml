@@ -5,7 +5,7 @@
         <item>Join Map</item>
         <item>Find Map</item>
         <item>Quit Map</item>
-        <item>+----+</item>
+        <item>--------</item>
     </string-array>
 
     <string-array name="pref_map_type_entries">
