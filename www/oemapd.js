@@ -81,7 +81,10 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function(err, db) {
     //put a presence
     app.put('/presence', function(req, res) {
 
-        console.log('put presence uid: ' + req.body.uid + " space: " + req.body.space)
+        var pid = req.body.uid + '_' + req.body.space
+        req.body['_id'] = pid
+
+        console.log('put presence pid: ' + pid + ' ' + req.body.label)
         if (!req.body) {
             res.statusCode = 400;
             return res.send('Error 400: No presence in put');
@@ -89,7 +92,8 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function(err, db) {
         var ttl = req.body.ttl
         if (ttl == 0) {
           db.collection('presences').remove(
-                {"uid": req.body.uid, "space": req.body.space}, 
+                //{"uid": req.body.uid, "space": req.body.space}, 
+                {"_id": pid}, 
                 function(err, doc) {
                     if(err) throw err;
                     //todo: handle err
@@ -114,7 +118,8 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function(err, db) {
                 break;
           }
           db.collection('presences').update(
-                {"uid": req.body.uid, "space": req.body.space}, 
+                //{"uid": req.body.uid, "space": req.body.space}, 
+                {"_id": pid}, 
                 req.body, 
                 {"upsert": true}, 
                 function(err, doc) {
