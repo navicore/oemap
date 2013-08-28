@@ -4,8 +4,8 @@ import datetime
 import redis
 import json
 
-outQName = "oemap_db_worker_01_in_queue" # todo: unique
-inQName = "oemap_www_node_01_in_queue"
+outQName = "oemap_db_worker_in_queue" # todo: unique
+inQName = "oemap_www_nodejs_in_queue"
 
 rhost = "127.0.0.1"
 rport = 6379
