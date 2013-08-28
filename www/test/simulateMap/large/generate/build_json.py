@@ -28,7 +28,7 @@ with open(filedir + '/../tmp/names.txt') as namefile, open(filedir + '/../tmp/po
         presence = {}
         presence['uid'] = str(counter) + '_1234567890_TEST'
         presence['label'] = name
-        presence['snippit'] = 'having fun in CA'
+        presence['snippit'] = 'having more fun'
         presence['ttl'] = 3
         now = int(round(time.time() * 1000))
         presence['time'] = now
