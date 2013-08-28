@@ -125,7 +125,7 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
                 req.body.medium_ttl_start_time = now;
                 break;
             }
-            db.collection.presences.update(req.body, {"upsert": true},
+            db.collection('presences').update(req.body, {"upsert": true},
                 function (err, doc) {
                     if (err) {
                         throw err;
