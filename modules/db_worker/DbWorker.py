@@ -48,12 +48,6 @@ class DbWorker():
             self.statI = 0
             self.startTime = now
     
-    def logNotice (self, msg):
-            syslog.syslog(syslog.LOG_NOTICE, "%s %s" % (self.args.job, msg))
-
-    def logErr (self, msg):
-            syslog.syslog(syslog.LOG_ERR, "%s %s" % (self.args.job, msg))
-
     def run (self):
         self.logNotice('%s starting queue %s' % ("test", self.inQName))
 
@@ -64,31 +58,35 @@ class DbWorker():
             try:
                
                 (q, msg) = self.rdis.brpop(keys=[self.inQName], timeout=600);
-                #self.logNotice('DbWorker got %s' % (str(msg)))
 
-                #if msg == None: continue
+                if msg == None: 
+                    continue
                 
                 rec = json.loads(msg)
                 rec = json.loads(rec)
                 rec['_id'] = rec['uid'] + '_' + rec['space']
-                try:
-                    #self.logNotice('DbWorker updating pid %s' % (rec['_id']))
-                    self.db.presences.save(rec)
-                    self.stats()
-                except Exception as e:
-                    response = {'status': 'error', 'msg': str(e)}
-                    self.logErr('mongodb exception %s' % (e))
+                
+                self.db.presences.save(rec)
+                self.stats()
                 
                 # reply to client
                 self.rdis.lpush(self.replyTo, json.dumps(response));
             
-            except Exception as e:
-                self.logErr('exception %s' % (e))
             except: # catch *all* exceptions
-                e = sys.exc_info()[0]
-                self.logErr('exception %s (%s)' % (e.__class__, e))
+                self.handleException()
                 time.sleep(1)
 
+    def logNotice (self, msg):
+            syslog.syslog(syslog.LOG_NOTICE, "%s %s" % (self.args.job, msg))
+
+    def logErr (self, msg):
+            syslog.syslog(syslog.LOG_ERR, "%s %s" % (self.args.job, msg))
+
+    def handleException(self):
+        import traceback
+        formatted_lines = traceback.format_exc().splitlines()
+        for l in formatted_lines:
+            self.logErr(l)
 
 if __name__ == "__main__":
 
