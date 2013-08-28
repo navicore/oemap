@@ -35,4 +35,5 @@ db.presences.ensureIndex(
 
 //support query 'get the nearest n unique maps'
 db.presences.ensureIndex({"location": "2dsphere"})
+db.presences.ensureIndex({"space": 1})
 

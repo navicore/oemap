@@ -65,6 +65,8 @@ class DbWorker():
                
                 (q, msg) = self.rdis.brpop(keys=[self.inQName], timeout=600);
                 #self.logNotice('DbWorker got %s' % (str(msg)))
+
+                #if msg == None: continue
                 
                 rec = json.loads(msg)
                 rec = json.loads(rec)

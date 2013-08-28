@@ -4,10 +4,11 @@ import json
 
 filedir = os.path.dirname(os.path.realpath(__file__))
 
-import requests
 import time
-import json
 from itertools import izip
+
+snippit = 'having less fun'
+space = 'big test'
 
 with open(filedir + '/../tmp/names.txt') as namefile, open(filedir + '/../tmp/points.txt') as pointfile:
     
@@ -28,11 +29,11 @@ with open(filedir + '/../tmp/names.txt') as namefile, open(filedir + '/../tmp/po
         presence = {}
         presence['uid'] = str(counter) + '_1234567890_TEST'
         presence['label'] = name
-        presence['snippit'] = 'having more fun'
+        presence['snippit'] = snippit
         presence['ttl'] = 3
         now = int(round(time.time() * 1000))
         presence['time'] = now
-        presence['space'] = 'big test'
+        presence['space'] = space
         presence['location'] = {}
         presence['location']['type'] = "Point"
         presence['location']['coordinates'] = [lon, lat]
