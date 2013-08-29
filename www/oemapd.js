@@ -18,10 +18,12 @@ app.configure(function () {
     app.use(express.bodyParser());
 });
 
+
 MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
 
     if (err) {
-        throw err;
+        Syslog.log(Syslog.LOG_ERR, "error: %s" % (err));
+        //throw err;
     }
 
     Syslog.log(Syslog.LOG_INFO, "created mongodb connection");
