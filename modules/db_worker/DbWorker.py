@@ -13,6 +13,8 @@ from argparse import ArgumentParser
 
 #rmmonitor = RiemannClient(transport = RiemannUDPTransport, host=config.riemann['host'])
 
+ok_response = {'status': 'ok'}
+
 class DbWorker():
 
 
@@ -48,12 +50,13 @@ class DbWorker():
             self.statI = 0
             self.startTime = now
     
+
     def run (self):
         self.logNotice('%s starting queue %s' % ("test", self.inQName))
 
         while True:
 
-            response = {'status': 'ok'}
+            response = ok_response;
 
             try:
                
@@ -61,16 +64,17 @@ class DbWorker():
 
                 if msg == None: 
                     continue
+                self.logNotice('ejs got: ' + msg);
                 
                 rec = json.loads(msg)
-                rec = json.loads(rec)
+                #rec = json.loads(rec)
                 rec['_id'] = rec['uid'] + '_' + rec['space']
                 
                 self.db.presences.save(rec)
                 self.stats()
                 
                 # reply to client
-                self.rdis.lpush(self.replyTo, json.dumps(response));
+                #self.rdis.lpush(self.replyTo, json.dumps(response));
             
             except: # catch *all* exceptions
                 self.handleException()

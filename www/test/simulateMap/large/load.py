@@ -35,13 +35,13 @@ else:
 filedir = os.path.dirname(os.path.realpath(__file__))
 
 serverAddr = 'http://' + host + ':' + str(port) + '/presence'
+headers = {'Content-Type': 'application/json'}
 
 for line in open(filedir + '/tmp/presences.json'):
 
     line = line.strip()
     #print line
 
-    headers = {'Content-Type': 'application/json'}
     r = requests.put(serverAddr, data=line, headers=headers)
 
     #print "%s %s" % (r.status_code, r.text)

@@ -5,6 +5,7 @@ var express = require('express'),
     app = express(),
     cons = require('consolidate'),
     crypto = require('crypto'),
+    redis = require('redis'),
     MongoClient = require('mongodb').MongoClient;
 
 app.engine('html', cons.swig);
@@ -20,6 +21,10 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
         throw err;
     }
     //todo: syslog logging
+    console.log('created mongodb connection');
+
+    var rclient = redis.createClient();
+    console.log('created redis client');
 
     //return a list of presences for the space
     app.get('/presence', function (req, res) {
@@ -99,6 +104,7 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
 
         var pid = req.body.uid + '_' + req.body.space,
             ttl = req.body.ttl,
+            label = req.body.label,
             now = new Date();
 
         req.body._id = pid;
@@ -131,20 +137,24 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
                 req.body.medium_ttl_start_time = now;
                 break;
             }
-            db.collection('presences').save(req.body,
-                function (err, doc) {
-                    if (err) {
-                        console.log('upsert error: ' + err);
-                        //todo: handle err
-                        throw err;
-                    }
-                    if (!doc) {
-                        console.log('warning: no records modified ');
-                    } else {
-                        console.log('*** pid: ' + doc.pid + ' updated');
-                    }
-                }
-                );
+
+            rclient.lpush('oemap_db_worker_in_queue', JSON.stringify(req.body));
+//todo ejs callback
+
+            //db.collection('presences').save(req.body,
+            //    function (err, doc) {
+            //        if (err) {
+            //            console.log('upsert error: ' + err);
+            //            //todo: handle err
+            //            throw err;
+            //        }
+            //        if (!doc) {
+            //            console.log('warning: no records modified ');
+            //        } else {
+            //            console.log('pid: "' + pid + '" for ' + label + ' updated');
+            //        }
+            //    }
+            //    );
         }
         res.send(200);
     });
