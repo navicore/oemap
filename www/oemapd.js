@@ -6,7 +6,10 @@ var express = require('express'),
     cons = require('consolidate'),
     crypto = require('crypto'),
     redis = require('redis'),
+    Syslog = require('node-syslog'),
     MongoClient = require('mongodb').MongoClient;
+
+Syslog.init("oemapd", Syslog.LOG_PID | Syslog.LOG_ODELAY, Syslog.LOG_LOCAL0);
 
 app.engine('html', cons.swig);
 app.set('view engine', 'html');
@@ -20,11 +23,12 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
     if (err) {
         throw err;
     }
-    //todo: syslog logging
-    console.log('created mongodb connection');
+
+    Syslog.log(Syslog.LOG_INFO, "created mongodb connection");
+
 
     var rclient = redis.createClient();
-    console.log('created redis client');
+    Syslog.log(Syslog.LOG_INFO, "created redis client");
 
     //return a list of presences for the space
     app.get('/presence', function (req, res) {
@@ -82,9 +86,9 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
                     res.statusCode = 404;
                     return res.send('Error 404: No presences found');
                 }
-                console.log('get got ' + doc.length + ' presences for ' +
-                    spc + ' near ' + lat + "/" + lon + " within " + dist +
-                    " meters");
+                Syslog.log(Syslog.LOG_DEBUG, 'get got ' + doc.length +
+                    ' presences for ' + spc + ' near ' + lat + "/" +
+                    lon + " within " + dist + " meters");
 
                 res.statusCode = 200;
                 return res.json(doc);
@@ -97,7 +101,7 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
     app.put('/presence', function (req, res) {
 
         if (!req.body) {
-            console.log('put missing req.body');
+            Syslog.log(Syslog.LOG_DEBUG, "put missing req.body");
             res.statusCode = 400;
             return res.send('Error 400: No presence in put');
         }
@@ -110,7 +114,8 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
         req.body._id = pid;
 
         if (ttl === 0) {
-            console.log('ttl expired for pid: ' + pid + ' ' + req.body.label);
+            Syslog.log(Syslog.LOG_DEBUG, 'ttl expired for pid: ' + 
+                pid + ' ' + req.body.label);
             db.collection('presences').remove(
                 function (err, doc) {
                     if (err) {
@@ -165,6 +170,6 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
     });
 
     app.listen(8080);
-    console.log('oemapd server started on port 8080');
+    Syslog.log(Syslog.LOG_INFO, 'server started on port 8080');
 });
 

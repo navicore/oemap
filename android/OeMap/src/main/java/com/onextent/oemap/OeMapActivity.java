@@ -530,6 +530,8 @@ public class OeMapActivity extends OeBaseActivity {
                             Toast.makeText(this, getString(R.string.msg_still_looking), Toast.LENGTH_SHORT).show();
                         }
                     }
+                    wakePresenceService();
+                    wakePresenceBroadcastService();
                 }
                 break;
             case R.id.action_help:

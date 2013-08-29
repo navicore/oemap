@@ -207,6 +207,9 @@ public class OeMapFragment extends MapFragment  {
                 _home.showMarkerDialog();
             }
         });
+        OeMapActivity a = (OeMapActivity) getActivity();
+        a.wakePresenceService();
+        a.wakePresenceBroadcastService(); //temp ejs todo: make servcie smart about ttl and distance
     }
 
     @Override
