@@ -7,7 +7,7 @@ filedir = os.path.dirname(os.path.realpath(__file__))
 import time
 from itertools import izip
 
-snippit = 'having less fun'
+snippit = 'having fun'
 space = 'big test'
 
 with open(filedir + '/../tmp/names.txt') as namefile, open(filedir + '/../tmp/points.txt') as pointfile:

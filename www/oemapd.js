@@ -53,7 +53,6 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
             res.statusCode = 400;
             return res.send('Error 400: No space requested');
         }
-        console.log('get ' + count + ' presences for ' + spc + ' near ' + lat + "/" + lon + " within " + dist + " meters");
 
         if (lat && lon) {
             geoq = {
@@ -68,37 +67,44 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
             query.location = geoq;
         }
 
-        db.collection('presences').find(query).limit(count).toArray(function (err, doc) {
-            if (err) {
-                throw err;
-            }
+        db.collection('presences').find(query).limit(count).toArray(
+            function (err, doc) {
+                if (err) {
+                    throw err;
+                }
 
-            if (!doc || doc.length < 1) {
-                res.statusCode = 404;
-                return res.send('Error 404: No presences found');
-            }
+                if (!doc || doc.length < 1) {
+                    res.statusCode = 404;
+                    return res.send('Error 404: No presences found');
+                }
+                console.log('get got ' + doc.length + ' presences for ' +
+                    spc + ' near ' + lat + "/" + lon + " within " + dist +
+                    " meters");
 
-            res.statusCode = 200;
-            return res.json(doc);
-        });
+                res.statusCode = 200;
+                return res.json(doc);
+            }
+        );
         return;
     });
 
     //put a presence
     app.put('/presence', function (req, res) {
 
+        if (!req.body) {
+            console.log('put missing req.body');
+            res.statusCode = 400;
+            return res.send('Error 400: No presence in put');
+        }
+
         var pid = req.body.uid + '_' + req.body.space,
             ttl = req.body.ttl,
             now = new Date();
 
-        req.body_id = pid;
+        req.body._id = pid;
 
-        console.log('put presence pid: ' + pid + ' ' + req.body.label);
-        if (!req.body) {
-            res.statusCode = 400;
-            return res.send('Error 400: No presence in put');
-        }
         if (ttl === 0) {
+            console.log('ttl expired for pid: ' + pid + ' ' + req.body.label);
             db.collection('presences').remove(
                 function (err, doc) {
                     if (err) {
@@ -125,13 +131,18 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
                 req.body.medium_ttl_start_time = now;
                 break;
             }
-            db.collection('presences').update(req.body, {"upsert": true},
+            db.collection('presences').save(req.body,
                 function (err, doc) {
                     if (err) {
+                        console.log('upsert error: ' + err);
+                        //todo: handle err
                         throw err;
                     }
-                    //todo: handle err
-                    //todo: make pid uid and overwrite map dupes
+                    if (!doc) {
+                        console.log('warning: no records modified ');
+                    } else {
+                        console.log('*** pid: ' + doc.pid + ' updated');
+                    }
                 }
                 );
         }
