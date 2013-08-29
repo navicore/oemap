@@ -30,7 +30,7 @@ with open(filedir + '/../tmp/names.txt') as namefile, open(filedir + '/../tmp/po
         presence['uid'] = str(counter) + '_1234567890_TEST'
         presence['label'] = name
         presence['snippit'] = snippit
-        presence['ttl'] = 3
+        presence['ttl'] = 2
         now = int(round(time.time() * 1000))
         presence['time'] = now
         presence['space'] = space
