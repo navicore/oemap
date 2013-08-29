@@ -7,8 +7,9 @@ filedir = os.path.dirname(os.path.realpath(__file__))
 import time
 from itertools import izip
 
-snippit = 'having fun'
+snippit = 'having fun?'
 space = 'big test'
+ttl = 2
 
 with open(filedir + '/../tmp/names.txt') as namefile, open(filedir + '/../tmp/points.txt') as pointfile:
     
@@ -30,7 +31,7 @@ with open(filedir + '/../tmp/names.txt') as namefile, open(filedir + '/../tmp/po
         presence['uid'] = str(counter) + '_1234567890_TEST'
         presence['label'] = name
         presence['snippit'] = snippit
-        presence['ttl'] = 2
+        presence['ttl'] = ttl
         now = int(round(time.time() * 1000))
         presence['time'] = now
         presence['space'] = space
