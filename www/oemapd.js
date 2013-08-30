@@ -22,7 +22,7 @@ app.configure(function () {
 MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
 
     if (err) {
-        Syslog.log(Syslog.LOG_ERR, "error: %s" % (err));
+        Syslog.log(Syslog.LOG_ERR, "mongodb error", err);
         //throw err;
     }
 
@@ -116,7 +116,7 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
         req.body._id = pid;
 
         if (ttl === 0) {
-            Syslog.log(Syslog.LOG_DEBUG, 'ttl expired for pid: ' + 
+            Syslog.log(Syslog.LOG_DEBUG, 'ttl expired for pid: ' +
                 pid + ' ' + req.body.label);
             db.collection('presences').remove(
                 function (err, doc) {
@@ -145,7 +145,13 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
                 break;
             }
 
-            rclient.lpush('oemap_db_worker_in_queue', JSON.stringify(req.body));
+            //rclient.lpush('oemap_db_worker_in_queue', JSON.stringify(req.body));
+            rclient.lpush('oemap_db_worker_in_queue', JSON.stringify(req.body),
+                function (err) {
+                    if (err) {
+                        Syslog.log(Syslog.LOG_WARNING, "lpush error: %s", err);
+                    }
+                });
 //todo ejs callback
 
             //db.collection('presences').save(req.body,

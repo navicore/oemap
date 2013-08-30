@@ -7,7 +7,7 @@ filedir = os.path.dirname(os.path.realpath(__file__))
 import time
 from itertools import izip
 
-snippit = 'having a blast'
+snippit = 'having a blast!'
 space = 'big test'
 ttl = 3
 
