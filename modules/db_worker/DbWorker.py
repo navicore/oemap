@@ -23,18 +23,14 @@ class DbWorker():
         parser = ArgumentParser()
         parser.add_argument('-n', '--job', dest='job', action='store', help='worker instance id')
         self.args = parser.parse_args()
-        rhost = "127.0.0.1"
-        rport = 6379
-        self.rdis = redis.Redis(host=rhost, port=rport)
-        self.inQName = "oemap_db_worker_in_queue"
-        self.replyTo = "oemap_www_nodejs_in_queue"
-
+        self.rhost = "127.0.0.1"
+        self.rport = 6379
         self.startTime = datetime.datetime.now()
         self.statC = 0
         self.statI = 0
-        client = MongoClient()
-        self.db = client.oemap_test
-
+        self.inQName = "oemap_db_worker_in_queue"
+        self.replyTo = "oemap_www_nodejs_in_queue"
+        
     def stats(self):
         self.statC = self.statC + 1
         self.statI = self.statI + 1
@@ -52,13 +48,18 @@ class DbWorker():
     
 
     def run (self):
+
+      while True:
+       try:
         self.logNotice('%s starting queue %s' % ("test", self.inQName))
+
+        self.rdis = redis.Redis(host=self.rhost, self.port=rport)
+        client = MongoClient()
+        self.db = client.oemap_test
 
         while True:
 
-            response = ok_response;
-
-            try:
+                response = ok_response;
                
                 (q, msg) = self.rdis.brpop(keys=[self.inQName], timeout=600);
 
@@ -75,9 +76,9 @@ class DbWorker():
                 # reply to client
                 #self.rdis.lpush(self.replyTo, json.dumps(response));
             
-            except: # catch *all* exceptions
-                self.handleException()
-                time.sleep(1)
+       except: # catch *all* exceptions
+        self.handleException()
+        time.sleep(1)
 
     def logNotice (self, msg):
             syslog.syslog(syslog.LOG_NOTICE, "%s %s" % (self.args.job, msg))
