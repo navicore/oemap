@@ -25,7 +25,7 @@ def stats():
         if dur.seconds > 0:
             r = str(statI / dur.seconds) + " per second"
         else:
-            r = "1000+ per second"
+            r = "10000+ per second"
         print "processed %s records. rate was %s." % (statC, r)
         statI = 0
         startTime = now
@@ -35,10 +35,11 @@ filedir = os.path.dirname(os.path.realpath(__file__))
 for line in open(filedir + '/tmp/presences.json'):
 
     line = line.strip()
-    rdis.lpush(outQName, json.dumps(line));
-    (q, msg) = rdis.brpop(keys=[inQName], timeout=600);
-    rec = json.loads(msg)
+    #rdis.lpush(outQName, json.loads(line));
+    rdis.lpush(outQName, line);
+    #(q, msg) = rdis.brpop(keys=[inQName], timeout=600);
+    #rec = json.loads(msg)
     #rec = json.loads(rec)
-    if (rec['status'] != 'ok'): print rec
+    #if (rec['status'] != 'ok'): print rec
     stats()
 

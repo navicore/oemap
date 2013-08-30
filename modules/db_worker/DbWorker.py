@@ -64,7 +64,6 @@ class DbWorker():
 
                 if msg == None: 
                     continue
-                self.logNotice('ejs got: ' + msg);
                 
                 rec = json.loads(msg)
                 #rec = json.loads(rec)

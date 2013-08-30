@@ -18,10 +18,12 @@ app.configure(function () {
     app.use(express.bodyParser());
 });
 
+
 MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
 
     if (err) {
-        throw err;
+        Syslog.log(Syslog.LOG_ERR, "mongodb error", err);
+        //throw err;
     }
 
     Syslog.log(Syslog.LOG_INFO, "created mongodb connection");
@@ -143,7 +145,13 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
                 break;
             }
 
-            rclient.lpush('oemap_db_worker_in_queue', JSON.stringify(req.body));
+            //rclient.lpush('oemap_db_worker_in_queue', JSON.stringify(req.body));
+            rclient.lpush('oemap_db_worker_in_queue', JSON.stringify(req.body),
+                function (err) {
+                    if (err) {
+                        Syslog.log(Syslog.LOG_WARNING, "lpush error: %s", err);
+                    }
+                });
 //todo ejs callback
 
             //db.collection('presences').save(req.body,
