@@ -68,6 +68,7 @@ class DbWorker():
                     
                   rec = json.loads(msg)
                   rec['_id'] = rec['uid'] + '_' + rec['space']
+                  self.logDebug("updating %s for %s" % (rec['_id'], rec['label']))
                     
                   self.db.presences.save(rec)
                   self.stats()
@@ -79,6 +80,9 @@ class DbWorker():
               self.handleException()
               time.sleep(1)
     
+    def logDebug (self, msg):
+            syslog.syslog(syslog.LOG_DEBUG, "%s %s" % (self.args.job, msg))
+
     def logNotice (self, msg):
             syslog.syslog(syslog.LOG_NOTICE, "%s %s" % (self.args.job, msg))
 
