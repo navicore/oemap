@@ -50,36 +50,35 @@ class DbWorker():
     def run (self):
 
       while True:
-       try:
-        self.logNotice('%s starting queue %s' % ("test", self.inQName))
-
-        self.rdis = redis.Redis(host=self.rhost, self.port=rport)
-        client = MongoClient()
-        self.db = client.oemap_test
-
-        while True:
-
-                response = ok_response;
-               
-                (q, msg) = self.rdis.brpop(keys=[self.inQName], timeout=600);
-
-                if msg == None: 
-                    continue
+          try:
+              self.logNotice('%s starting queue %s' % ("test", self.inQName))
+    
+              rdis = redis.Redis(host=self.rhost, port=self.rport)
+              client = MongoClient()
+              self.db = client.oemap_test
+    
+              while True:
+    
+                  response = ok_response;
+                   
+                  (q, msg) = rdis.brpop(keys=[self.inQName], timeout=600);
+    
+                  if msg == None: 
+                      continue
+                    
+                  rec = json.loads(msg)
+                  rec['_id'] = rec['uid'] + '_' + rec['space']
+                    
+                  self.db.presences.save(rec)
+                  self.stats()
+                    
+                  # reply to client
+                  #rdis.lpush(self.replyTo, json.dumps(response));
                 
-                rec = json.loads(msg)
-                #rec = json.loads(rec)
-                rec['_id'] = rec['uid'] + '_' + rec['space']
-                
-                self.db.presences.save(rec)
-                self.stats()
-                
-                # reply to client
-                #self.rdis.lpush(self.replyTo, json.dumps(response));
-            
-       except: # catch *all* exceptions
-        self.handleException()
-        time.sleep(1)
-
+          except: # catch *all* exceptions
+              self.handleException()
+              time.sleep(1)
+    
     def logNotice (self, msg):
             syslog.syslog(syslog.LOG_NOTICE, "%s %s" % (self.args.job, msg))
 
