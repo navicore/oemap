@@ -54,6 +54,8 @@ public class OeMapPresenceService extends Service {
     public static final String CMD_POLL = "poll";
     public static final String CMD_BOOT = "boot";
     public static final String CMD_ADD_SPACE = "add_space";
+    public static final String CMD_ADD_INTEREST = "add_interest";
+    public static final String CMD_RM_INTEREST = "add_interest";
     public static final String CMD_RM_SPACE = "rm_space";
     public static final String KEY_REASON = "reason";
     public static final String KEY_SPACENAME = "spacename";
@@ -78,6 +80,7 @@ public class OeMapPresenceService extends Service {
     private boolean _running = false;
     private Notification _notification = null;
     private Location _lastLocation = null;
+    private LatLng _interestPoint = null;
     private Location _lastBCastLocation = null;
     private long _lastPollTime = 0;
     private long _lastPushTime = 0;
@@ -343,6 +346,18 @@ public class OeMapPresenceService extends Service {
 
     private void pollSpace(String s) {
 
+        LatLng point;
+
+        if (_interestPoint != null) {
+            point = _interestPoint;
+
+        } else if (_lastLocation != null) {
+            point = new LatLng(_lastLocation.getLatitude(), _lastLocation.getLongitude());
+
+        } else {
+            return; // not yet
+        }
+
         if (_lastLocation == null) return; //not yet
 
         OeLog.d("pollSpace space: " + s);
@@ -365,8 +380,8 @@ public class OeMapPresenceService extends Service {
         try {
             HttpGet get = new HttpGet(PRESENCE_URL + "?" +
                     PRESENCE_PARAM_SPACE + "=" + URLEncoder.encode(s, "UTF8") +
-                    "&" + PRESENCE_PARAM_LATITUDE + "=" + URLEncoder.encode(String.valueOf(_lastLocation.getLatitude()), "UTF8") +
-                    "&" + PRESENCE_PARAM_LONGITUDE + "=" + URLEncoder.encode(String.valueOf(_lastLocation.getLongitude()), "UTF8") +
+                    "&" + PRESENCE_PARAM_LATITUDE + "=" + URLEncoder.encode(String.valueOf(point.latitude), "UTF8") +
+                    "&" + PRESENCE_PARAM_LONGITUDE + "=" + URLEncoder.encode(String.valueOf(point.longitude), "UTF8") +
                     "&" + PRESENCE_PARAM_MAX + "=" + max
             );
             get.addHeader("Content-Type", "application/json");

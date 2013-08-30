@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
@@ -25,6 +24,10 @@ import com.onextent.oemap.presence.PresenceException;
 import com.onextent.oemap.provider.PresenceHelper;
 
 import org.json.JSONException;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class MarkerDialog extends DialogFragment {
@@ -53,7 +56,9 @@ public class MarkerDialog extends DialogFragment {
         final String spacename = s;
 
         try {
-            final List<Presence> presences = presenceHelper.getAllPrecenses(spacename);
+            List<Presence> tmpp = presenceHelper.getAllPrecenses(spacename);
+            final PresenceList presences = new PresenceList(tmpp);
+            presences.sort();
             ListAdapter presencesAdapter = new MarkerLabelAdapter(presences);
 
             builder.setTitle("Find Map Member")
@@ -80,6 +85,29 @@ public class MarkerDialog extends DialogFragment {
             OeLog.e(e);
         }
         return builder.create();
+    }
+
+    private class PresenceList extends ArrayList<Presence>
+    {
+        PresenceList(List l ) {
+            super(l);
+        }
+
+        Comparator<Presence> comp = new Comparator<Presence>() {
+            @Override
+            public int compare(Presence lhs, Presence rhs) {
+                return lhs.getLabel().compareTo(rhs.getLabel());
+            }
+
+            @Override
+            public boolean equals(Object object) {
+                return false;
+            }
+        };
+
+        public void sort() {
+            Collections.sort(this, comp);
+        }
     }
 
     private class MarkerLabelAdapter extends BaseAdapter {

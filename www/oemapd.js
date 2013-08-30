@@ -114,7 +114,7 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
         req.body._id = pid;
 
         if (ttl === 0) {
-            Syslog.log(Syslog.LOG_DEBUG, 'ttl expired for pid: ' + 
+            Syslog.log(Syslog.LOG_DEBUG, 'ttl expired for pid: ' +
                 pid + ' ' + req.body.label);
             db.collection('presences').remove(
                 function (err, doc) {
