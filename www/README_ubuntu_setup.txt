@@ -35,4 +35,5 @@ wget -q -O - http://www.dotdeb.org/dotdeb.gpg | sudo apt-key add -
 apt-get update
 apt-get install redis-server
 
+echo 1 > /proc/sys/vm/overcommit_memory
 
