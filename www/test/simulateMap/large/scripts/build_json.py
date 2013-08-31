@@ -7,7 +7,7 @@ filedir = os.path.dirname(os.path.realpath(__file__))
 import time
 from itertools import izip
 
-snippit = 'good morning'
+snippit = 'good morning to you all'
 space = 'big test'
 ttl = 1
 
@@ -34,6 +34,13 @@ with open(filedir + '/../tmp/names.txt') as namefile, open(filedir + '/../tmp/po
         presence['ttl'] = ttl
         now = int(round(time.time() * 1000))
         presence['time'] = now
+        if ttl == 1:
+            ttl_idx = 'short_ttl_start_time'
+        elif ttl == 2:
+            ttl_idx = 'medium_ttl_start_time'
+        else:
+            ttl_idx = 'long_ttl_start_time'
+        presence[ttl_idx] = now
         presence['space'] = space
         presence['location'] = {}
         presence['location']['type'] = "Point"
