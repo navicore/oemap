@@ -145,6 +145,9 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
                 break;
             }
 
+            //
+            //todo: exception.  what happens if redis is down?
+            //
             //rclient.lpush('oemap_db_worker_in_queue', JSON.stringify(req.body));
             rclient.lpush('oemap_db_worker_in_queue', JSON.stringify(req.body),
                 function (err) {
@@ -152,7 +155,6 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
                         Syslog.log(Syslog.LOG_WARNING, "lpush error: %s", err);
                     }
                 });
-//todo ejs callback
 
             //db.collection('presences').save(req.body,
             //    function (err, doc) {
