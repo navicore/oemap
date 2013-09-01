@@ -10,9 +10,8 @@ var redis = require('redis'),
     MongoClient = require('mongodb').MongoClient;
 
 process.argv.forEach(function (val, index, array) {
-    if (index === 2) {
+    if (index === 2) { //ejs todo: fix this idiotic hack with proper arg processing
         workerId = val;
-    }
     Syslog.init(workerId, Syslog.LOG_PID | Syslog.LOG_ODELAY, Syslog.LOG_LOCAL0);
 
     MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', function (err, db) {
@@ -80,5 +79,6 @@ process.argv.forEach(function (val, index, array) {
         lrpop();
     });
 
+        }
 });
 
