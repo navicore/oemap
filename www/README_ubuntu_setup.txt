@@ -32,6 +32,9 @@ apt-get install mongodb-10gen
 deb http://packages.dotdeb.org squeeze all
 deb-src http://packages.dotdeb.org squeeze all
 
+# settings in /etc/redis/redis.conf     
+# todo: consider commenting out save, this is how we are tesing
+
 wget -q -O - http://www.dotdeb.org/dotdeb.gpg | sudo apt-key add -
 
 apt-get update

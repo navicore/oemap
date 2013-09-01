@@ -10,7 +10,6 @@ var redis = require('redis'),
     MongoClient = require('mongodb').MongoClient;
 
 process.argv.forEach(function (val, index, array) {
-    console.log(index + ': ' + val);
     if (index === 2) {
         workerId = val;
     }
