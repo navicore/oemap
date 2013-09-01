@@ -16,7 +16,7 @@ process.argv.forEach(function (val, index, array) {
     }
     Syslog.init(workerId, Syslog.LOG_PID | Syslog.LOG_ODELAY, Syslog.LOG_LOCAL0);
 
-    MongoClient.connect('mongodb://localhost:27017/oemap_test', function (err, db) {
+    MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', function (err, db) {
 
         if (err) {
             Syslog.log(Syslog.LOG_ERR, "mongodb error", err);
