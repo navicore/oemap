@@ -1,13 +1,14 @@
 #!/usr/bin/python2
 import os
 import json
+import datetime
 
 filedir = os.path.dirname(os.path.realpath(__file__))
 
 import time
 from itertools import izip
 
-snippit = 'good morning to you all'
+snippit = 'good morning to you'
 space = 'big test'
 ttl = 1
 
@@ -32,7 +33,7 @@ with open(filedir + '/../tmp/names.txt') as namefile, open(filedir + '/../tmp/po
         presence['label'] = name
         presence['snippit'] = snippit
         presence['ttl'] = ttl
-        now = int(round(time.time() * 1000))
+        now = str(datetime.datetime.now())
         presence['time'] = now
         if ttl == 1:
             ttl_idx = 'short_ttl_start_time'
