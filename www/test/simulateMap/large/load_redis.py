@@ -2,7 +2,6 @@
 import os
 import datetime
 import redis
-import json
 
 outQName = "oemap_db_worker_in_queue"
 inQName = "oemap_www_nodejs_in_queue"

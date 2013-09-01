@@ -3,6 +3,8 @@ Ubuntu 12.04 LTS 64-bit
 useradd USERNAME -m -s /bin/bash
 passwd USERNAME
 
+# for vim get .vimrc and .vim dir from user git
+
 # for ssh
 # from client machine (your laptop or desktop) to server machine:
 ssh-copy-id -i ~/.ssh/id_rsa.pub esweeney@nashua.onextent.com

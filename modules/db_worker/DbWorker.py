@@ -1,7 +1,7 @@
 #!/usr/bin/python2
+"""worker to read presence records from redis and write to mongodb"""
 
 from pymongo import MongoClient
-import sys
 import syslog
 import redis
 import json
@@ -11,89 +11,97 @@ from argparse import ArgumentParser
 
 #from riemann import RiemannClient, RiemannUDPTransport
 
-#rmmonitor = RiemannClient(transport = RiemannUDPTransport, host=config.riemann['host'])
+#rmmonitor = RiemannClient(transport = RiemannUDPTransport,
+#host=config.riemann['host'])
 
-ok_response = {'status': 'ok'}
+#ok_response = {'status': 'ok'}
+
+INQNAME = "oemap_db_worker_in_queue"
+REPLYTO = "oemap_www_nodejs_in_queue"
 
 class DbWorker():
-
-
+    
     def __init__ (self):
 
         parser = ArgumentParser()
-        parser.add_argument('-n', '--job', dest='job', action='store', help='worker instance id')
+        parser.add_argument('-n', '--job', dest='job', action='store', 
+                help='worker instance id')
         self.args = parser.parse_args()
         self.rhost = "127.0.0.1"
         self.rport = 6379
-        self.startTime = datetime.datetime.now()
-        self.statC = 0
-        self.statI = 0
-        self.inQName = "oemap_db_worker_in_queue"
-        self.replyTo = "oemap_www_nodejs_in_queue"
+        self.starttime = datetime.datetime.now()
+        self.statc = 0
+        self.stati = 0
+        self.database = None
         
     def stats(self):
-        self.statC = self.statC + 1
-        self.statI = self.statI + 1
-        if self.statI == 10000:
+        self.statc = self.statc + 1
+        self.stati = self.stati + 1
+        if self.stati == 10000:
             now = datetime.datetime.now()
-            dur = now - self.startTime
-            r = ''
+            dur = now - self.starttime
+            rate = ''
             if dur.seconds > 0:
-                r = str(self.statI / dur.seconds) + " per second"
+                rate = str(self.stati / dur.seconds) + " per second"
             else:
-                r = "1000+ per second"
-            self.logNotice("processed %s records. rate was %s." % (self.statC, r))
-            self.statI = 0
-            self.startTime = now
+                rate = "1000+ per second"
+            self.log_notice("processed %s records. rate was %s." % 
+                    (self.statc, rate))
+            self.stati = 0
+            self.starttime = now
     
 
     def run (self):
 
-      while True:
-          try:
-              self.logNotice('%s starting queue %s' % ("test", self.inQName))
+        while True:
+            try:
+                self.log_notice('%s starting queue %s' % ("test", INQNAME))
     
-              rdis = redis.Redis(host=self.rhost, port=self.rport)
-              client = MongoClient()
-              self.db = client.oemap_test
+                rdis = redis.Redis(host=self.rhost, port=self.rport)
+                client = MongoClient()
+                self.database = client.oemap_test
     
-              while True:
+                while True:
     
-                  response = ok_response;
+                    #response = ok_response;
                    
-                  (q, msg) = rdis.brpop(keys=[self.inQName], timeout=600);
+                    (_, msg) = rdis.brpop(keys=[INQNAME], timeout=600)
     
-                  if msg == None: 
-                      continue
+                    if msg == None: 
+                        continue
                     
-                  rec = json.loads(msg)
-                  rec['_id'] = rec['uid'] + '_' + rec['space']
-                  self.logDebug("updating %s for %s" % (rec['_id'], rec['label']))
+                    rec = json.loads(msg)
+                    rec['_id'] = rec['uid'] + '_' + rec['space']
+                    self.log_debug("updating %s for %s" % (rec['_id'], 
+                        rec['label']))
                     
-                  self.db.presences.save(rec)
-                  self.stats()
+                    self.database.presences.save(rec)
+                    self.stats()
                     
                   # reply to client
                   #rdis.lpush(self.replyTo, json.dumps(response));
                 
-          except: # catch *all* exceptions
-              self.handleException()
-              time.sleep(1)
+            except Exception:
+                self.handle_exception()
+                time.sleep(1)
+            except: # catch *all* exceptions
+                self.handle_exception()
+                time.sleep(1)
     
-    def logDebug (self, msg):
-            syslog.syslog(syslog.LOG_DEBUG, "%s %s" % (self.args.job, msg))
+    def log_debug (self, msg):
+        syslog.syslog(syslog.LOG_DEBUG, "%s %s" % (self.args.job, msg))
 
-    def logNotice (self, msg):
-            syslog.syslog(syslog.LOG_NOTICE, "%s %s" % (self.args.job, msg))
+    def log_notice (self, msg):
+        syslog.syslog(syslog.LOG_NOTICE, "%s %s" % (self.args.job, msg))
 
-    def logErr (self, msg):
-            syslog.syslog(syslog.LOG_ERR, "%s %s" % (self.args.job, msg))
+    def log_error (self, msg):
+        syslog.syslog(syslog.LOG_ERR, "%s %s" % (self.args.job, msg))
 
-    def handleException(self):
+    def handle_exception(self):
         import traceback
         formatted_lines = traceback.format_exc().splitlines()
-        for l in formatted_lines:
-            self.logErr(l)
+        for line in formatted_lines:
+            self.log_error(line)
 
 if __name__ == "__main__":
 
