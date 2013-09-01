@@ -1,13 +1,10 @@
-/var/log/oemapd
-{
+/var/log/oemapd.log {
 	rotate 7
 	daily
-	missingok
-	notifempty
-	delaycompress
+    missingok
+    notifempty
+    size 300k
+    create 0600 node node
 	compress
-	postrotate
-		invoke-rc.d syslog-ng reload > /dev/null
-	endscript
 }
 
