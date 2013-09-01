@@ -55,7 +55,7 @@ class DbWorker():
 
         while True:
             try:
-                self.log_notice('%s starting queue %s' % ("test", INQNAME))
+                self.log_notice('%s Python impl starting queue %s' % ("test", INQNAME))
     
                 rdis = redis.Redis(host=self.rhost, port=self.rport)
                 client = MongoClient()
