@@ -89,7 +89,7 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', 
                     return res.send('Error 404: No presences found');
                 }
                 Syslog.log(Syslog.LOG_DEBUG, 'get got ' + doc.length +
-                    ' presences for ' + spc + ' near ' + lat + "/" +
+                    ' presences in ' + spc + ' near ' + lat + "/" +
                     lon + " within " + dist + " meters");
 
                 res.statusCode = 200;
