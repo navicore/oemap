@@ -11,11 +11,13 @@ import com.google.android.gms.maps.model.LatLng;
 public interface Presence {
 
     public static int NONE   = 0; //delete presence
-    public static int SHORT  = 1;
-    public static int MEDIUM = 2;
-    public static int LONG   = 3;
+    public static int SHORT  = 1; // 5 min
+    public static int MEDIUM = 2; // 1 hour
+    public static int LONG   = 3; // 1 day
 
     public LatLng getLocation();
+
+    public String getPID();
 
     public String getUID();
 

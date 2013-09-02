@@ -9,6 +9,7 @@ import android.content.Context;
 import android.database.Cursor;
 
 import com.onextent.oemap.OeMapActivity;
+import com.onextent.oemap.presence.JsonPresence;
 import com.onextent.oemap.presence.Presence;
 import com.onextent.oemap.presence.PresenceException;
 import com.onextent.oemap.presence.PresenceFactory;
@@ -30,6 +31,7 @@ public class PresenceHelper {
 
     public void insertPresence(Presence presence) {
         ContentValues values = new ContentValues();
+        values.put(PresenceProvider.IPresence._ID, presence.getPID());
         values.put(PresenceProvider.IPresence.UID, presence.getUID());
         values.put(PresenceProvider.IPresence.SPACE, presence.getSpaceName());
         values.put(PresenceProvider.IPresence.DATA, presence.toString());
@@ -60,7 +62,10 @@ public class PresenceHelper {
                 PresenceProvider.IPresence.SPACE + "='" + spacename + "'", null);
     }
 
-    public Presence getPresence(String uid, String spacename) throws JSONException, PresenceException {
+    public Presence getPresence(String uid, String space) throws JSONException, PresenceException {
+        return getPresence(JsonPresence.makePid(uid, space));
+    }
+    public Presence getPresence(String pid) throws JSONException, PresenceException {
 
         Cursor c = null;
         Presence p = null;
@@ -68,8 +73,8 @@ public class PresenceHelper {
 
         c = _context.getContentResolver().query(PresenceProvider.CONTENT_URI,
                 PresenceProvider.IPresence.PROJECTION_ALL,
-                PresenceProvider.IPresence.UID + "='" + uid + "' AND " +
-                        PresenceProvider.IPresence.SPACE + "='" + spacename + "'", null, null);
+                PresenceProvider.IPresence._ID + "='" + pid + "'", null, null);
+
             if (c.getCount() > 0) {
                 int col = c.getColumnIndex(PresenceProvider.IPresence.DATA);
                 c.moveToFirst();
@@ -106,6 +111,7 @@ public class PresenceHelper {
         }
         return l;
     }
+
     public List<Presence> getAllPrecenses(String spacename) throws JSONException, PresenceException {
         Cursor c = null;
         List<Presence> l = null;

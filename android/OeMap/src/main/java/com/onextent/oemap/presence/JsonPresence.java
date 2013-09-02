@@ -21,6 +21,7 @@ import java.util.TimeZone;
 public class JsonPresence implements Presence {
 
     private static final String KEY_UID = "uid";
+    private static final String KEY_PID = "pid";
     private static final String KEY_LOC = "location";
     private static final String KEY_CRD = "coordinates";
     private static final String KEY_LBL = "label";
@@ -37,7 +38,7 @@ public class JsonPresence implements Presence {
         _dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    private final String _uid, _label, _snippet;
+    private final String _uid, _label, _snippet, _pid;
     private final LatLng _location;
     private final long _create_time;
     private final int _time_to_live;
@@ -48,6 +49,13 @@ public class JsonPresence implements Presence {
 
         try {
             _uid = jobj.getString(KEY_UID);
+            _spacename = jobj.getString(KEY_SPC);
+
+            if (jobj.has(KEY_PID)) { //legacy pids  //todo: remove before public beta
+                _pid = jobj.getString(KEY_PID);
+            } else {
+                _pid = makePid(_uid, _spacename);
+            }
 
             //see http://www.geojson.org for standard.  for some reason lon comes before lat
             if (jobj.has(KEY_LOC)) {
@@ -60,7 +68,6 @@ public class JsonPresence implements Presence {
 
             _label = jobj.getString(KEY_LBL);
             _snippet = jobj.getString(KEY_SNP);
-            _spacename = jobj.getString(KEY_SPC);
             long tmp_time = 0;
             if (jobj.has(KEY_TIM)) {
                 try {
@@ -87,6 +94,14 @@ public class JsonPresence implements Presence {
         }
     }
 
+    public static String makePid(String uid, String space) {
+        StringBuffer b = new StringBuffer();
+        b.append(uid);
+        b.append('_');
+        b.append(space);
+        return b.toString();
+    }
+
     JsonPresence(String json) throws PresenceException, JSONException {
         this(new JSONObject(json));
     }
@@ -100,6 +115,11 @@ public class JsonPresence implements Presence {
         _spacename = spacename;
         _create_time = System.currentTimeMillis();
         _time_to_live = ttl;
+        StringBuffer b = new StringBuffer();
+        b.append(getUID());
+        b.append('_');
+        b.append(getSpaceName());
+        _pid = b.toString();
     }
 
     public JsonPresence(String uid, String spacename) {
@@ -109,6 +129,11 @@ public class JsonPresence implements Presence {
     @Override
     public LatLng getLocation() {
         return _location;
+    }
+
+    @Override
+    public String getPID() {
+        return _pid;
     }
 
     @Override
@@ -146,6 +171,7 @@ public class JsonPresence implements Presence {
         JSONObject jobj = new JSONObject();
         try {
             jobj.put(KEY_UID, _uid);
+            jobj.put(KEY_PID, _pid);
 
             if (_location != null) {
 

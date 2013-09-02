@@ -654,7 +654,7 @@ public class OeMapActivity extends OeBaseActivity {
         super.onPause();
     }
 
-    private String getMapName() {
+    public String getMapName() {
         return _prefs.get(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
     }
 

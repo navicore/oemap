@@ -12,19 +12,18 @@ import com.onextent.oemap.R;
 
 public class PresenceDbHelper extends SQLiteOpenHelper {
 
-    private static int DATABASE_VERSION = 5;
+    private static int DATABASE_VERSION = 6;
     public static final String PRESENCE_TABLE = "presence";
     public static final String PRESENCE_UID = "uid";
     public static final String PRESENCE_SPACE = "space";
     public static final String PRESENCE_DATA = "data";
 
-    //ejs todo: constrain mus be key + map
     private static final String SQL_CREATE =
             "CREATE TABLE " + PRESENCE_TABLE +
-            " (_id INTEGER PRIMARY KEY, " +
-            PRESENCE_UID + " TEXT, " +
-            PRESENCE_SPACE + " TEXT, " +
-            PRESENCE_DATA +" TEXT, UNIQUE (" + PRESENCE_UID + ", " + PRESENCE_SPACE+ "))";
+                    " (_id TEXT PRIMARY KEY, " +
+                    PRESENCE_UID + " TEXT, " +
+                    PRESENCE_SPACE + " TEXT, " +
+                    PRESENCE_DATA +" TEXT)";
 
     private static final String SQL_SPACE_IDX =
             "CREATE INDEX SPACE_INDEX ON " + PRESENCE_TABLE + " (" + PRESENCE_SPACE + ")";

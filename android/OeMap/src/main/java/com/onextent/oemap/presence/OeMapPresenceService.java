@@ -290,7 +290,6 @@ public class OeMapPresenceService extends Service {
         } else if (CMD_RM_SPACE.equals(reason)) {
 
             String spacename = extras.getString(KEY_SPACENAME);
-            OeLog.d(" *** ejs rm space: " + spacename);
 
             _spaceHelper.deleteSpacename(spacename);
             _presenceHelper.deletePresencesWithSpaceName(spacename);
@@ -299,7 +298,6 @@ public class OeMapPresenceService extends Service {
             try {
 
                 p = createPresence(null, spacename, Presence.NONE);
-                OeLog.d(" *** ejs rm space 2: " + spacename);
                 new Send().execute(p);
 
             } catch (PresenceException e) {

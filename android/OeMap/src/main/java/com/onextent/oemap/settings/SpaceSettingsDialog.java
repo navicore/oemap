@@ -39,7 +39,13 @@ public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
         getDialog().getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
-        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        //getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        getDialog().getWindow().setTitle(_space);
+
+        OeMapActivity a = (OeMapActivity) getActivity();
+        if (_space == null || (!_space.equals(a.getMapName()))) {
+            OeLog.w("map name for dialog and active map do not match: " + _space + " vs " + a.getMapName()); //tmp todo: ejs
+        }
 
         return view;
     }
