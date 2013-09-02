@@ -1,12 +1,10 @@
-.idea/
-.gradle/
+*.vtg
+*.vpw*
 .metadata/
 bin/
-tmp/
 build/
 obj/
 gen/
-eclimd.log
-*.swp
 local.properties
+node_modules/
 
