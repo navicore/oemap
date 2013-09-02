@@ -61,10 +61,16 @@ public class JsonPresence implements Presence {
             _label = jobj.getString(KEY_LBL);
             _snippet = jobj.getString(KEY_SNP);
             _spacename = jobj.getString(KEY_SPC);
-            if (jobj.has(KEY_TIM))
-                _create_time = jobj.getLong(KEY_TIM);
-            else
-                _create_time = 0;
+            long tmp_time = 0;
+            if (jobj.has(KEY_TIM)) {
+                try {
+                    tmp_time = jobj.getLong(KEY_TIM);
+                } catch (JSONException ex) {
+                    OeLog.w("bad KEY_TIM: " + ex);
+                }
+            }
+
+            _create_time = tmp_time;
             _time_to_live = jobj.getInt(KEY_TTL);
             if (jobj.has(KEY_EXP)) {
 
