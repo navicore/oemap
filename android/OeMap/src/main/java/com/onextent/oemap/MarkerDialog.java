@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013. Ed Sweeney.  All Rights Reserved.
+ * Copyright (c) 2013. Ed Sweeney, All Rights Reserved
  */
 
 package com.onextent.oemap;
@@ -69,10 +69,10 @@ public class MarkerDialog extends DialogFragment {
                             if (!p.getSpaceName().equals(spacename)) return;
                             OeMapFragment f = activity.getMapFrag();
                             if (f != null) {
-                                OeMapFragment.Holder h = f.getMarkers().remove(p.getUID());
+                                MarkerHelper.Holder h = f.get_markerHelper().getMarkers().remove(p.getUID());
                                 if (h != null) { //move selected marker to the top by adding it last
                                     h.marker.remove();
-                                    Marker m = f.updateMarker(p);
+                                    Marker m = f.get_markerHelper().updateMarker(p, false, f.isMyPresence(p));
                                     m.showInfoWindow();
                                     f.setLocation(p);
                                 }
