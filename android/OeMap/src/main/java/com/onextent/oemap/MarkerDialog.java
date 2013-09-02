@@ -57,6 +57,7 @@ public class MarkerDialog extends DialogFragment {
 
         try {
             List<Presence> tmpp = presenceHelper.getAllPrecenses(spacename);
+            if (tmpp == null) tmpp = new ArrayList<Presence>(); //nothing to see yet
             final PresenceList presences = new PresenceList(tmpp);
             presences.sort();
             ListAdapter presencesAdapter = new MarkerLabelAdapter(presences);

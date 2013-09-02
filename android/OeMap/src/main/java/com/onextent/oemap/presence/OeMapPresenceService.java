@@ -55,7 +55,7 @@ public class OeMapPresenceService extends Service {
     public static final String CMD_BOOT = "boot";
     public static final String CMD_ADD_SPACE = "add_space";
     public static final String CMD_ADD_INTEREST = "add_interest";
-    public static final String CMD_RM_INTEREST = "add_interest";
+    public static final String CMD_RM_INTEREST = "rm_interest";
     public static final String CMD_RM_SPACE = "rm_space";
     public static final String KEY_REASON = "reason";
     public static final String KEY_SPACENAME = "spacename";

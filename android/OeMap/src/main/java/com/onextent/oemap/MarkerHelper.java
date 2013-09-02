@@ -47,6 +47,7 @@ public class MarkerHelper {
         for (Holder h : _markers.values()) {
             h.marker.remove();
         }
+        _markers.clear();
     }
 
     public static class Holder {
@@ -96,6 +97,8 @@ public class MarkerHelper {
         Holder h = null;
         h = _markers.get(p.getUID());
 
+        boolean isNew = false;
+
         if (h == null) {
             float color;
             if (isMine) {
@@ -109,6 +112,7 @@ public class MarkerHelper {
                     ));
             h = new Holder(m);
             _markers.put(p.getUID(), h);
+            isNew = true;
             if (isMine) {
                 _myMarker = m;
             }
@@ -117,7 +121,9 @@ public class MarkerHelper {
         h.marker.setTitle(p.getLabel());
         h.marker.setSnippet(p.getSnippet());
 
-        if (animate)
+        if (!isNew && !h.marker.isVisible())
+            h.marker.setPosition(p.getLocation());
+        else if (animate)
             animateNewMarkerPos(map, h.marker, p.getLocation());
         else {
             h.marker.setPosition(p.getLocation());

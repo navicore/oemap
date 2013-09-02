@@ -15,7 +15,7 @@
             android:id="@+id/action_refresh"
             android:title="@string/action_refresh"
             android:showAsAction="always"
-            android:icon="@android:drawable/ic_menu_compass"
+            android:icon="@drawable/holo_dark_navigation_refresh"
             />
 
     <item
