@@ -2,6 +2,7 @@
 *.vpw*
 .metadata/
 bin/
+tmp/
 build/
 obj/
 gen/
