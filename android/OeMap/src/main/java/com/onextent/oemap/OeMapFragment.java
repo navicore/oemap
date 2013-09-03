@@ -132,7 +132,7 @@ public class OeMapFragment extends MapFragment {
             List<Presence> presences = _presenceHelper.getAllPrecenses(spacename);
             if (presences != null) {
                 for (Presence p : presences) {
-                    _markerHelper.setMarker(p, false, isMyPresence(p));
+                    _markerHelper.setMarker(p, MarkerHelper.AnimationType.NONE, isMyPresence(p));
                 }
             }
         } catch (JSONException e) {
@@ -346,7 +346,7 @@ public class OeMapFragment extends MapFragment {
                 try {
                     Presence p = _presenceHelper.getPresence(uid, spacename);
                     if (p == null) {
-                        _markerHelper.removeMarker(PresenceFactory.createPresence(uid, spacename), true);
+                        _markerHelper.removeMarker(PresenceFactory.createPresence(uid, spacename), MarkerHelper.AnimationType.MOVE);
                     } else {
                         if (isMyPresence(p)) {
                             _currLoc = p.getLocation();
@@ -355,7 +355,7 @@ public class OeMapFragment extends MapFragment {
                                 setLocation(false);
                             }
                         }
-                        _markerHelper.setMarker(p, false, isMyPresence(p));
+                        _markerHelper.setMarker(p, MarkerHelper.AnimationType.NONE, isMyPresence(p));
                     }
                 } catch (JSONException e) {
                     OeLog.e("PresenceReceiver.onReceive error: " + e, e);

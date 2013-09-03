@@ -45,10 +45,10 @@ public class PresenceHelper {
 
     public void deletePresence(Presence presence) {
         _context.getContentResolver().delete(PresenceProvider.CONTENT_URI,
-                    PresenceProvider.IPresence.UID + "='" + presence.getUID() +
-                            "' AND " + PresenceProvider.IPresence.SPACE + "='" +
-                            presence.getSpaceName() + "'", null);
+                    PresenceProvider.IPresence._ID + "='" + presence.getPID() + "'", null);
     }
+
+    /*
 
     public void deletePresencesWithSpaceNameNotMine(String spacename) {
         String me = OeMapActivity.id(_context);
@@ -56,6 +56,7 @@ public class PresenceHelper {
                 PresenceProvider.IPresence.SPACE + "='" + spacename +
                         "' AND " + PresenceProvider.IPresence.UID + " != '" + me + "'", null);
     }
+     */
 
     public void deletePresencesWithSpaceName(String spacename) {
         _context.getContentResolver().delete(PresenceProvider.CONTENT_URI,

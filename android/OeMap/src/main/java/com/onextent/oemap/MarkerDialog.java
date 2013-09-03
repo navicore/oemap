@@ -74,7 +74,7 @@ public class MarkerDialog extends DialogFragment {
                                 MarkerHelper.Holder h = f.get_markerHelper().getMarkers().get(p.getUID());
                                 if (h != null) { //move selected marker to the top by adding it last
                                     //h.marker.remove();
-                                    Marker m = f.get_markerHelper().setMarker(p, true, f.isMyPresence(p));
+                                    Marker m = f.get_markerHelper().setMarker(p, MarkerHelper.AnimationType.BOUNCE, f.isMyPresence(p));
                                     if (m != null) {
                                         m.showInfoWindow();
                                     }

@@ -60,12 +60,12 @@ public class MarkerHelper {
         }
     }
 
-    public Marker removeMarker(Presence p, boolean animate) {
+    public Marker removeMarker(Presence p, AnimationType animation) {
 
         Holder h = _markers.remove(p.getUID());
         if (h == null) return null;
 
-        if (animate) {
+        if (animation == AnimationType.MOVE) {
 
             animateMarkerRemoval(p, h.marker);
 
@@ -77,19 +77,20 @@ public class MarkerHelper {
         return h.marker;
     }
 
-    public Marker setMarker(Presence p, boolean animate, boolean isme) {
+    public static enum AnimationType {NONE, BOUNCE, MOVE};
+    public Marker setMarker(Presence p, AnimationType animation, boolean isMine) {
 
         if (p.getTimeToLive() == Presence.NONE) {
 
-            return removeMarker(p, animate);
+            return removeMarker(p, animation);
 
         } else {
 
-            return updateMarker(p, animate, isme);
+            return updateMarker(p, animation, isMine);
         }
     }
 
-    private Marker updateMarker(Presence p, boolean animate, boolean isMine) {
+    private Marker updateMarker(Presence p, AnimationType animation, boolean isMine) {
 
         final GoogleMap map = getMap();
         if (map == null) return null;
@@ -121,9 +122,9 @@ public class MarkerHelper {
         h.marker.setTitle(p.getLabel());
         h.marker.setSnippet(p.getSnippet());
 
-        if (isNew) {
+        if (isNew && animation == AnimationType.MOVE) {
             animateNewMarkerPos(map, h.marker, p.getLocation());
-        } else if (animate) {
+        } else if (animation == AnimationType.BOUNCE) {
             h.marker.setPosition(p.getLocation());
             MarkerAnimation.bounceMarker(map, h.marker, null);
         } else {

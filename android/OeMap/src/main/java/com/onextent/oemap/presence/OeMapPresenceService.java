@@ -446,9 +446,9 @@ public class OeMapPresenceService extends Service {
             }
         }
         if (oldUids != null) {
-            OeLog.d("processPollJson cleanup old uids");
             for (String uid : oldUids) {
                 Presence p = PresenceFactory.createPresence(uid, null, null, null, space, Presence.NONE, null);
+                OeLog.d("processPollJson cleanup pid " + p.getPID());
                 _presenceHelper.deletePresence(p);
                 broadcastIntent(p); //causes current map to remove markers
             }
