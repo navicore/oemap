@@ -60,36 +60,36 @@ public class MarkerHelper {
         }
     }
 
-    public void removeMarker(Presence p, boolean animate) {
+    public Marker removeMarker(Presence p, boolean animate) {
 
         Holder h = _markers.remove(p.getUID());
+        if (h == null) return null;
 
-        if (h != null) {
+        if (animate) {
 
-            if (animate) {
-
-                animateMarkerRemoval(p, h.marker);
-
-            } else {
-
-                h.marker.remove();
-            }
-        }
-    }
-
-    public void setMarker(Presence p, boolean animate, boolean isme) {
-
-        if (p.getTimeToLive() == Presence.NONE) {
-
-            removeMarker(p, animate);
+            animateMarkerRemoval(p, h.marker);
 
         } else {
 
-            updateMarker(p, animate, isme);
+            h.marker.remove();
+        }
+
+        return h.marker;
+    }
+
+    public Marker setMarker(Presence p, boolean animate, boolean isme) {
+
+        if (p.getTimeToLive() == Presence.NONE) {
+
+            return removeMarker(p, animate);
+
+        } else {
+
+            return updateMarker(p, animate, isme);
         }
     }
 
-    public Marker updateMarker(Presence p, boolean animate, boolean isMine) {
+    private Marker updateMarker(Presence p, boolean animate, boolean isMine) {
 
         final GoogleMap map = getMap();
         if (map == null) return null;
@@ -121,13 +121,13 @@ public class MarkerHelper {
         h.marker.setTitle(p.getLabel());
         h.marker.setSnippet(p.getSnippet());
 
-        if (!isNew && !h.marker.isVisible())
-            h.marker.setPosition(p.getLocation());
-        else if (animate)
+        if (isNew) {
             animateNewMarkerPos(map, h.marker, p.getLocation());
-        else {
+        } else if (animate) {
             h.marker.setPosition(p.getLocation());
             MarkerAnimation.bounceMarker(map, h.marker, null);
+        } else {
+            h.marker.setPosition(p.getLocation());
         }
 
         return h.marker;

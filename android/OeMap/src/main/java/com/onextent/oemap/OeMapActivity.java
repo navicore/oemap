@@ -642,6 +642,15 @@ public class OeMapActivity extends OeBaseActivity {
         wakePresenceService();
         wakePresenceBroadcastService();
         registerReceiver(_presenceReceiver, _presenceReceiverFilter);
+        OeMapFragment f = getMapFrag();
+        if (f != null) {
+            String cname = getMapName();
+            String fname = f.getName();
+            if (!cname.equals(fname)) {
+                OeLog.w("onResume map fragment does not match current map name");
+                setMapFrag(cname);
+            }
+        }
     }
 
     @Override

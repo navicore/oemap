@@ -125,6 +125,7 @@ public class OeMapPresenceService extends Service {
 
     private Presence createPresence(Location l, String spacename) throws PresenceException {
         int ttl = _kvHelper.getInt(getString(R.string.pref_ttl), DEFAULT_TTL);
+        //int ttl = DEFAULT_TTL;
         return createPresence(l, spacename, ttl);
     }
 

@@ -70,11 +70,14 @@ public class MarkerDialog extends DialogFragment {
                             if (!p.getSpaceName().equals(spacename)) return;
                             OeMapFragment f = activity.getMapFrag();
                             if (f != null) {
-                                MarkerHelper.Holder h = f.get_markerHelper().getMarkers().remove(p.getUID());
+                                //MarkerHelper.Holder h = f.get_markerHelper().getMarkers().remove(p.getUID());
+                                MarkerHelper.Holder h = f.get_markerHelper().getMarkers().get(p.getUID());
                                 if (h != null) { //move selected marker to the top by adding it last
-                                    h.marker.remove();
-                                    Marker m = f.get_markerHelper().updateMarker(p, false, f.isMyPresence(p));
-                                    m.showInfoWindow();
+                                    //h.marker.remove();
+                                    Marker m = f.get_markerHelper().setMarker(p, true, f.isMyPresence(p));
+                                    if (m != null) {
+                                        m.showInfoWindow();
+                                    }
                                     f.setLocation(p);
                                 }
                             }

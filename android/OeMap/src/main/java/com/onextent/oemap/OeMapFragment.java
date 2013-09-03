@@ -154,14 +154,27 @@ public class OeMapFragment extends MapFragment {
             @Override
             public void onMapLongClick(LatLng latLng) {
 
-                //_home.showLeaseDialog();
-                _home.showMarkerDialog();
+                OeLog.d("set point of interest to: " + latLng);
+                //setPointOfInterest(latLng);
             }
         });
         OeMapActivity a = (OeMapActivity) getActivity();
         a.wakePresenceService();
         a.wakePresenceBroadcastService(); //temp ejs todo: make servcie smart about ttl and distance
     }
+
+    /*
+    private void unsetPointOfInterest() {
+        _prefs.delete("pref_poi_lat");
+        _prefs.delete("pref_poi_lon");
+    }
+    private void setPointOfInterest(LatLng l) {
+
+        _prefs.replaceDouble("pref_poi_lat", l.latitude);
+        _prefs.replaceDouble("pref_poi_lon", l.longitude);
+        getMap().animateCamera(CameraUpdateFactory.newLatLng(l));
+    }
+     */
 
     @Override
     public void onDestroy() {
@@ -171,6 +184,8 @@ public class OeMapFragment extends MapFragment {
 
     @Override
     public void onPause() {
+
+        //unsetPointOfInterest();
 
         getActivity().unregisterReceiver(_presenceReceiver);
         _markerHelper.clearMarkers();
@@ -340,7 +355,7 @@ public class OeMapFragment extends MapFragment {
                                 setLocation(false);
                             }
                         }
-                        _markerHelper.setMarker(p, true, isMyPresence(p));
+                        _markerHelper.setMarker(p, false, isMyPresence(p));
                     }
                 } catch (JSONException e) {
                     OeLog.e("PresenceReceiver.onReceive error: " + e, e);
