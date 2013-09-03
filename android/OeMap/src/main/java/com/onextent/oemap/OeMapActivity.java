@@ -231,11 +231,20 @@ public class OeMapActivity extends OeBaseActivity {
         startService(i);
     }
 
+    private String getInactiveSpaceName(String curname) {
+        for (int i = 0; i < _spaceNamesAdapter.getCount(); i++) {
+            if (!curname.equals(_spaceNamesAdapter.getItem(i))) {
+                return _spaceNamesAdapter.getItem(i).toString();
+            }
+        }
+        return getString(R.string.null_map_name);
+    }
+
     private void quitSpace() {
 
         String spacename = getMapName();
-        setMapFrag(getString(R.string.null_map_name));
-        setMapName(getString(R.string.null_map_name));
+        //setMapFrag(getString(R.string.null_map_name));
+        setMapFrag(getInactiveSpaceName(spacename));
         //todo: helper method that sets a nice UI and location for none
 
         Intent i = new Intent(this, OeMapPresenceService.class);
