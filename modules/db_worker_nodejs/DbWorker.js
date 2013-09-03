@@ -57,7 +57,7 @@ process.argv.forEach(function (val, index, array) {
                     if (!count) {
                         Syslog.log(Syslog.LOG_WARNING, "no docs upserted");
                     } else {
-                        Syslog.log(Syslog.LOG_DEBUG, 'pid: "' + doc._id + '" for ' + doc.label + ' updated');
+                        Syslog.log(Syslog.LOG_DEBUG, 'pid: "' + doc._id + '" for ' + doc.label + ' updated. ttl: ' + doc.ttl);
                         stats();
                     }
                 }

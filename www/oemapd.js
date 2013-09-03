@@ -116,15 +116,13 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', 
         req.body._id = pid;
 
         if (ttl === 0) {
-            Syslog.log(Syslog.LOG_DEBUG, 'ttl expired for pid: ' +
-                pid + ' ' + req.body.label);
-            db.collection('presences').remove(
+            Syslog.log(Syslog.LOG_DEBUG, 'ttl expired for pid: ' + pid);
+            db.collection('presences').remove({_id: pid},
                 function (err, doc) {
                     if (err) {
                         throw err;
                     }
                     //todo: handle err
-                    //todo: make pid uid and overwrite map dupes
                 }
             );
         } else {

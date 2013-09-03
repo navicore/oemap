@@ -10,7 +10,7 @@ NAMES_FILE = MY_DIR + '/../tmp/names.txt'
 POINTS_FILE = MY_DIR + '/../tmp/points.txt'
 
 
-SNIPPIT = 'good morning'
+SNIPPIT = 'good afternoon'
 SPACE = 'big test'
 TTL = 2
 
