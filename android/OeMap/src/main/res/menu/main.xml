@@ -5,13 +5,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-            android:id="@+id/action_search"
-            android:title="@string/action_search_title"
-            android:showAsAction="ifRoom"
-            android:icon="@android:drawable/ic_menu_search"
-            />
-
-    <item
             android:id="@+id/action_refresh"
             android:title="@string/action_refresh"
             android:showAsAction="always"
@@ -23,7 +16,15 @@
             android:title="@string/action_share_title"
             android:showAsAction="ifRoom"
             android:icon="@android:drawable/ic_menu_share"
+            android:actionProviderClass="android.widget.ShareActionProvider"
             />
+
+    <item
+        android:id="@+id/action_search"
+        android:title="@string/action_search_title"
+        android:showAsAction="ifRoom"
+        android:icon="@android:drawable/ic_menu_search"
+        />
 
     <item
             android:id="@+id/action_lease"

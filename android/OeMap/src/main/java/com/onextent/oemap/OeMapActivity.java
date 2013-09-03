@@ -15,6 +15,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
+import android.database.DataSetObserver;
 import android.database.SQLException;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,6 +31,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ShareActionProvider;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -44,30 +46,47 @@ import com.onextent.oemap.provider.SpaceHelper;
 import com.onextent.oemap.settings.OeMapPreferencesDialog;
 import com.onextent.oemap.settings.SpaceSettingsDialog;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
 public class OeMapActivity extends OeBaseActivity {
 
-    public static final int NEW_PUBLIC_MAP  = 0;
-    public static final int FIND_MAP_POS    = 1;
-    public static final int QUIT_MAP_POS    = 2;
-    public static final int SEPARATOR_POS   = 3;
+    private static final String MAP_SHARE_URL_BASE = "http://oemap.onextent.com/share?map=";
 
+    public static final int NEW_PUBLIC_MAP = 0;
+    public static final int FIND_MAP_POS = 1;
+    public static final int QUIT_MAP_POS = 2;
+    public static final int SEPARATOR_POS = 3;
+
+    private static final String OEMAP_INTENT_SUBJECT = "OeMap URL";
     private static final String MAP_FRAG_TAG = "oemap";
     private static final int MAX_HISTORY = 20;
+    private ShareActionProvider _shareActionProvider;
+    private ListView _drawerList;
+    private ActionBarDrawerToggle _drawerToggle;
+    private ArrayList<String> _drawerNamesList;
+    private String _mapFragTag;
+    private KvHelper _prefs = null;
+    private ListDbHelper _history_store = null;
+    private SpaceNamesAdapter _spaceNamesAdapter;
+    private BroadcastReceiver _presenceReceiver = new QuitSpaceReceiver();
+    private IntentFilter _presenceReceiverFilter = null;
+    private DataSetObserver _mapSpinnerObserver = new DataSetObserver() {
 
-    private ListView                _drawerList;
-    private ActionBarDrawerToggle   _drawerToggle;
-    private ArrayList<String>       _drawerNamesList;
+        @Override
+        public void onChanged() {
+            super.onChanged();
+            setActionBarToCurrentMap();
+        }
 
-    private String              _mapFragTag;
-    private KvHelper            _prefs = null;
-    private ListDbHelper        _history_store = null;
-    private SpaceNamesAdapter   _spaceNamesAdapter;
-
-    private BroadcastReceiver   _presenceReceiver = new QuitSpaceReceiver();
-    private IntentFilter        _presenceReceiverFilter = null;
+        @Override
+        public void onInvalidated() {
+            super.onInvalidated();
+        }
+    };
 
     private boolean aMapIsActive() {
         String m = getMapName();
@@ -115,6 +134,7 @@ public class OeMapActivity extends OeBaseActivity {
             ).commit();
         }
 
+        setShareIntent();
         updateSpaceNames(mapname);
         setActionBarToCurrentMap();
     }
@@ -124,12 +144,6 @@ public class OeMapActivity extends OeBaseActivity {
         //No call for super(). Bug on API Level > 11.
     }
 
-    private void startSettingsDialog() {
-
-        DialogFragment f = new OeMapPreferencesDialog();
-        f.show(getFragmentManager(), "OeMap Preferences Dialog");
-    }
-
     /*
     private void showNewPrivateMapDialog() {
         FragmentManager fm = getFragmentManager();
@@ -137,6 +151,12 @@ public class OeMapActivity extends OeBaseActivity {
         d.show(fm, "new_priv_map_dialog");
     }
      */
+
+    private void startSettingsDialog() {
+
+        DialogFragment f = new OeMapPreferencesDialog();
+        f.show(getFragmentManager(), "OeMap Preferences Dialog");
+    }
 
     public void showLeaseDialog() {
         FragmentManager fm = getFragmentManager();
@@ -296,7 +316,7 @@ public class OeMapActivity extends OeBaseActivity {
     }
 
     private void initDrawer() {
-        String[]  menuNames = getResources().getStringArray(R.array.menu_names_array);
+        String[] menuNames = getResources().getStringArray(R.array.menu_names_array);
         //mTitle = getResources().getString(R.string.app_name);
 
         _drawerNamesList = new ArrayList();
@@ -356,10 +376,15 @@ public class OeMapActivity extends OeBaseActivity {
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.oe_map_activity);
 
         _prefs = new KvHelper(this);
-        OeLog.d("onCreate: " + getMapName());
+
+        Intent i = getIntent();
+
+        OeLog.d("onCreate: " + getMapName() + " with intent: " + i);
+
         _history_store = new ListDbHelper(this, "oemap_history_store");
 
         _spaceNamesAdapter = new SpaceNamesAdapter(getActionBar().getThemedContext());
@@ -431,6 +456,7 @@ public class OeMapActivity extends OeBaseActivity {
 
     private void setActionBarToCurrentMap() {
 
+        boolean success = false;
         String currName = getMapName();
         for (int i = 0; i < _spaceNamesAdapter.getCount(); i++) {
 
@@ -438,9 +464,13 @@ public class OeMapActivity extends OeBaseActivity {
             if (n != null && n.equals(currName)) {
 
                 getActionBar().setSelectedNavigationItem(i);
+                success = true;
                 break;
             }
         }
+        if (success) OeLog.d("action bar set to current map");
+        else
+            OeLog.w("could not set action bar to current map"); //the problem must be that the notify isn't done yet
     }
 
     private void setMapTyp(int t) {
@@ -453,7 +483,6 @@ public class OeMapActivity extends OeBaseActivity {
     }
 
     private void initMapTypeMenu(Menu menu) {
-
 
         MenuItem typeItem = null;
         int t = _prefs.getInt(getString(R.string.pref_map_type), GoogleMap.MAP_TYPE_NORMAL);
@@ -487,6 +516,27 @@ public class OeMapActivity extends OeBaseActivity {
         zoomItem.setChecked(showZoom);
     }
 
+    // Call to update the share intent
+    private void setShareIntent() {
+
+        String mapname = null;
+        try {
+            mapname = URLEncoder.encode(getMapName(), "UTF8");
+        } catch (UnsupportedEncodingException e) {
+            OeLog.e("setShareIntent " + e);
+            return;
+        }
+
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("text/plain");
+        i.putExtra(Intent.EXTRA_SUBJECT, OEMAP_INTENT_SUBJECT);
+        i.putExtra(Intent.EXTRA_TEXT, MAP_SHARE_URL_BASE + mapname);
+
+        if (_shareActionProvider != null) {
+            _shareActionProvider.setShareIntent(i);
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -494,6 +544,11 @@ public class OeMapActivity extends OeBaseActivity {
         inflater.inflate(R.menu.main, menu);
 
         initMapTypeMenu(menu);
+
+        MenuItem item = menu.findItem(R.id.action_share);
+
+        // Fetch and store ShareActionProvider
+        _shareActionProvider = (ShareActionProvider) item.getActionProvider();
 
         return true;
     }
@@ -655,10 +710,16 @@ public class OeMapActivity extends OeBaseActivity {
         super.onResume();
         OeLog.d("onResume: " + getMapName());
 
+        _spaceNamesAdapter.registerDataSetObserver(_mapSpinnerObserver);
         updateMapNamesFromHistory();
         wakePresenceService();
         wakePresenceBroadcastService();
         registerReceiver(_presenceReceiver, _presenceReceiverFilter);
+
+        boolean done = setupFromIntent();
+
+        if (!done) {
+
         OeMapFragment f = getMapFrag();
         if (f != null) {
             String cname = getMapName();
@@ -668,11 +729,38 @@ public class OeMapActivity extends OeBaseActivity {
                 setMapFrag(cname);
             }
         }
+        }
+    }
+
+    private boolean setupFromIntent() {
+        Intent i = getIntent();
+        if ( i.getAction().equals(Intent.ACTION_VIEW) ) {
+            Uri uri = i.getData();
+            if (uri != null) {
+                String mapname = uri.getQueryParameter("map");
+                if (mapname != null) {
+
+                    //check for name in spacedb, if there, call set frag
+                    //else call new map dialog
+                    SpaceHelper h = new SpaceHelper(this);
+                    SpaceHelper.Space s = h.getSpace(mapname);
+                    if (s == null) {
+                        showNewSpaceDialogWithName(mapname);
+                    } else {
+                        setMapFrag(mapname);
+                    }
+
+                   return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
     public void onPause() {
 
+        _spaceNamesAdapter.unregisterDataSetObserver(_mapSpinnerObserver);
         OeLog.d("onPause: " + getMapName());
         unregisterReceiver(_presenceReceiver);
         saveHistory();

@@ -372,6 +372,10 @@ public class OeMapPresenceService extends Service {
          */
 
         SpaceHelper.Space space = _spaceHelper.getSpace(s);
+        if (space == null) {
+            OeLog.w("can not poll space: " + s + ".  space not in space db");
+            return;
+        }
         int max = space.getMaxPoints();
         max += 1;    //don't forget you are the nearest person to yourself in oemap logic.
         // if you say 1 person it'll just be you coming back unless the server

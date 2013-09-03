@@ -73,7 +73,7 @@ public class JsonPresence implements Presence {
                 try {
                     tmp_time = jobj.getLong(KEY_TIM);
                 } catch (JSONException ex) {
-                    OeLog.w("bad KEY_TIM: " + ex);
+                    //OeLog.w("bad KEY_TIM: " + ex);  //ejs todo: fix test code on server
                 }
             }
 
