@@ -103,28 +103,6 @@ public class OeMapFragment extends MapFragment {
 
     private void loadMarkers() {
 
-        /**
-         *
-         *
-         * ejs todo:
-         *
-         * THE BUG IS that I can read them one by one when the bcast comes in
-         * but the getAll isn't finding them just by map name alone.  Huh.
-         *
-         * need a map-only index?
-         * need a map-only index?
-         * need a map-only index?
-         * need a map-only index?
-         * need a map-only index?
-         *
-         * bug is only when you join multiple maps big hint for index fix
-         * bug is only when you join multiple maps big hint for index fix
-         * bug is only when you join multiple maps big hint for index fix
-         * bug is only when you join multiple maps big hint for index fix
-         *
-         *
-         *
-         */
         _markerHelper.clearMarkers();
 
         String spacename = getName();

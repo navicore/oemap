@@ -49,25 +49,25 @@ import java.util.List;
 
 public class OeMapActivity extends OeBaseActivity {
 
-    public static final int NEW_PUBLIC_MAP = 0;
-    public static final int FIND_MAP_POS = 1;
-    public static final int QUIT_MAP_POS = 2;
-    public static final int SEPARATOR_POS = 3;
+    public static final int NEW_PUBLIC_MAP  = 0;
+    public static final int FIND_MAP_POS    = 1;
+    public static final int QUIT_MAP_POS    = 2;
+    public static final int SEPARATOR_POS   = 3;
+
     private static final String MAP_FRAG_TAG = "oemap";
     private static final int MAX_HISTORY = 20;
-    private ListView _drawerList;
-    private DrawerLayout _drawerLayout;
-    private DrawerAdapter _drawerAdapter = null;
-    private ActionBarDrawerToggle _drawerToggle;
-    private CharSequence mTitle = "na";
-    private String[] _menuNames;
-    private ArrayList<String> _drawerNamesList;
-    private String _mapFragTag;
-    private KvHelper _prefs = null;
-    private ListDbHelper _history_store = null;
-    private BroadcastReceiver _presenceReceiver = new QuitSpaceReceiver();
-    private IntentFilter _presenceReceiverFilter = null;
-    private SpaceNamesAdapter _spaceNamesAdapter;
+
+    private ListView                _drawerList;
+    private ActionBarDrawerToggle   _drawerToggle;
+    private ArrayList<String>       _drawerNamesList;
+
+    private String              _mapFragTag;
+    private KvHelper            _prefs = null;
+    private ListDbHelper        _history_store = null;
+    private SpaceNamesAdapter   _spaceNamesAdapter;
+
+    private BroadcastReceiver   _presenceReceiver = new QuitSpaceReceiver();
+    private IntentFilter        _presenceReceiverFilter = null;
 
     private boolean aMapIsActive() {
         String m = getMapName();
@@ -130,11 +130,13 @@ public class OeMapActivity extends OeBaseActivity {
         f.show(getFragmentManager(), "OeMap Preferences Dialog");
     }
 
+    /*
     private void showNewPrivateMapDialog() {
         FragmentManager fm = getFragmentManager();
         DialogFragment d = new NewPrivateSpaceDialog();
         d.show(fm, "new_priv_map_dialog");
     }
+     */
 
     public void showLeaseDialog() {
         FragmentManager fm = getFragmentManager();
@@ -179,7 +181,7 @@ public class OeMapActivity extends OeBaseActivity {
             _drawerNamesList.remove(n);
         }
         _drawerNamesList.add(SEPARATOR_POS + 1, n);
-        _drawerAdapter.notifyDataSetChanged();
+        notifyDrawList();
     }
 
     void enableNewSpace(String newMapName) {
@@ -251,7 +253,8 @@ public class OeMapActivity extends OeBaseActivity {
                 break;
         }
 
-        _drawerLayout.closeDrawer(_drawerList);
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerLayout.closeDrawer(_drawerList);
     }
 
     public void clearMapNamesHistory() {
@@ -260,7 +263,12 @@ public class OeMapActivity extends OeBaseActivity {
         for (int i = SEPARATOR_POS + 1; i < sz; i++) {
             _drawerNamesList.remove(_drawerNamesList.size() - 1);
         }
-        _drawerAdapter.notifyDataSetChanged();
+        notifyDrawList();
+    }
+
+    private void notifyDrawList() {
+
+        ((DrawerAdapter) _drawerList.getAdapter()).notifyDataSetChanged();
     }
 
     public void updateMapNamesFromHistory() {
@@ -276,7 +284,7 @@ public class OeMapActivity extends OeBaseActivity {
                 _drawerNamesList.add(s);
             }
         }
-        _drawerAdapter.notifyDataSetChanged();
+        notifyDrawList();
     }
 
     @Override
@@ -287,39 +295,28 @@ public class OeMapActivity extends OeBaseActivity {
         super.onDestroy();
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.oe_map_activity);
-
-        _prefs = new KvHelper(this);
-        OeLog.d("onCreate: " + getMapName());
-        _history_store = new ListDbHelper(this, "oemap_history_store");
-
-        _menuNames = getResources().getStringArray(R.array.menu_names_array);
-        _drawerList = (ListView) findViewById(R.id.left_drawer);
-        mTitle = getResources().getString(R.string.app_name);
-
-        _spaceNamesAdapter = new SpaceNamesAdapter(getActionBar().getThemedContext());
+    private void initDrawer() {
+        String[]  menuNames = getResources().getStringArray(R.array.menu_names_array);
+        //mTitle = getResources().getString(R.string.app_name);
 
         _drawerNamesList = new ArrayList();
-        for (String n : _menuNames) {
+        for (String n : menuNames) {
             _drawerNamesList.add(n);
         }
 
-        _drawerAdapter = new DrawerAdapter(this, R.layout.drawer_list_item, _drawerNamesList);
-        _drawerList.setAdapter(_drawerAdapter);
+        DrawerAdapter drawerAdapter = new DrawerAdapter(this, R.layout.drawer_list_item, _drawerNamesList);
+        _drawerList = (ListView) findViewById(R.id.left_drawer);
+        _drawerList.setAdapter(drawerAdapter);
         // Set the list's click listener
         _drawerList.setOnItemClickListener(new DrawerItemClickListener());
         _drawerList.setOnItemLongClickListener(new DrawerItemLongClickListener());
 
-        _drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (_drawerLayout == null)
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawerLayout == null)
             throw new NullPointerException("drawer layout not found, inflate first!");
         _drawerToggle = new ActionBarDrawerToggle(
                 this,                  /* host Activity */
-                _drawerLayout,         /* DrawerLayout object */
+                drawerLayout,         /* DrawerLayout object */
                 R.drawable.ic_drawer,  /* nav drawer icon to replace 'Up' caret */
                 R.string.drawer_open,  /* "open drawer" description */
                 R.string.drawer_close  /* "close drawer" description */
@@ -337,25 +334,45 @@ public class OeMapActivity extends OeBaseActivity {
                 getActionBar().setDisplayShowTitleEnabled(true);
             }
         };
-        OeLog.d("onCreate 3: " + getMapName());
 
         // Set the drawer toggle as the DrawerListener
-        _drawerLayout.setDrawerListener(_drawerToggle);
+        drawerLayout.setDrawerListener(_drawerToggle);
+    }
 
-        OeLog.d("onCreate 3.0: " + getMapName());
-        activeMapIsInStore();
-        OeLog.d("onCreate 3.1: " + getMapName());
-        setActiveMapsSpinner();
-        OeLog.d("onCreate 3.2: " + getMapName());
+    private void initActionBar() {
 
         ActionBar actionBar = getActionBar();
+
         actionBar.setDisplayHomeAsUpEnabled(true);
+
         actionBar.setHomeButtonEnabled(true);
+
         actionBar.setDisplayShowTitleEnabled(false);
+
         actionBar.setTitle("");
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.oe_map_activity);
+
+        _prefs = new KvHelper(this);
+        OeLog.d("onCreate: " + getMapName());
+        _history_store = new ListDbHelper(this, "oemap_history_store");
+
+        _spaceNamesAdapter = new SpaceNamesAdapter(getActionBar().getThemedContext());
+
+        initDrawer();
+
+        activeMapIsInStore();
+
+        setActiveMapsSpinner();
+
+        initActionBar();
 
         _presenceReceiverFilter = new IntentFilter(getString(R.string.presence_service_quit_space_intent));
-        OeLog.d("onCreate done: " + getMapName());
     }
 
     @Override
@@ -764,7 +781,7 @@ public class OeMapActivity extends OeBaseActivity {
 
                     _drawerNamesList.remove(SEPARATOR_POS + 1);
                 }
-                _drawerAdapter.notifyDataSetChanged();
+                notifyDrawList();
                 dialog.dismiss();
             }
         });
