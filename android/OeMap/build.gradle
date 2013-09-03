@@ -46,3 +46,14 @@ android {
 
 }
 
+task initVerInfo << {
+    //ejs fix this @@4#$%#$$ing absolute path
+    def proc = "/home/esweeney/git/oemap/android/OeMap/init_verinfo.sh".execute()
+    proc.in.eachLine {line -> println line} 
+    proc.err.eachLine {line -> println 'ERROR: ' + line} 
+    proc.waitFor() 
+    tasks.build.execute();
+}
+
+build.dependsOn initVerInfo
+

@@ -829,6 +829,8 @@ public class OeMapActivity extends OeBaseActivity {
 
     private void showAboutDialog() {
 
+        /*
+
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 this);
 
@@ -857,6 +859,10 @@ public class OeMapActivity extends OeBaseActivity {
 
         // show it
         d.show();
+         */
+        Dialog d = new AboutDialog(this);
+        d.show();
+
     }
 
     private void showClearHistoryDialog() {
