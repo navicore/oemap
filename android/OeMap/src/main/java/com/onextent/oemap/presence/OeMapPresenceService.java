@@ -451,6 +451,10 @@ public class OeMapPresenceService extends Service {
         }
         if (oldUids != null) {
             for (String uid : oldUids) {
+
+                //don't delete yourself, though you should always be in there
+                if (OeMapActivity.id(getApplicationContext()).equals(uid)) continue;
+
                 Presence p = PresenceFactory.createPresence(uid, null, null, null, space, Presence.NONE, null);
                 OeLog.d("processPollJson cleanup pid " + p.getPID());
                 _presenceHelper.deletePresence(p);

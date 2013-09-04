@@ -333,7 +333,7 @@ public class OeMapFragment extends MapFragment {
                                 setLocation(false);
                             }
                         }
-                        _markerHelper.setMarker(p, MarkerHelper.AnimationType.NONE, isMyPresence(p));
+                        _markerHelper.setMarker(p, MarkerHelper.AnimationType.MOVE, isMyPresence(p));
                     }
                 } catch (JSONException e) {
                     OeLog.e("PresenceReceiver.onReceive error: " + e, e);
