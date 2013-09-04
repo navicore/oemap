@@ -213,10 +213,7 @@ public class OeMapFragment extends MapFragment {
             float lng = _prefs.getFloat(getString(R.string.state_lng), 0);
             float lat = _prefs.getFloat(getString(R.string.state_lat), 0);
             _currLoc = new LatLng(lat, lng);
-        } else {
-            _currLoc = _currLoc;
         }
-        ;
 
         setTrafficEnabled();
         setMapType();

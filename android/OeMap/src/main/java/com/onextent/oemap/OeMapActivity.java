@@ -47,7 +47,6 @@ import com.onextent.oemap.settings.OeMapPreferencesDialog;
 import com.onextent.oemap.settings.SpaceSettingsDialog;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -482,49 +481,6 @@ public class OeMapActivity extends OeBaseActivity {
             OeLog.w("could not set action bar to current map"); //the problem must be that the notify isn't done yet
     }
 
-    private void setMapTyp(int t) {
-
-        GoogleMap m = getMap();
-        if (m != null) {
-            m.setMapType(t);
-        }
-        _prefs.replaceInt(getString(R.string.pref_map_type), t);
-    }
-
-    private void initMapTypeMenu(Menu menu) {
-
-        MenuItem typeItem = null;
-        int t = _prefs.getInt(getString(R.string.pref_map_type), GoogleMap.MAP_TYPE_NORMAL);
-        switch (t) {
-            case GoogleMap.MAP_TYPE_NORMAL:
-                typeItem = menu.findItem(R.id.map_type_normal);
-                break;
-            case GoogleMap.MAP_TYPE_TERRAIN:
-                typeItem = menu.findItem(R.id.map_type_terrain);
-                break;
-            case GoogleMap.MAP_TYPE_SATELLITE:
-                typeItem = menu.findItem(R.id.map_type_satellite);
-                break;
-            default:
-                OeLog.e("unknown map type: " + t);
-                break;
-        }
-        if (typeItem != null)
-            typeItem.setChecked(true);
-
-        boolean showTraffic = _prefs.getBoolean(getString(R.string.pref_show_traffic), false);
-        MenuItem trafficItem = menu.findItem(R.id.menu_show_traffic);
-        trafficItem.setChecked(showTraffic);
-
-        boolean showIndoors = _prefs.getBoolean(getString(R.string.pref_show_indoors), false);
-        MenuItem inDoorsItem = menu.findItem(R.id.menu_show_indoors);
-        inDoorsItem.setChecked(showIndoors);
-
-        boolean showZoom = _prefs.getBoolean(getString(R.string.pref_show_zoom_ctl), true);
-        MenuItem zoomItem = menu.findItem(R.id.menu_show_zoom_controls);
-        zoomItem.setChecked(showZoom);
-    }
-
     // Call to update the share intent
     private void setShareIntent() {
 
@@ -552,7 +508,7 @@ public class OeMapActivity extends OeBaseActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
 
-        initMapTypeMenu(menu);
+        //initMapTypeMenu(menu);
 
         MenuItem item = menu.findItem(R.id.action_share);
 
@@ -583,21 +539,18 @@ public class OeMapActivity extends OeBaseActivity {
         _drawerToggle.onConfigurationChanged(newConfig);
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Pass the event to ActionBarDrawerToggle, if it returns
-        // true, then it has handled the app icon touch event
-        if (_drawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
+    public boolean handleMenuItem(MenuItem item) {
+        boolean handled = false;
         boolean checked;
         // Handle your other action bar items...
         switch (item.getItemId()) {
             case R.id.action_lease:
                 showLeaseDialog();
+                handled = true;
                 break;
             case R.id.action_search:
                 showMarkerDialog();
+                handled = true;
                 break;
             case R.id.action_refresh:
                 OeMapFragment f = getMapFrag();
@@ -614,14 +567,22 @@ public class OeMapActivity extends OeBaseActivity {
                     wakePresenceService();
                     wakePresenceBroadcastService();
                 }
+                handled = true;
                 break;
             case R.id.action_help:
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.onextent.com"));
                 startActivity(browserIntent);
+                handled = true;
                 break;
             case R.id.action_settings:
                 startSettingsDialog();
+                handled = true;
                 break;
+            case R.id.action_map_features:
+                showMapFeaturesDialog();
+                handled = true;
+                break;
+            /*
             case R.id.map_type_normal:
                 item.setChecked(true);
                 setMapTyp(GoogleMap.MAP_TYPE_NORMAL);
@@ -654,50 +615,36 @@ public class OeMapActivity extends OeBaseActivity {
                 item.setChecked(!checked);
                 setShowAutoZoom(!checked);
                 break;
+             */
             case R.id.action_about:
                 showAboutDialog();
+                handled = true;
             default:
         }
 
-        return super.onOptionsItemSelected(item);
+        //return super.onOptionsItemSelected(item);
+        return handled;
+    }
+
+    private void showMapFeaturesDialog() {
+
+        Dialog d = new MapFeaturesDialog(this);
+        d.show();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (_drawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        } else {
+           return handleMenuItem(item);
+        }
     }
 
     private void showSearchDialog() {
 
         DialogFragment f = new SearchDialog();
         f.show(getFragmentManager(), "OeMap Search Dialog");
-    }
-
-    private void setShowAutoZoom(boolean b) {
-
-        _prefs.replaceBoolean(getString(R.string.pref_autozoom), b);
-    }
-
-    private void setShowZoomCtls(boolean b) {
-
-        GoogleMap m = getMap();
-        if (m != null) {
-            m.getUiSettings().setZoomControlsEnabled(b);
-        }
-        _prefs.replaceBoolean(getString(R.string.pref_show_zoom_ctl), b);
-    }
-
-    private void setShowTrafficOption(boolean b) {
-
-        GoogleMap m = getMap();
-        if (m != null) {
-            m.setTrafficEnabled(b);
-        }
-        _prefs.replaceBoolean(getString(R.string.pref_show_traffic), b);
-    }
-
-    private void setShowInDoorsOption(boolean b) {
-
-        GoogleMap m = getMap();
-        if (m != null) {
-            m.setIndoorEnabled(b);
-        }
-        _prefs.replaceBoolean(getString(R.string.pref_show_indoors), b);
     }
 
     @Override

@@ -5,110 +5,49 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-            android:id="@+id/action_refresh"
-            android:title="@string/action_refresh"
-            android:showAsAction="always"
-            android:icon="@drawable/holo_dark_navigation_refresh"
-            />
+        android:id="@+id/action_refresh"
+        android:icon="@drawable/holo_dark_navigation_refresh"
+        android:showAsAction="always"
+        android:title="@string/action_refresh" />
 
     <item
-            android:id="@+id/action_share"
-            android:title="@string/action_share_title"
-            android:showAsAction="ifRoom"
-            android:icon="@android:drawable/ic_menu_share"
-            android:actionProviderClass="android.widget.ShareActionProvider"
-            />
+        android:id="@+id/action_share"
+        android:actionProviderClass="android.widget.ShareActionProvider"
+        android:icon="@android:drawable/ic_menu_share"
+        android:showAsAction="ifRoom"
+        android:title="@string/action_share_title" />
 
     <item
         android:id="@+id/action_search"
-        android:title="@string/action_search_title"
-        android:showAsAction="ifRoom"
         android:icon="@android:drawable/ic_menu_search"
-        />
+        android:showAsAction="ifRoom"
+        android:title="@string/action_search_title" />
 
     <item
-            android:id="@+id/action_lease"
-            android:title="@string/action_map_settings_title"
-            android:showAsAction="never|withText"
-            android:icon="@android:drawable/ic_menu_today"
-            />
-
-    <!-- item
-            android:id="@+id/action_map_size"
-            android:title="@string/action_map_size_title"
-            android:showAsAction="never|withText"
-            android:icon="@android:drawable/ic_menu_crop"
-            / -->
+        android:id="@+id/action_lease"
+        android:icon="@android:drawable/ic_menu_today"
+        android:showAsAction="never|withText"
+        android:title="@string/action_map_settings_title" />
 
     <item
-            android:id="@+id/action_map_settings_submenu"
-            android:title="@string/pref_map_features_title"
-            android:showAsAction="never|withText"
-            >
-        <menu>
-            <group
-                    android:checkableBehavior="single"
-                    android:showAsAction="never|withText"
-                    >
-                <item
-                        android:id="@+id/map_type_normal"
-                        android:checked="false"
-                        android:title="@string/pref_feature_normal_title"/>
-                <item
-                        android:id="@+id/map_type_terrain"
-                        android:checked="false"
-                        android:title="@string/pref_feature_terrain_title"/>
-                <item
-                        android:id="@+id/map_type_satellite"
-                        android:checked="false"
-                        android:title="@string/pref_feature_satellite_title"/>
-            </group>
-
-            <group
-                    android:checkableBehavior="all"
-                    android:showAsAction="never|withText"
-                    >
-                <item
-                        android:id="@+id/menu_show_traffic"
-                        android:checked="false"
-                        android:title="@string/pref_show_traffic_title"
-                        />
-                <item
-                        android:id="@+id/menu_show_indoors"
-                        android:checked="false"
-                        android:title="@string/pref_show_indoors_title"
-                        />
-                <item
-                        android:id="@+id/menu_show_zoom_controls"
-                        android:checked="true"
-                        android:title="@string/pref_show_zoom_controls_title"
-                        />
-                <item
-                        android:id="@+id/menu_autozoom"
-                        android:checked="true"
-                        android:title="@string/pref_autozoom_title"
-                        />
-            </group>
-        </menu>
-    </item>
+        android:id="@+id/action_map_features"
+        android:showAsAction="never|withText"
+        android:title="@string/pref_map_features_title" />
 
     <item
-            android:id="@+id/action_settings"
-            android:title="@string/action_settings"
-            android:showAsAction="never|withText"
-            />
+        android:id="@+id/action_settings"
+        android:showAsAction="never|withText"
+        android:title="@string/action_settings" />
 
     <item
-            android:id="@+id/action_help"
-            android:title="@string/action_help"
-            android:showAsAction="never|withText"
-            />
+        android:id="@+id/action_help"
+        android:showAsAction="never|withText"
+        android:title="@string/action_help" />
 
     <item
-            android:id="@+id/action_about"
-            android:title="@string/action_about"
-            android:showAsAction="never|withText"
-            />
+        android:id="@+id/action_about"
+        android:showAsAction="never|withText"
+        android:title="@string/action_about" />
 
 </menu>
 
