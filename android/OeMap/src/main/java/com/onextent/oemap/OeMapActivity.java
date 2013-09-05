@@ -661,7 +661,7 @@ public class OeMapActivity extends OeBaseActivity {
 
     private boolean setupFromIntent() {
         Intent i = getIntent();
-        if (i.getAction().equals(Intent.ACTION_VIEW)) {
+        if (i.getAction() != null && i.getAction().equals(Intent.ACTION_VIEW)) {
             Uri uri = i.getData();
             if (uri != null) {
                 String mapname = uri.getQueryParameter("map");
@@ -747,37 +747,6 @@ public class OeMapActivity extends OeBaseActivity {
 
     private void showAboutDialog() {
 
-        /*
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
-                this);
-
-        // set title
-        alertDialogBuilder.setTitle("About OeMap");
-
-        // set dialog message
-        alertDialogBuilder
-                .setMessage("OeMap was created by Ed Sweeney.  Contact Ed at info@onextent.com.  Thanks for using OeMap!")
-                .setCancelable(false);
-
-        // create alert dialog
-        final AlertDialog d = alertDialogBuilder.create();
-
-        d.setOnKeyListener(new Dialog.OnKeyListener() {
-
-            @Override
-            public boolean onKey(DialogInterface arg0, int keyCode,
-                                 KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_BACK) {
-                    d.dismiss();
-                }
-                return true;
-            }
-        });
-
-        // show it
-        d.show();
-         */
         Dialog d = new AboutDialog(this);
         d.show();
 
