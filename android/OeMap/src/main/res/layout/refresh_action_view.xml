@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Copyright (c) 2013. Ed Sweeney, All Rights Reserved
+  -->
+
+<ImageView
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+
+    android:src="@drawable/holo_dark_navigation_refresh"
+
+    android:layout_gravity="center"
+    android:paddingLeft="4dip"
+    android:paddingRight="4dip"
+    style="?android:attr/actionButtonStyle"
+
+    />

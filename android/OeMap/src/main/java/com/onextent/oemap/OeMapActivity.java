@@ -27,7 +27,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -53,13 +52,11 @@ import java.util.List;
 
 public class OeMapActivity extends OeBaseActivity {
 
-    private static final String MAP_SHARE_URL_BASE = "http://oemap.onextent.com/share?map=";
-
     public static final int NEW_PUBLIC_MAP = 0;
     public static final int FIND_MAP_POS = 1;
     public static final int QUIT_MAP_POS = 2;
     public static final int SEPARATOR_POS = 3;
-
+    private static final String MAP_SHARE_URL_BASE = "http://oemap.onextent.com/share?map=";
     private static final String OEMAP_INTENT_SUBJECT = "OeMap URL";
     private static final String MAP_FRAG_TAG = "oemap";
     private static final int MAX_HISTORY = 20;
@@ -73,6 +70,8 @@ public class OeMapActivity extends OeBaseActivity {
     private SpaceNamesAdapter _spaceNamesAdapter;
     private BroadcastReceiver _presenceReceiver = new QuitSpaceReceiver();
     private IntentFilter _presenceReceiverFilter = null;
+    private boolean isRefreshing;
+    private AnimationHelper _animHelper;
     private DataSetObserver _mapSpinnerObserver = new DataSetObserver() {
 
         @Override
@@ -138,11 +137,6 @@ public class OeMapActivity extends OeBaseActivity {
         setActionBarToCurrentMap();
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        //No call for super(). Bug on API Level > 11.
-    }
-
     /*
     private void showNewPrivateMapDialog() {
         FragmentManager fm = getFragmentManager();
@@ -150,6 +144,11 @@ public class OeMapActivity extends OeBaseActivity {
         d.show(fm, "new_priv_map_dialog");
     }
      */
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        //No call for super(). Bug on API Level > 11.
+    }
 
     private void startSettingsDialog() {
 
@@ -320,6 +319,7 @@ public class OeMapActivity extends OeBaseActivity {
         OeLog.d("onDestroy: " + getMapName());
         _spaceNamesAdapter.onDestroy();
         _history_store.close();
+        _animHelper.completeRefresh();
         super.onDestroy();
     }
 
@@ -386,6 +386,8 @@ public class OeMapActivity extends OeBaseActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.oe_map_activity);
+
+        _animHelper = new AnimationHelper(this, R.layout.refresh_action_view, R.anim.clockwise_refresh);
 
         _prefs = new KvHelper(this);
 
@@ -505,13 +507,12 @@ public class OeMapActivity extends OeBaseActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
+
+        menu.clear();
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
 
-        //initMapTypeMenu(menu);
-
         MenuItem item = menu.findItem(R.id.action_share);
-
         // Fetch and store ShareActionProvider
         _shareActionProvider = (ShareActionProvider) item.getActionProvider();
 
@@ -540,7 +541,7 @@ public class OeMapActivity extends OeBaseActivity {
     }
 
     public boolean handleMenuItem(MenuItem item) {
-        boolean handled = false;
+        boolean handled = false; //does not seem to matter what we return
         boolean checked;
         // Handle your other action bar items...
         switch (item.getItemId()) {
@@ -553,6 +554,7 @@ public class OeMapActivity extends OeBaseActivity {
                 handled = true;
                 break;
             case R.id.action_refresh:
+                _animHelper.refresh(item);
                 OeMapFragment f = getMapFrag();
                 if (f != null) {
                     boolean success = f.setLocation();
@@ -582,48 +584,17 @@ public class OeMapActivity extends OeBaseActivity {
                 showMapFeaturesDialog();
                 handled = true;
                 break;
-            /*
-            case R.id.map_type_normal:
-                item.setChecked(true);
-                setMapTyp(GoogleMap.MAP_TYPE_NORMAL);
-                break;
-            case R.id.map_type_terrain:
-                item.setChecked(true);
-                setMapTyp(GoogleMap.MAP_TYPE_TERRAIN);
-                break;
-            case R.id.map_type_satellite:
-                item.setChecked(true);
-                setMapTyp(GoogleMap.MAP_TYPE_SATELLITE);
-                break;
-            case R.id.menu_show_traffic:
-                checked = item.isChecked();
-                item.setChecked(!checked);
-                setShowTrafficOption(!checked);
-                break;
-            case R.id.menu_show_indoors:
-                checked = item.isChecked();
-                item.setChecked(!checked);
-                setShowInDoorsOption(!checked);
-                break;
-            case R.id.menu_show_zoom_controls:
-                checked = item.isChecked();
-                item.setChecked(!checked);
-                setShowZoomCtls(!checked);
-                break;
-            case R.id.menu_autozoom:
-                checked = item.isChecked();
-                item.setChecked(!checked);
-                setShowAutoZoom(!checked);
-                break;
-             */
             case R.id.action_about:
                 showAboutDialog();
                 handled = true;
             default:
         }
 
-        //return super.onOptionsItemSelected(item);
         return handled;
+    }
+
+    public AnimationHelper getAnimationHelper() {
+        return _animHelper;
     }
 
     private void showMapFeaturesDialog() {
@@ -637,7 +608,7 @@ public class OeMapActivity extends OeBaseActivity {
         if (_drawerToggle.onOptionsItemSelected(item)) {
             return true;
         } else {
-           return handleMenuItem(item);
+            return handleMenuItem(item);
         }
     }
 
@@ -676,21 +647,21 @@ public class OeMapActivity extends OeBaseActivity {
 
         if (!done) {
 
-        OeMapFragment f = getMapFrag();
-        if (f != null) {
-            String cname = getMapName();
-            String fname = f.getName();
-            if (!cname.equals(fname)) {
-                OeLog.w("onResume map fragment does not match current map name");
-                setMapFrag(cname);
+            OeMapFragment f = getMapFrag();
+            if (f != null) {
+                String cname = getMapName();
+                String fname = f.getName();
+                if (!cname.equals(fname)) {
+                    OeLog.w("onResume map fragment does not match current map name");
+                    setMapFrag(cname);
+                }
             }
-        }
         }
     }
 
     private boolean setupFromIntent() {
         Intent i = getIntent();
-        if ( i.getAction().equals(Intent.ACTION_VIEW) ) {
+        if (i.getAction().equals(Intent.ACTION_VIEW)) {
             Uri uri = i.getData();
             if (uri != null) {
                 String mapname = uri.getQueryParameter("map");
@@ -706,7 +677,7 @@ public class OeMapActivity extends OeBaseActivity {
                         setMapFrag(mapname);
                     }
 
-                   return true;
+                    return true;
                 }
             }
         }

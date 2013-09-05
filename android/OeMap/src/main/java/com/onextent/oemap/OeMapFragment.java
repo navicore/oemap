@@ -120,6 +120,19 @@ public class OeMapFragment extends MapFragment {
         }
     }
 
+    /*
+    private void unsetPointOfInterest() {
+        _prefs.delete("pref_poi_lat");
+        _prefs.delete("pref_poi_lon");
+    }
+    private void setPointOfInterest(LatLng l) {
+
+        _prefs.replaceDouble("pref_poi_lat", l.latitude);
+        _prefs.replaceDouble("pref_poi_lon", l.longitude);
+        getMap().animateCamera(CameraUpdateFactory.newLatLng(l));
+    }
+     */
+
     @Override
     public void onResume() {
         super.onResume();
@@ -140,19 +153,6 @@ public class OeMapFragment extends MapFragment {
         a.wakePresenceService();
         a.wakePresenceBroadcastService(); //temp ejs todo: make servcie smart about ttl and distance
     }
-
-    /*
-    private void unsetPointOfInterest() {
-        _prefs.delete("pref_poi_lat");
-        _prefs.delete("pref_poi_lon");
-    }
-    private void setPointOfInterest(LatLng l) {
-
-        _prefs.replaceDouble("pref_poi_lat", l.latitude);
-        _prefs.replaceDouble("pref_poi_lon", l.longitude);
-        getMap().animateCamera(CameraUpdateFactory.newLatLng(l));
-    }
-     */
 
     @Override
     public void onDestroy() {
@@ -244,10 +244,6 @@ public class OeMapFragment extends MapFragment {
         map.animateCamera(CameraUpdateFactory.newLatLng(p.getLocation()));
     }
 
-    public boolean setLocation() {
-        return setLocation(true);
-    }
-
     /*
     private boolean allMarkersAreVisible() {
         GoogleMap m = getMap();
@@ -259,6 +255,10 @@ public class OeMapFragment extends MapFragment {
         return true;
     }
      */
+
+    public boolean setLocation() {
+        return setLocation(true);
+    }
 
     public boolean setLocation(boolean tryAutoZoom) {
 
@@ -310,33 +310,34 @@ public class OeMapFragment extends MapFragment {
             String mName = getName();
             String uid = intent.getExtras().getString(OeMapPresenceService.KEY_UID);
 
-            if (uid == null) {
-                //this is not an update, bail
-                return;
-            }
+            if (uid != null) {
+                //this is an update
+                String spacename = intent.getExtras().getString(OeMapPresenceService.KEY_SPACENAME);
 
-            String spacename = intent.getExtras().getString(OeMapPresenceService.KEY_SPACENAME);
-
-            if (mName != null && mName.equals(spacename)) {
-                try {
-                    Presence p = _presenceHelper.getPresence(uid, spacename);
-                    if (p == null) {
-                        _markerHelper.removeMarker(PresenceFactory.createPresence(uid, spacename), MarkerHelper.AnimationType.MOVE);
-                    } else {
-                        if (isMyPresence(p)) {
-                            _currLoc = p.getLocation();
-                            if (!_loc_is_init) {
-                                _loc_is_init = true;//set map the first time we get a loc
-                                setLocation(false);
+                if (mName != null && mName.equals(spacename)) {
+                    try {
+                        Presence p = _presenceHelper.getPresence(uid, spacename);
+                        if (p == null) {
+                            _markerHelper.removeMarker(PresenceFactory.createPresence(uid, spacename), MarkerHelper.AnimationType.MOVE);
+                        } else {
+                            if (isMyPresence(p)) {
+                                _currLoc = p.getLocation();
+                                if (!_loc_is_init) {
+                                    _loc_is_init = true;//set map the first time we get a loc
+                                    setLocation(false);
+                                }
                             }
+                            _markerHelper.setMarker(p, MarkerHelper.AnimationType.MOVE, isMyPresence(p));
                         }
-                        _markerHelper.setMarker(p, MarkerHelper.AnimationType.MOVE, isMyPresence(p));
+                    } catch (JSONException e) {
+                        OeLog.e("PresenceReceiver.onReceive error: " + e, e);
+                    } catch (PresenceException e) {
+                        OeLog.e("PresenceReceiver.onReceive error: " + e, e);
                     }
-                } catch (JSONException e) {
-                    OeLog.e("PresenceReceiver.onReceive error: " + e, e);
-                } catch (PresenceException e) {
-                    OeLog.e("PresenceReceiver.onReceive error: " + e, e);
                 }
+
+                final OeMapActivity a = (OeMapActivity) getActivity();
+                a.getAnimationHelper().completeRefresh();
             }
         }
     }
