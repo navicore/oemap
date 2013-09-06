@@ -46,6 +46,7 @@ import com.onextent.oemap.settings.OeMapPreferencesDialog;
 import com.onextent.oemap.settings.SpaceSettingsDialog;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +58,7 @@ public class OeMapActivity extends OeBaseActivity {
     public static final int QUIT_MAP_POS = 2;
     public static final int SEPARATOR_POS = 3;
     private static final String MAP_SHARE_URL_BASE = "http://oemap.onextent.com/share?map=";
-    private static final String OEMAP_INTENT_SUBJECT = "OeMap URL";
+    private static final String OEMAP_INTENT_SUBJECT = "OeMap";
     private static final String MAP_FRAG_TAG = "oemap";
     private static final int MAX_HISTORY = 20;
     private ShareActionProvider _shareActionProvider;
@@ -486,9 +487,10 @@ public class OeMapActivity extends OeBaseActivity {
     // Call to update the share intent
     private void setShareIntent() {
 
-        String mapname = null;
+        String mapname = getMapName();
+        String enc_mapname = null;
         try {
-            mapname = URLEncoder.encode(getMapName(), "UTF8");
+            enc_mapname = URLEncoder.encode(mapname, "UTF8");
         } catch (UnsupportedEncodingException e) {
             OeLog.e("setShareIntent " + e);
             return;
@@ -496,8 +498,8 @@ public class OeMapActivity extends OeBaseActivity {
 
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType("text/plain");
-        i.putExtra(Intent.EXTRA_SUBJECT, OEMAP_INTENT_SUBJECT);
-        i.putExtra(Intent.EXTRA_TEXT, MAP_SHARE_URL_BASE + mapname);
+        i.putExtra(Intent.EXTRA_SUBJECT, mapname + " " + OEMAP_INTENT_SUBJECT);
+        i.putExtra(Intent.EXTRA_TEXT, MAP_SHARE_URL_BASE + enc_mapname);
 
         if (_shareActionProvider != null) {
             _shareActionProvider.setShareIntent(i);
@@ -664,20 +666,28 @@ public class OeMapActivity extends OeBaseActivity {
         if (i.getAction() != null && i.getAction().equals(Intent.ACTION_VIEW)) {
             Uri uri = i.getData();
             if (uri != null) {
-                String mapname = uri.getQueryParameter("map");
-                if (mapname != null) {
+                String enc_mapname = uri.getQueryParameter("map");
+                if (enc_mapname != null) {
 
-                    //check for name in spacedb, if there, call set frag
-                    //else call new map dialog
-                    SpaceHelper h = new SpaceHelper(this);
-                    SpaceHelper.Space s = h.getSpace(mapname);
-                    if (s == null) {
-                        showNewSpaceDialogWithName(mapname);
-                    } else {
-                        setMapFrag(mapname);
+                    String mapname = null;
+                    try {
+                        mapname = URLDecoder.decode(enc_mapname, "UTF8");
+
+                        //check for name in spacedb, if there, call set frag
+                        //else call new map dialog
+                        SpaceHelper h = new SpaceHelper(this);
+                        OeLog.d("ejs looking for " + mapname);
+                        SpaceHelper.Space s = h.getSpace(mapname);
+                        if (s == null) {
+                            showNewSpaceDialogWithName(mapname);
+                        } else {
+                            setMapFrag(mapname);
+                        }
+
+                        return true;
+                    } catch (UnsupportedEncodingException e) {
+                        OeLog.e(e);
                     }
-
-                    return true;
                 }
             }
         }

@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -23,19 +24,11 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
     private EditText mEditText;
     private int _max_points = SpaceHelper.PRESENCE_PARAM_DEFAULT_MAX_COUNT;
 
-    void setTitle() {
-        setTitle(getString(R.string.new_map_dialog_title));
-    }
-    void setTitle(String t) {
-        Dialog d = getDialog();
-        if (d != null) d.setTitle(t);
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.new_space_dialog, container);
-        setTitle();
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
         setupNameEdit(view);
         setupButton(view);

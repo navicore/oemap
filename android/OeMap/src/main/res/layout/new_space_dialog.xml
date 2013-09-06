@@ -4,114 +4,158 @@
   ~ Copyright (c) 2013. Ed Sweeney.  All Rights Reserved.
   -->
 
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    >
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_gravity="center"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              >
-
-    <TextView
-        android:id="@+id/lbl_map_name" android:text="@string/map_name_fld_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:padding="8dp"/>
-
-    <EditText
-        android:id="@+id/txt_map_name"
-        android:inputType="text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:imeOptions="actionDone"
-        android:editable="true"
-        android:padding="8dp"
-        android:layout_margin="8dp"
-        android:hint="enter name of new map"/>
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            >
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
         <TextView
-                android:text="Quit Time"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:padding="8dp"
-                />
+            android:id="@+id/lbl_map_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_weight=".3"
+            android:text="@string/map_name_fld_text" />
 
         <EditText
-                android:id="@+id/quitTime"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:inputType="time"
-                android:ems="10"
-                android:layout_margin="8dp"
-                android:padding="8dp"
-                android:editable="false"
-                android:enabled="false"/>
+            android:id="@+id/txt_map_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_weight=".7"
+            android:editable="true"
+            android:hint="enter name of new map"
+            android:imeOptions="actionDone"
+            android:inputType="text" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_weight=".3"
+            android:text="Quit Time" />
+
+        <EditText
+            android:id="@+id/quitTime"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_weight=".7"
+            android:editable="false"
+            android:ems="10"
+            android:enabled="false"
+            android:inputType="time" />
 
     </LinearLayout>
 
     <SeekBar
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/quitTimeSeekBar"
-            android:layout_gravity="center"
-            android:max="100"
-            android:progress="34"
-            android:layout_margin="8dp"
-            android:padding="8dp"
-            />
+        android:id="@+id/quitTimeSeekBar"
+
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="8dp"
+
+        android:max="100"
+        android:progress="34" />
 
     <LinearLayout
-            android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <CheckBox
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            >
-        <TextView
-                android:text="@string/pref_map_number_of_nearest_people_title"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:padding="8dp"
-                />
-
-        <EditText
-                android:id="@+id/max_presence_fld"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:inputType="time"
-                android:ems="10"
-                android:layout_margin="8dp"
-                android:padding="8dp"
-                android:editable="false"
-                android:enabled="false"/>
+            android:layout_gravity="center|right"
+            android:text="Private"
+            android:id="@+id/space_settings_private" />
 
     </LinearLayout>
 
-    <SeekBar
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/max_presence_SeekBar"
-            android:layout_gravity="center"
-            android:max="50"
-            android:progress="10"
-            android:layout_margin="8dp"
-            android:padding="8dp"
-            />
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="right"
+        android:orientation="horizontal"
+        >
 
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Join Map"
+        <Button
             android:id="@+id/join_space_button"
-            android:layout_gravity="right"
-            android:enabled="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:layout_margin="8dp"
-            android:padding="8dp"
-            />
+            android:enabled="true"
+            android:text="Join Map" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="@string/pref_map_number_of_nearest_people_title" />
+
+        <EditText
+            android:id="@+id/max_presence_fld"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:editable="false"
+            android:ems="10"
+            android:enabled="false"
+            android:inputType="time" />
+
+    </LinearLayout>
+
+    <SeekBar
+        android:id="@+id/max_presence_SeekBar"
+
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="8dp"
+
+        android:max="50"
+        android:progress="10" />
 
 </LinearLayout>
+</ScrollView>
+
