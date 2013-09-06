@@ -2,7 +2,7 @@
  * Copyright (c) 2013. Ed Sweeney, All Rights Reserved
  */
 
-package com.onextent.oemap;
+package com.onextent.android.activity;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,6 +17,8 @@ import android.text.util.Linkify;
 import android.graphics.Color;
 import android.view.Window;
 import android.widget.TextView;
+
+import com.onextent.oemap.R;
 
 public class AboutDialog extends Dialog {
 

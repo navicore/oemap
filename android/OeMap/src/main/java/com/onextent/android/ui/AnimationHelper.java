@@ -2,7 +2,7 @@
  * Copyright (c) 2013. Ed Sweeney, All Rights Reserved
  */
 
-package com.onextent.oemap;
+package com.onextent.android.ui;
 
 import android.app.Activity;
 import android.content.Context;

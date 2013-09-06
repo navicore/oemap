@@ -15,6 +15,9 @@ import android.os.Handler;
 
 import com.onextent.android.util.OeLog;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -45,12 +48,12 @@ public class SpaceHelper {
         }
         Uri r = _context.getContentResolver().insert(SpaceProvider.CONTENT_URI, values);
     }
-    public void insert(String space, Date lease) {
+    public void insert(String space, Date lease) throws UnsupportedEncodingException {
 
         Space s = new Space(lease, space, PRESENCE_PARAM_DEFAULT_DIST, PRESENCE_PARAM_DEFAULT_MAX_COUNT);
         insert(s);
     }
-    public void insert(String space) {
+    public void insert(String space) throws UnsupportedEncodingException {
 
         Space s = new Space(null, space, PRESENCE_PARAM_DEFAULT_DIST, PRESENCE_PARAM_DEFAULT_MAX_COUNT);
         insert(s);
@@ -71,7 +74,7 @@ public class SpaceHelper {
         return l;
     }
 
-    public void setLease(String n, Date d) {
+    public void setLease(String n, Date d) throws UnsupportedEncodingException {
 
         deleteSpacename(n);
         insert(n, d);
@@ -103,9 +106,9 @@ public class SpaceHelper {
         private Date _lease;
         private final String _name;
         private int _nmeters, _max;
-        public Space(Date l, String n, int dist, int max) {
+        public Space(Date l, String n, int dist, int max) throws UnsupportedEncodingException {
             setLease(l);
-            _name = n;
+            _name = URLEncoder.encode(n, "UTF8");
             _nmeters = dist;
             if (max <= 0)
                 _max = PRESENCE_PARAM_DEFAULT_MAX_COUNT;
@@ -123,7 +126,12 @@ public class SpaceHelper {
                 _lease = new Date(Long.MAX_VALUE);
         }
         public String getName() {
-            return _name;
+            try {
+                return URLDecoder.decode(_name, "UTF8");
+            } catch (UnsupportedEncodingException e) {
+                OeLog.e(_name);
+                return _name;
+            }
         }
         public int getNMeters() {
             return _nmeters;

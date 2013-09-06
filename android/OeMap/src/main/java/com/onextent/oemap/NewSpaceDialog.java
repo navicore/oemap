@@ -16,8 +16,11 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import com.onextent.android.util.OeLog;
 import com.onextent.oemap.provider.SpaceHelper;
 import com.onextent.oemap.settings.BaseSpaceSettingsDialog;
+
+import java.io.UnsupportedEncodingException;
 
 public class NewSpaceDialog extends BaseSpaceSettingsDialog {
 
@@ -115,9 +118,13 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
                     SpaceHelper h = new SpaceHelper(getActivity());
                     SpaceHelper.Space s = h.getSpace(name);
                     if (s == null) {
-                        s = new SpaceHelper.Space(_quitDate, name,
-                                SpaceHelper.PRESENCE_PARAM_DEFAULT_DIST, _max_points);
-                        h.insert(s);
+                        try {
+                            s = new SpaceHelper.Space(_quitDate, name,
+                                    SpaceHelper.PRESENCE_PARAM_DEFAULT_DIST, _max_points);
+                            h.insert(s);
+                        } catch (UnsupportedEncodingException e) {
+                            OeLog.e(e);
+                        }
                     } else {
                         h.deleteSpacename(name);
                         s.setLease(_quitDate);

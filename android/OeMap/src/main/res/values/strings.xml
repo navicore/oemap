@@ -94,7 +94,7 @@
     <string name="pref_map_features_title">Map Features</string>
     <string name="pref_map_size">pref_map_size</string>
     <string name="pref_max_presences">pref_max_presences</string>
-    <string name="pref_map_number_of_nearest_people_title">Nearest People to Show</string>
+    <string name="pref_map_number_of_nearest_people_title">People to Show</string>
     <string name="msg_format_nearest_people_0">nobody</string>
     <string name="msg_format_nearest_people_1">the nearest person</string>
     <string name="msg_format_nearest_people">the %d nearest people</string>

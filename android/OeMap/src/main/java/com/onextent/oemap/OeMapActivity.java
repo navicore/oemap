@@ -35,7 +35,9 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.onextent.android.activity.AboutDialog;
 import com.onextent.android.activity.OeBaseActivity;
+import com.onextent.android.ui.AnimationHelper;
 import com.onextent.android.util.ListDbHelper;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.OeMapPresenceService;
@@ -382,6 +384,11 @@ public class OeMapActivity extends OeBaseActivity {
     }
 
     @Override
+    public void onNewIntent(Intent i) {
+        setupFromIntent(i);
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
@@ -645,7 +652,7 @@ public class OeMapActivity extends OeBaseActivity {
         wakePresenceBroadcastService();
         registerReceiver(_presenceReceiver, _presenceReceiverFilter);
 
-        boolean done = setupFromIntent();
+        boolean done = setupFromIntent(getIntent());
 
         if (!done) {
 
@@ -661,10 +668,9 @@ public class OeMapActivity extends OeBaseActivity {
         }
     }
 
-    private boolean setupFromIntent() {
-        Intent i = getIntent();
-        if (i.getAction() != null && i.getAction().equals(Intent.ACTION_VIEW)) {
-            Uri uri = i.getData();
+    private boolean setupFromIntent(Intent intent) {
+        if (intent.getAction() != null && intent.getAction().equals(Intent.ACTION_VIEW)) {
+            Uri uri = intent.getData();
             if (uri != null) {
                 String enc_mapname = uri.getQueryParameter("map");
                 if (enc_mapname != null) {

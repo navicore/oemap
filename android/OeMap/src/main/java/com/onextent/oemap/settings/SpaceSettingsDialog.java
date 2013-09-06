@@ -19,13 +19,15 @@ import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.R;
 import com.onextent.oemap.provider.SpaceHelper;
 
+import java.io.UnsupportedEncodingException;
+
 public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
 
     private String _space = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
 
         Bundle args = getArguments();
         if (args != null)
@@ -110,17 +112,21 @@ public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
 
                 SpaceHelper h = new SpaceHelper(getActivity());
                 h.deleteSpacename(_space);
-                if (_quitDate != null) {
+                try {
+                    if (_quitDate != null) {
 
-                    //time.setText(_sdf.format(_quitDate));
-                    time.setText(DateUtils.getRelativeDateTimeString(getActivity(),
-                            _quitDate.getTime(), DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0));
-                    h.insert(_space, _quitDate);
+                        //time.setText(_sdf.format(_quitDate));
+                        time.setText(DateUtils.getRelativeDateTimeString(getActivity(),
+                                _quitDate.getTime(), DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0));
+                        h.insert(_space, _quitDate);
 
-                } else {
+                    } else {
 
-                    time.setText("Until I manually quit");
-                    h.insert(_space, null);
+                        time.setText("Until I manually quit");
+                        h.insert(_space, null);
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
                 }
                 OeMapActivity a = (OeMapActivity) getActivity();
                 a.wakePresenceService();
