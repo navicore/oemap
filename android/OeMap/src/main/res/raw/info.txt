@@ -1,8 +1,12 @@
-<h2>OeMap</h2>
+<h1>OeMap</h1>
 Copyright 2013<br>
 
 <br><br>
-OeMap was created by Ed Sweeney.  Thanks for using OeMap!
+OeMap was created by
+<br>
+Ed Sweeney.
+<br><br>
+Thanks for using OeMap!
 
 <br><br>
 <b>www.onextent.com</b>

@@ -55,5 +55,6 @@ task initVerInfo << {
     tasks.build.execute();
 }
 
-build.dependsOn initVerInfo
+assembleDebug.dependsOn initVerInfo
+assembleRelease.dependsOn initVerInfo
 

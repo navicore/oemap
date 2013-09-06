@@ -235,9 +235,11 @@ public class OeMapPresenceService extends Service {
     private void createNotification(String msg) {
         Intent intent = new Intent(this, OeMapActivity.class);
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, 0);
+        String appName = getString(R.string.app_name);
+        String title = getString(R.string.msg_service_is_broadcasting, appName);
         _notification = new Notification.Builder(this)
                 .setContentIntent(pIntent)
-                .setContentTitle("OeMap is Broadcasting").setContentText(msg)
+                .setContentTitle(title).setContentText(msg)
                 .setSmallIcon(R.drawable.ic_launcher).getNotification();
 
         _notification.flags |= Notification.FLAG_NO_CLEAR;

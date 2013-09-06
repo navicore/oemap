@@ -73,7 +73,7 @@
 
     <string name="presence_service_key_running">presence_service_key_running</string>
     <string name="presence_service_key_uid">uid</string>
-    <string name="presence_service_name">OeMap Presence Service</string>
+    <string name="presence_service_name">Augie Map Presence Service</string>
     <string name="presence_service_update_intent">com.onextent.oemap.presenceServiceUpdate</string>
     <string name="presence_service_quit_space_intent">com.onextent.oemap.presenceServiceQuitSpace</string>
 
@@ -99,6 +99,7 @@
     <string name="msg_format_nearest_people_1">the nearest person</string>
     <string name="msg_format_nearest_people">the %d nearest people</string>
     <string name="msg_max_lease_time">until I quit</string>
+    <string name="msg_service_is_broadcasting">%s is Broadcasting</string>
 
 </resources>
 
