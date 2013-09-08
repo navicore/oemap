@@ -43,12 +43,13 @@ public class SpaceProvider extends ContentProvider {
         static String LEASE             = SpaceDbHelper.LEASE;
         static String NAME              = SpaceDbHelper.NAME;
         static String TYPE              = SpaceDbHelper.TYPE;
+        static String URI               = SpaceDbHelper.URI;
         static String SIZE_IN_METERS    = SpaceDbHelper.SIZE_IN_METERS;
         static String SIZE_IN_POINTS    = SpaceDbHelper.SIZE_IN_POINTS;
         static String CONTENT_PATH      = SpaceDbHelper.SPACE_TABLE;
         static String CONTENT_TYPE      = ContentResolver.CURSOR_DIR_BASE_TYPE + "/com.onextent.oemap.provider.spaces";
         static String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/com.onextent.oemap.provider.spaces";
-        static String[] PROJECTION_ALL  = {_ID, LEASE, SIZE_IN_METERS, SIZE_IN_POINTS, NAME, TYPE};
+        static String[] PROJECTION_ALL  = {_ID, LEASE, SIZE_IN_METERS, SIZE_IN_POINTS, NAME, TYPE, URI};
         static String SORT_ORDER_DEFAULT = _ID + " ASC";
     }
 

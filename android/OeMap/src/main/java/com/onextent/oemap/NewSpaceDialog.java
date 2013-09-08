@@ -4,7 +4,6 @@
 
 package com.onextent.oemap;
 
-import android.app.Dialog;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -16,33 +15,65 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.SeekBar;
-import android.widget.Switch;
 import android.widget.Toast;
 
-import com.onextent.android.util.OeLog;
+import com.onextent.oemap.provider.KvHelper;
 import com.onextent.oemap.provider.SpaceHelper;
 import com.onextent.oemap.provider.SpaceProvider;
 import com.onextent.oemap.settings.BaseSpaceSettingsDialog;
 
-import java.io.UnsupportedEncodingException;
-
 public class NewSpaceDialog extends BaseSpaceSettingsDialog {
 
-    boolean _isPrivate = false;
-    boolean _isSharable = true;
     private EditText mEditText;
     private int _max_points = SpaceHelper.PRESENCE_PARAM_DEFAULT_MAX_COUNT;
+    private KvHelper _prefs;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.new_space_dialog, container);
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
-        setupPublicCheckBox(view);
-        setupSharableCheckBox(view);
+        _prefs = new KvHelper(getActivity());
+        int type = getTypeArg();
+        if (type == -1) {
+
+            setupPublicCheckBox(view);
+            setupSharableCheckBox(view);
+        } else {
+            CheckBox isSharCheckBox = (CheckBox) view.findViewById(R.id.space_settings_resharable);
+            CheckBox isPublicBox = (CheckBox) view.findViewById(R.id.space_settings_public);
+            switch (type) {
+                case SpaceProvider.Spaces.PUBLIC:
+                    setPublic(true);
+                    setSharable(true);
+
+                    isPublicBox.setChecked(true);
+                    isSharCheckBox.setChecked(true);
+                    isSharCheckBox.setVisibility(View.INVISIBLE);
+                    break;
+                case SpaceProvider.Spaces.PRIVATE:
+                    setPublic(false);
+                    isPublicBox.setChecked(false);
+
+                    setSharable(false);
+                    isSharCheckBox.setChecked(false);
+                    isSharCheckBox.setVisibility(View.VISIBLE);
+                    break;
+                default:
+                    setPublic(false);
+                    isPublicBox.setChecked(false);
+
+                    setSharable(true);
+                    isSharCheckBox.setChecked(true);
+                    isSharCheckBox.setVisibility(View.VISIBLE);
+                    break;
+            }
+            isSharCheckBox.setEnabled(false);
+            isPublicBox.setEnabled(false);
+        }
         setupNameEdit(view);
         setupButton(view);
         setupSeekBar(view);
@@ -51,9 +82,23 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
         return view;
     }
 
+    private boolean isPublic() {
+        return _prefs.getBoolean("prefs_new_map_is_public", false);
+    }
+    private void setPublic(boolean v) {
+        _prefs.replaceBoolean("prefs_new_map_is_public", v);
+    }
+    private boolean isSharable() {
+        return _prefs.getBoolean("prefs_new_map_is_sharable", true);
+    }
+    private void setSharable(boolean v) {
+        _prefs.replaceBoolean("prefs_new_map_is_sharable", v);
+    }
+
     private void setupPublicCheckBox(final View view) {
 
         CheckBox cb = (CheckBox) view.findViewById(R.id.space_settings_public);
+        cb.setChecked(isPublic()); //init from last use
         cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -61,10 +106,10 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
                 CheckBox isSharCheckBox = (CheckBox) view.findViewById(R.id.space_settings_resharable);
                 if (isChecked) {
                     isSharCheckBox.setVisibility(View.INVISIBLE);
-                    _isPrivate = false;
+                    setPublic(true);
                 } else {
                     isSharCheckBox.setVisibility(View.VISIBLE);
-                    _isPrivate = true;
+                    setPublic(false);
                 }
             }
         });
@@ -72,12 +117,19 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
 
     private void setupSharableCheckBox(final View view) {
 
-        CheckBox cb = (CheckBox) view.findViewById(R.id.space_settings_public);
+        CheckBox cb = (CheckBox) view.findViewById(R.id.space_settings_resharable);
+        if (isPublic()) {
+            cb.setChecked(true); //all public maps are sharable
+            cb.setVisibility(View.INVISIBLE);
+        } else {
+            cb.setVisibility(View.VISIBLE);
+            cb.setChecked(isSharable()); //init from last use
+        }
         cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 
-                _isSharable = isChecked;
+                setSharable(isChecked);
             }
         });
     }
@@ -150,16 +202,41 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
         }
     }
 
-    private int getType(boolean isPrivate, boolean isSharable) {
-        if (isPrivate) {
+    private int getType(boolean isPublic, boolean isSharable) {
+        if (!isPublic) {
             if (isSharable) {
                 return SpaceProvider.Spaces.PRIVATE_SHARABLE;
             } else {
                 return SpaceProvider.Spaces.PRIVATE;
             }
-        } else {
+        } else { //all public maps are sharable
             return SpaceProvider.Spaces.PUBLIC;
         }
+    }
+
+    private int getTypeArg() {
+
+        Bundle b = getArguments();
+        if (b != null && b.containsKey(getString(R.string.bundle_type))) {
+            return b.getInt(getString(R.string.bundle_type));
+        }
+        return -1;
+    }
+    private String getUriArg() {
+
+        Bundle b = getArguments();
+        if (b != null && b.containsKey(getString(R.string.bundle_uri))) {
+            return b.getString(getString(R.string.bundle_uri));
+        }
+        return null;
+    }
+    private String getSidArg() {
+
+        Bundle b = getArguments();
+        if (b != null && b.containsKey(getString(R.string.bundle_sid))) {
+            return b.getString(getString(R.string.bundle_sid));
+        }
+        return null;
     }
 
     private void setupButton(View view) {
@@ -172,15 +249,23 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
                 OeMapActivity activity = (OeMapActivity) getActivity();
                 String name = mEditText.getText().toString();
 
-                int type = getType(_isPrivate, _isSharable);
+                int type = getType(isPublic(), isSharable());
+                String sid = getSidArg();
+                String uriString = getUriArg();
+                if (sid == null) {
+                    if (type == SpaceProvider.Spaces.PUBLIC)
+                        sid = name.toLowerCase(); //i18n
+                    else
+                        sid = activity.createUUID();
+                }
 
                 if (name != null && name.length() > 0) {
 
                     SpaceHelper h = new SpaceHelper(getActivity());
                     SpaceHelper.Space s = h.getSpace(name);
                     if (s == null) {
-                        s = new SpaceHelper.Space(_quitDate, name, name,
-                                SpaceHelper.PRESENCE_PARAM_DEFAULT_DIST, _max_points, type);
+                        s = new SpaceHelper.Space(_quitDate, sid, name,
+                                SpaceHelper.PRESENCE_PARAM_DEFAULT_DIST, _max_points, type, uriString);
                         h.insert(s);
                     } else {
                         h.deleteSpacename(name);
@@ -188,7 +273,7 @@ public class NewSpaceDialog extends BaseSpaceSettingsDialog {
                         s.setMaxPoints(_max_points);
                         h.insert(s);
                     }
-                    activity.onFinishNewSpaceDialog(name);
+                    activity.onFinishNewSpaceDialog(sid, name);
                     dismiss();
                 } else {
                     //todo: this feedback is not working at all

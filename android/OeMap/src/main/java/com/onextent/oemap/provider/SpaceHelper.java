@@ -33,6 +33,8 @@ public class SpaceHelper extends BaseProviderHelper {
         ContentValues values = new ContentValues();
         values.put(SpaceProvider.Spaces._ID, space._id);  //use encoded inner value
         values.put(SpaceProvider.Spaces.NAME, space._name); //use encoded inner value
+        values.put(SpaceProvider.Spaces.TYPE, space.getType());
+        values.put(SpaceProvider.Spaces.URI, space.getUri());
         values.put(SpaceProvider.Spaces.SIZE_IN_METERS, space.getNMeters());
         values.put(SpaceProvider.Spaces.SIZE_IN_POINTS, space.getMaxPoints());
         if (space.getLease() != null) {
@@ -98,19 +100,18 @@ public class SpaceHelper extends BaseProviderHelper {
             if (c != null) c.close();
         }
     }
+
     public static class Space {
         Date _lease;
-        String _name, _id;
+        String _name, _id, _uri;
         int _nmeters, _max, _type;
 
-        public Space(Date l, String id, String n, int dist, int max, int type) {
+        public Space(Date l, String id, String n, int dist, int max, int type, String uri) {
             if (n == null) throw new NullPointerException("name is null");
+            if (id == null) throw new NullPointerException("id is null");
+            _uri = uri;
             _name = encode(n);
-            if (id == null) {
-                _id = _name;
-            } else {
-                _id = encode(id);
-            }
+            _id = encode(id);
             _type = type;
             _nmeters = dist;
             if (max <= 0)
@@ -138,6 +139,9 @@ public class SpaceHelper extends BaseProviderHelper {
             return _type;
         }
 
+        public String getUri() {
+            return _uri;
+        }
         public String getId() {
             return decode(_id);
         }
@@ -158,9 +162,36 @@ public class SpaceHelper extends BaseProviderHelper {
         }
     }
 
-    public Space getSpace(String id) {
+    public Space getSpaceByName(String name) {
+        String safe_name = encode(name);
+        Cursor c = null;
+        String[] proj = {SpaceProvider.Spaces._ID};
 
-        String safe_id = encode(id);
+        try {
+
+            c = _context.getContentResolver().query(SpaceProvider.CONTENT_URI, proj,
+                    SpaceProvider.Spaces.NAME + "='" + safe_name + "'", null, SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
+            if (c.getCount() <= 0) return null;
+            c.moveToFirst();
+
+            int pos = c.getColumnIndex(SpaceProvider.Spaces._ID);
+            String sid = decode(c.getString(pos));
+
+            Space space = getSpace(sid);
+
+            return space;
+
+        } catch (Exception ex) {
+            OeLog.w(ex.toString(), ex);
+            return null;
+        } finally {
+            if (c != null) c.close();
+        }
+    }
+
+    public Space getSpace(String sid) {
+
+        String safe_id = encode(sid);
         Cursor c = null;
         try {
 
@@ -169,23 +200,26 @@ public class SpaceHelper extends BaseProviderHelper {
             if (c.getCount() <= 0) return null;
             c.moveToFirst();
 
-            int namepos = c.getColumnIndex(SpaceProvider.Spaces.NAME);
-            String name = decode(c.getString(namepos));
+            int pos = c.getColumnIndex(SpaceProvider.Spaces.URI);
+            String uri = c.getString(pos);
 
-            int lpos = c.getColumnIndex(SpaceProvider.Spaces.LEASE);
-            long l = c.getLong(lpos);
+            pos = c.getColumnIndex(SpaceProvider.Spaces.NAME);
+            String name = decode(c.getString(pos));
+
+            pos = c.getColumnIndex(SpaceProvider.Spaces.LEASE);
+            long l = c.getLong(pos);
             Date d = new Date(l);
 
-            int metpos = c.getColumnIndex(SpaceProvider.Spaces.SIZE_IN_METERS);
-            int met = c.getInt(metpos);
+            pos = c.getColumnIndex(SpaceProvider.Spaces.SIZE_IN_METERS);
+            int met = c.getInt(pos);
 
-            int maxpos = c.getColumnIndex(SpaceProvider.Spaces.SIZE_IN_POINTS);
-            int max = c.getInt(maxpos);
+            pos = c.getColumnIndex(SpaceProvider.Spaces.SIZE_IN_POINTS);
+            int max = c.getInt(pos);
 
-            int tpos = c.getColumnIndex(SpaceProvider.Spaces.TYPE);
-            int type = c.getInt(tpos);
+            pos = c.getColumnIndex(SpaceProvider.Spaces.TYPE);
+            int type = c.getInt(pos);
 
-            Space space = new Space(d, id, name, met, max, type);
+            Space space = new Space(d, sid, name, met, max, type, uri);
 
             return space;
 

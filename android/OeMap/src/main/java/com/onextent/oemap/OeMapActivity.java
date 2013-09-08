@@ -44,6 +44,7 @@ import com.onextent.oemap.presence.OeMapPresenceService;
 import com.onextent.oemap.presence.SearchDialog;
 import com.onextent.oemap.provider.KvHelper;
 import com.onextent.oemap.provider.SpaceHelper;
+import com.onextent.oemap.provider.SpaceProvider;
 import com.onextent.oemap.settings.OeMapPreferencesDialog;
 import com.onextent.oemap.settings.SpaceSettingsDialog;
 
@@ -51,18 +52,25 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class OeMapActivity extends OeBaseActivity {
 
-    public static final int NEW_PUBLIC_MAP = 0;
-    public static final int FIND_MAP_POS = 1;
-    public static final int QUIT_MAP_POS = 2;
-    public static final int SEPARATOR_POS = 3;
-    private String MAP_SHARE_URL_BASE = null;
-    private String OEMAP_INTENT_SUBJECT = null;
+    static final String URI_PARAM_NAME = "name";
+    static final String URI_PARAM_DATETIME = "date";
+    static final String URI_PARAM_SID = "sid";
+    static final String URI_PARAM_TYPE = "type";
+    static final String URI_PARAM_USERNAME = "user";
+    static final int NEW_PUBLIC_MAP = 0;
+    static final int FIND_MAP_POS = 1;
+    static final int QUIT_MAP_POS = 2;
+    static final int MAP_INFO_POS = 3;
+    static final int SEPARATOR_POS = 4;
     private static final String MAP_FRAG_TAG = "oemap";
     private static final int MAX_HISTORY = 20;
+    private String MAP_SHARE_URL_BASE = null;
+    private String OEMAP_INTENT_SUBJECT = null;
     private ShareActionProvider _shareActionProvider;
     private ListView _drawerList;
     private ActionBarDrawerToggle _drawerToggle;
@@ -90,7 +98,7 @@ public class OeMapActivity extends OeBaseActivity {
     };
 
     private boolean aMapIsActive() {
-        String m = getMapName();
+        String m = getCurrentSpaceId();
         return !getString(R.string.null_map_name).equals(m);
     }
 
@@ -119,34 +127,25 @@ public class OeMapActivity extends OeBaseActivity {
         return null;
     }
 
-    public void setMapFrag(String mapname) {
+    public void setMapFrag(String sid, String name) {
 
-        OeLog.d("setMapFrag: " + mapname);
+        OeLog.d("setMapFrag: " + sid);
         MapFragment fragment = null;  //creating a new frag per map, optimise later
 
-        if (fragment == null) {
-            fragment = new OeMapFragment();
-            Bundle args = new Bundle();
-            args.putString("mapname", mapname);
-            fragment.setArguments(args);
-            FragmentManager fragmentManager = getFragmentManager();
-            fragmentManager.beginTransaction().replace(
-                    R.id.content_frame, fragment, MAP_FRAG_TAG
-            ).commit();
-        }
+        fragment = new OeMapFragment();
+        Bundle args = new Bundle();
+        args.putString(getString(R.string.bundle_sid), sid);
+        args.putString(getString(R.string.bundle_spacename), name);
+        fragment.setArguments(args);
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction().replace(
+                R.id.content_frame, fragment, MAP_FRAG_TAG
+        ).commit();
 
+        updateSpaceNames(sid);
         setShareIntent();
-        updateSpaceNames(mapname);
         setActionBarToCurrentMap();
     }
-
-    /*
-    private void showNewPrivateMapDialog() {
-        FragmentManager fm = getFragmentManager();
-        DialogFragment d = new NewPrivateSpaceDialog();
-        d.show(fm, "new_priv_map_dialog");
-    }
-     */
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -163,7 +162,7 @@ public class OeMapActivity extends OeBaseActivity {
         FragmentManager fm = getFragmentManager();
         DialogFragment d = new SpaceSettingsDialog();
         Bundle args = new Bundle();
-        String spacename = getMapName();
+        String spacename = getCurrentSpaceId();
         args.putString(getString(R.string.bundle_spacename), spacename);
         d.setArguments(args);
         d.show(fm, "space_settings_dialog");
@@ -173,18 +172,36 @@ public class OeMapActivity extends OeBaseActivity {
         FragmentManager fm = getFragmentManager();
         DialogFragment d = new MarkerDialog();
         Bundle args = new Bundle();
-        String spacename = getMapName();
+        String spacename = getCurrentSpaceId();
         args.putString(getString(R.string.bundle_spacename), spacename);
         d.setArguments(args);
         d.show(fm, "list_markers_dialog");
     }
 
-    private void showNewSpaceDialogWithName(String space) {
+    private void showNewSharedSpaceDialog(Uri uri) {
+
+        String name = decode(uri.getQueryParameter(URI_PARAM_NAME));
+        String sid = decode(uri.getQueryParameter(URI_PARAM_SID));
+        int type = Integer.valueOf(decode(uri.getQueryParameter(URI_PARAM_TYPE)));
         FragmentManager fm = getFragmentManager();
         DialogFragment d = new NewSpaceDialog();
-        if (space != null) {
+        if (name != null) {
             Bundle b = new Bundle();
-            b.putString(getString(R.string.bundle_spacename), space);
+            b.putString(getString(R.string.bundle_uri), uri.toString());
+            b.putString(getString(R.string.bundle_spacename), name);
+            b.putString(getString(R.string.bundle_sid), sid);
+            b.putInt(getString(R.string.bundle_type), type);
+            d.setArguments(b);
+        }
+        d.show(fm, "new_space_dialog");
+    }
+
+    private void showNewSpaceDialogWithName(String name) {
+        FragmentManager fm = getFragmentManager();
+        DialogFragment d = new NewSpaceDialog();
+        if (name != null) {
+            Bundle b = new Bundle();
+            b.putString(getString(R.string.bundle_spacename), name);
             d.setArguments(b);
         }
         d.show(fm, "new_space_dialog");
@@ -194,8 +211,32 @@ public class OeMapActivity extends OeBaseActivity {
         showNewSpaceDialogWithName(null);
     }
 
-    private void updateSpaceNames(String n) {
-        setMapName(n);
+    private String getSpaceId(String name) {
+
+        String none = getString(R.string.null_map_name);
+        if (none.equals(name)) return none;
+        SpaceHelper h = new SpaceHelper(this);
+        SpaceHelper.Space s = h.getSpaceByName(name);
+        if (s == null) throw new NullPointerException("no space found for name " + name);
+        return s.getId();
+    }
+
+    public String getSpaceName(String sid) {
+
+        String none = getString(R.string.null_map_name);
+        if (none.equals(sid)) return none;
+
+        SpaceHelper h = new SpaceHelper(this);
+        SpaceHelper.Space s = h.getSpace(sid);
+        //if (s == null) throw new NullPointerException("no space found for sid " + sid);
+        if (s == null) return null;
+
+        return s.getName();
+    }
+
+    private void updateSpaceNames(String sid) {
+        setCurrentSpaceId(sid);
+        String n = getSpaceName(sid);
         _history_store.replace(n);
 
         if (_drawerNamesList.contains(n)) {
@@ -205,19 +246,20 @@ public class OeMapActivity extends OeBaseActivity {
         notifyDrawList();
     }
 
-    void enableNewSpace(String newMapName) {
-        OeLog.d("enableNewSpace:: " + newMapName);
-        setMapFrag(newMapName);
+    void enableNewSpace(String sid, String name) {
+        OeLog.d("enableNewSpace:: " + sid);
+        setMapFrag(sid, name);
         Intent i = new Intent(this, OeMapPresenceService.class);
         i.putExtra(OeMapPresenceService.KEY_REASON, OeMapPresenceService.CMD_ADD_SPACE);
-        i.putExtra(OeMapPresenceService.KEY_SPACENAME, newMapName);
+        i.putExtra(OeMapPresenceService.KEY_SPACE_ID, sid);
         startService(i);
     }
 
-    void onFinishNewSpaceDialog(String newMapName) {
-        setMapName(newMapName);
-        enableNewSpace(newMapName);
-        Toast.makeText(this, "New map '" + newMapName + "' created.", Toast.LENGTH_SHORT).show();
+    void onFinishNewSpaceDialog(String sid, String name) {
+        setCurrentSpaceId(sid);
+        enableNewSpace(sid, name);
+        String n = getSpaceName(sid);
+        Toast.makeText(this, "New map '" + n + "' created.", Toast.LENGTH_SHORT).show();
     }
 
     public void wakePresenceBroadcastService() {
@@ -243,14 +285,15 @@ public class OeMapActivity extends OeBaseActivity {
 
     private void quitSpace() {
 
-        String spacename = getMapName();
-        //setMapFrag(getString(R.string.null_map_name));
-        setMapFrag(getInactiveSpaceName(spacename));
+        String sid = getCurrentSpaceId();
+        String newname = getInactiveSpaceName(getSpaceName(sid));
+        String newsid = getSpaceId(newname);
+        setMapFrag(newsid, newname);
         //todo: helper method that sets a nice UI and location for none
 
         Intent i = new Intent(this, OeMapPresenceService.class);
         i.putExtra(OeMapPresenceService.KEY_REASON, OeMapPresenceService.CMD_RM_SPACE);
-        i.putExtra(OeMapPresenceService.KEY_SPACENAME, spacename);
+        i.putExtra(OeMapPresenceService.KEY_SPACE_ID, sid);
         startService(i);
     }
 
@@ -271,6 +314,9 @@ public class OeMapActivity extends OeBaseActivity {
             case QUIT_MAP_POS:
                 quitSpace();
                 break;
+            case MAP_INFO_POS:
+                showMapInfoDialog();
+                break;
             default:
                 String m = _drawerNamesList.get(position);
                 SpaceHelper h = new SpaceHelper(this);
@@ -278,13 +324,26 @@ public class OeMapActivity extends OeBaseActivity {
                 if (space == null) {
                     showNewSpaceDialogWithName(m);
                 } else {
-                    enableNewSpace(m);
+                    enableNewSpace(space.getId(), space.getName());
                 }
                 break;
         }
 
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerLayout.closeDrawer(_drawerList);
+    }
+
+    private void showMapInfoDialog() {
+
+        String sid = getCurrentSpaceId();
+        SpaceHelper h = new SpaceHelper(this);
+        SpaceHelper.Space s = h.getSpace(sid);
+        Uri uri = null;
+        String suri = s.getUri();
+        if (suri != null)
+            uri = Uri.parse(suri);
+        Dialog d = new MapInfoDialog(this, uri);
+        d.show();
     }
 
     public void clearMapNamesHistory() {
@@ -319,7 +378,7 @@ public class OeMapActivity extends OeBaseActivity {
 
     @Override
     protected void onDestroy() {
-        OeLog.d("onDestroy: " + getMapName());
+        OeLog.d("onDestroy: " + getCurrentSpaceId());
         _spaceNamesAdapter.onDestroy();
         _history_store.close();
         _animHelper.completeRefresh();
@@ -404,7 +463,7 @@ public class OeMapActivity extends OeBaseActivity {
 
         Intent i = getIntent();
 
-        OeLog.d("onCreate: " + getMapName() + " with intent: " + i);
+        OeLog.d("onCreate: " + getCurrentSpaceId() + " with intent: " + i);
 
         _history_store = new ListDbHelper(this, "oemap_history_store");
 
@@ -430,22 +489,22 @@ public class OeMapActivity extends OeBaseActivity {
 
         boolean ret = false;
         //make sure the mapname is still in the spacedb it may get deleted on upgrade
-        String currMapName = getMapName();
-        if (currMapName != null && !currMapName.equals("") && !currMapName.equals(getString(R.string.null_map_name))) {
+        String spaceId = getCurrentSpaceId();
+        if (spaceId != null && !spaceId.equals("") && !spaceId.equals(getString(R.string.null_map_name))) {
             SpaceHelper h = new SpaceHelper(this);
-            SpaceHelper.Space s = h.getSpace(currMapName);
+            SpaceHelper.Space s = h.getSpace(spaceId);
 
             if (s == null) {
 
-                OeLog.w("activeMapIsInStore not in store: " + getMapName());
+                OeLog.w("activeMapIsInStore not in store: " + getCurrentSpaceId());
                 ret = false;
 
             } else if (s.getLease().getTime() < System.currentTimeMillis()) {
 
                 //expired
                 String msg = String.valueOf(DateUtils.getRelativeTimeSpanString(this, s.getLease().getTime()));
-                OeLog.d("activeMapIsInStore expiring: " + getMapName() + " lease: " + msg);
-                h.deleteSpacename(currMapName);
+                OeLog.d("activeMapIsInStore expiring: " + getCurrentSpaceId() + " lease: " + msg);
+                h.deleteSpacename(spaceId);
                 ret = false;
 
             } else {
@@ -468,8 +527,9 @@ public class OeMapActivity extends OeBaseActivity {
             public boolean onNavigationItemSelected(int i, long l) {
                 String n = (String) _spaceNamesAdapter.getItem(i);
                 OeLog.d("onNavigationItemSelcted pos " + i + " item id: " + l + " name: " + n);
-                setMapFrag(n);
-                return false;
+                String sid = getSpaceId(n);
+                setMapFrag(sid, n);
+                return true;
             }
         });
         setActionBarToCurrentMap();
@@ -478,11 +538,13 @@ public class OeMapActivity extends OeBaseActivity {
     private void setActionBarToCurrentMap() {
 
         boolean success = false;
-        String currName = getMapName();
+        String sid = getCurrentSpaceId();
+        if (sid == null) return;
+        String name = getSpaceName(sid);
         for (int i = 0; i < _spaceNamesAdapter.getCount(); i++) {
 
             String n = (String) _spaceNamesAdapter.getItem(i);
-            if (n != null && n.equals(currName)) {
+            if (n != null && n.equals(name)) {
 
                 getActionBar().setSelectedNavigationItem(i);
                 success = true;
@@ -497,19 +559,28 @@ public class OeMapActivity extends OeBaseActivity {
     // Call to update the share intent
     private void setShareIntent() {
 
-        String mapname = getMapName();
-        String enc_mapname = null;
-        try {
-            enc_mapname = URLEncoder.encode(mapname, "UTF8");
-        } catch (UnsupportedEncodingException e) {
-            OeLog.e("setShareIntent " + e);
+        String spaceId = getCurrentSpaceId();
+        SpaceHelper h = new SpaceHelper(this);
+        SpaceHelper.Space space = h.getSpace(spaceId);
+        if (space == null) {
+            OeLog.e("setShareIntent can not find space for sid: " + spaceId);
             return;
         }
+        String spaceName = space.getName();
+        String username = _prefs.get(getString(R.string.pref_username), "unknown");
+        int type = space.getType();
+        String enc_sid = encode(spaceId);
+        String enc_name = encode(spaceName);
+        String enc_username = encode(username);
+
+        Date date = new Date();
 
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType("text/plain");
-        i.putExtra(Intent.EXTRA_SUBJECT, mapname + " " + OEMAP_INTENT_SUBJECT);
-        i.putExtra(Intent.EXTRA_TEXT, MAP_SHARE_URL_BASE + enc_mapname);
+        i.putExtra(Intent.EXTRA_SUBJECT, spaceName + " " + OEMAP_INTENT_SUBJECT);
+        i.putExtra(Intent.EXTRA_TEXT, MAP_SHARE_URL_BASE + "?" + URI_PARAM_SID + "=" + enc_sid +
+                "&" + URI_PARAM_NAME + "=" + enc_name + "&" + URI_PARAM_TYPE + "=" + type + "&" +
+                URI_PARAM_USERNAME + "=" + enc_username + "&" + URI_PARAM_DATETIME + "=" + encode(date.toString()));
 
         if (_shareActionProvider != null) {
             _shareActionProvider.setShareIntent(i);
@@ -633,21 +704,21 @@ public class OeMapActivity extends OeBaseActivity {
     @Override
     public void onStop() {
 
-        OeLog.d("onStop: " + getMapName());
+        OeLog.d("onStop: " + getCurrentSpaceId());
         super.onStop();
     }
 
     @Override
     public void onStart() {
 
-        OeLog.d("onStart: " + getMapName());
+        OeLog.d("onStart: " + getCurrentSpaceId());
         super.onStart();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        OeLog.d("onResume: " + getMapName());
+        OeLog.d("onResume: " + getCurrentSpaceId());
 
         _spaceNamesAdapter.registerDataSetObserver(_mapSpinnerObserver);
         updateMapNamesFromHistory();
@@ -661,11 +732,11 @@ public class OeMapActivity extends OeBaseActivity {
 
             OeMapFragment f = getMapFrag();
             if (f != null) {
-                String cname = getMapName();
+                String cname = getCurrentSpaceId();
                 String fname = f.getName();
                 if (!cname.equals(fname)) {
                     OeLog.w("onResume map fragment does not match current map name");
-                    setMapFrag(cname);
+                    setMapFrag(cname, getSpaceName(cname));
                 }
             }
         }
@@ -675,28 +746,27 @@ public class OeMapActivity extends OeBaseActivity {
         if (intent.getAction() != null && intent.getAction().equals(Intent.ACTION_VIEW)) {
             Uri uri = intent.getData();
             if (uri != null) {
-                String enc_mapname = uri.getQueryParameter("map");
-                if (enc_mapname != null) {
+                String enc_name = uri.getQueryParameter(URI_PARAM_NAME);
+                String enc_sid = uri.getQueryParameter(URI_PARAM_SID);
+                if (enc_sid != null) {
 
-                    String mapname = null;
-                    try {
-                        mapname = URLDecoder.decode(enc_mapname, "UTF8");
+                    String name = decode(enc_name);
+                    String sid = decode(enc_sid);
 
-                        //check for name in spacedb, if there, call set frag
-                        //else call new map dialog
-                        SpaceHelper h = new SpaceHelper(this);
-                        OeLog.d("ejs looking for " + mapname);
-                        SpaceHelper.Space s = h.getSpace(mapname);
-                        if (s == null) {
-                            showNewSpaceDialogWithName(mapname);
-                        } else {
-                            setMapFrag(mapname);
-                        }
+                    //todo: check for differnet sids with the same name, in that chase
+                    // number the names like "my map(2)" etc...
 
-                        return true;
-                    } catch (UnsupportedEncodingException e) {
-                        OeLog.e(e);
+                    //check for name in spacedb, if there, call set frag
+                    //else call new map dialog
+                    SpaceHelper h = new SpaceHelper(this);
+                    SpaceHelper.Space s = h.getSpace(sid);
+                    if (s == null) {
+                        showNewSharedSpaceDialog(uri);
+                    } else {
+                        setMapFrag(sid, name);
                     }
+
+                    return true;
                 }
             }
         }
@@ -707,19 +777,19 @@ public class OeMapActivity extends OeBaseActivity {
     public void onPause() {
 
         _spaceNamesAdapter.unregisterDataSetObserver(_mapSpinnerObserver);
-        OeLog.d("onPause: " + getMapName());
+        OeLog.d("onPause: " + getCurrentSpaceId());
         unregisterReceiver(_presenceReceiver);
         saveHistory();
         clearMapNamesHistory();
         super.onPause();
     }
 
-    public String getMapName() {
-        return _prefs.get(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
+    public String getCurrentSpaceId() {
+        return _prefs.get(getString(R.string.state_current_space_id), getString(R.string.null_map_name));
     }
 
-    private void setMapName(String newname) {
-        _prefs.replace(getString(R.string.state_current_mapname), newname);
+    private void setCurrentSpaceId(String sid) {
+        _prefs.replace(getString(R.string.state_current_space_id), sid);
     }
 
     private void saveHistory() {
@@ -869,14 +939,14 @@ public class OeMapActivity extends OeBaseActivity {
                 return;
             }
 
-            String spacename = intent.getExtras().getString(OeMapPresenceService.KEY_SPACENAME);
+            String spacename = intent.getExtras().getString(OeMapPresenceService.KEY_SPACE_ID);
             OeLog.d("QuitSpaceReceiver.onReceive: " + spacename);
 
             OeMapFragment f = getMapFrag();
             String currSpace = f.getName();
 
             if (spacename != null && spacename.equals(currSpace)) {
-                setMapFrag(getString(R.string.null_map_name));
+                setMapFrag(getString(R.string.null_map_name), getString(R.string.null_map_name));
                 showRejoinDialog(spacename);
             }
         }

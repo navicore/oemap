@@ -10,7 +10,6 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,7 +24,6 @@ import com.onextent.oemap.R;
 import com.onextent.oemap.provider.KvHelper;
 import com.onextent.oemap.provider.PresenceHelper;
 import com.onextent.oemap.provider.SpaceHelper;
-import com.onextent.oemap.provider.SpaceProvider;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -58,7 +56,7 @@ public class OeMapPresenceService extends Service {
     public static final String CMD_RM_INTEREST = "rm_interest";
     public static final String CMD_RM_SPACE = "rm_space";
     public static final String KEY_REASON = "reason";
-    public static final String KEY_SPACENAME = "spacename";
+    public static final String KEY_SPACE_ID = "spacename";
     public static final String KEY_UID = "uid";
 
     private static final long DUR_15_MINUTES = 1000 * 60 * 60 * 15;
@@ -159,7 +157,7 @@ public class OeMapPresenceService extends Service {
 
         _presenceHelper.deletePresencesWithSpaceName(s);
 
-        _kvHelper.replace(getString(R.string.state_current_mapname), getString(R.string.null_map_name));
+        _kvHelper.replace(getString(R.string.state_current_space_id), getString(R.string.null_map_name));
 
         broadcastQuitSpaceIntent(s);
 
@@ -222,7 +220,7 @@ public class OeMapPresenceService extends Service {
     private void broadcastQuitSpaceIntent(String s) {
 
         Intent intent = new Intent(getString(R.string.presence_service_quit_space_intent));
-        intent.putExtra(KEY_SPACENAME, s);
+        intent.putExtra(KEY_SPACE_ID, s);
         sendBroadcast(intent);
     }
 
@@ -230,7 +228,7 @@ public class OeMapPresenceService extends Service {
 
         Intent intent = new Intent(getString(R.string.presence_service_update_intent));
         intent.putExtra(KEY_UID, p.getUID());
-        intent.putExtra(KEY_SPACENAME, p.getSpaceName());
+        intent.putExtra(KEY_SPACE_ID, p.getSpaceName());
         sendBroadcast(intent);
     }
 
@@ -294,7 +292,7 @@ public class OeMapPresenceService extends Service {
 
         } else if (CMD_RM_SPACE.equals(reason)) {
 
-            String spacename = extras.getString(KEY_SPACENAME);
+            String spacename = extras.getString(KEY_SPACE_ID);
 
             _spaceHelper.deleteSpacename(spacename);
             _presenceHelper.deletePresencesWithSpaceName(spacename);

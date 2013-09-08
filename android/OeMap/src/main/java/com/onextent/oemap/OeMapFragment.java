@@ -80,7 +80,7 @@ public class OeMapFragment extends MapFragment {
         String mName = null;
         Bundle args = getArguments();
         if (args != null)
-            mName = args.getString(getString(R.string.bundle_spacename));
+            mName = args.getString(getString(R.string.bundle_sid));
         return mName;
     }
 
@@ -312,7 +312,7 @@ public class OeMapFragment extends MapFragment {
 
             if (uid != null) {
                 //this is an update
-                String spacename = intent.getExtras().getString(OeMapPresenceService.KEY_SPACENAME);
+                String spacename = intent.getExtras().getString(OeMapPresenceService.KEY_SPACE_ID);
 
                 if (mName != null && mName.equals(spacename)) {
                     try {

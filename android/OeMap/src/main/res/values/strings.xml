@@ -5,6 +5,7 @@
         <item>Join Map</item>
         <item>Find Map</item>
         <item>Quit Map</item>
+        <item>Map Info</item>
         <item>--------</item>
     </string-array>
 
@@ -28,6 +29,9 @@
     <string name="app_name">OeMap</string>
     <string name="app_not_available">Sorry, there\'s no web browser available</string>
     <string name="bundle_spacename">mapname</string>
+    <string name="bundle_sid">sid</string>
+    <string name="bundle_type">type</string>
+    <string name="bundle_uri">uri</string>
 
     <string name="db_name_preferences">oemap_prefs_db</string>
     <string name="db_name_presence">oemap_presences_db</string>
@@ -77,7 +81,7 @@
     <string name="presence_service_update_intent">com.onextent.oemap.presenceServiceUpdate</string>
     <string name="presence_service_quit_space_intent">com.onextent.oemap.presenceServiceQuitSpace</string>
 
-    <string name="state_current_mapname">state_current_mapname</string>
+    <string name="state_current_space_id">state_current_space_id</string>
     <string name="state_history">state_history</string>
     <string name="state_init">state_init</string>
     <string name="state_lat">state_lat</string>
@@ -100,7 +104,7 @@
     <string name="msg_format_nearest_people">the %d nearest people</string>
     <string name="msg_max_lease_time">until I quit</string>
     <string name="msg_service_is_broadcasting">%s is Broadcasting</string>
-    <string name="url_base_map_share">http://oemap.onextent.com/share?map=</string>
+    <string name="url_base_map_share">http://oemap.onextent.com/share</string>
 
 </resources>
 

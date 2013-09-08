@@ -9,7 +9,6 @@ import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.SeekBar;
@@ -18,8 +17,6 @@ import com.onextent.android.util.OeLog;
 import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.R;
 import com.onextent.oemap.provider.SpaceHelper;
-
-import java.io.UnsupportedEncodingException;
 
 public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
 
@@ -45,8 +42,8 @@ public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
         getDialog().getWindow().setTitle(_space);
 
         OeMapActivity a = (OeMapActivity) getActivity();
-        if (_space == null || (!_space.equals(a.getMapName()))) {
-            OeLog.w("map name for dialog and active map do not match: " + _space + " vs " + a.getMapName()); //tmp todo: ejs
+        if (_space == null || (!_space.equals(a.getCurrentSpaceId()))) {
+            OeLog.w("map name for dialog and active map do not match: " + _space + " vs " + a.getCurrentSpaceId()); //tmp todo: ejs
         }
 
         return view;

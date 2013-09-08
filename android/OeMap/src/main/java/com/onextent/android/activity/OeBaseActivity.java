@@ -19,6 +19,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.UUID;
 
 public class OeBaseActivity extends Activity {
@@ -52,9 +55,16 @@ public class OeBaseActivity extends Activity {
 
     private static void writeInstallationFile(File installation) throws IOException {
         FileOutputStream out = new FileOutputStream(installation);
-        String id = UUID.randomUUID().toString();
+        // http://en.wikipedia.org/wiki/Universally_unique_identifier#Random_UUID_probability_of_duplicates
+        String id = createUUID();
         out.write(id.getBytes());
         out.close();
+    }
+
+    public static String createUUID() {
+
+        // http://en.wikipedia.org/wiki/Universally_unique_identifier#Random_UUID_probability_of_duplicates
+        return UUID.randomUUID().toString();
     }
 
     public String id() {
@@ -106,6 +116,30 @@ public class OeBaseActivity extends Activity {
 
         OeLog.d("using profile name: " + name);
         return name;
+    }
+
+    public static String encode(String value) {
+
+        if (value == null) return null;
+
+        try {
+            return URLEncoder.encode(value, "UTF8");
+        } catch (UnsupportedEncodingException e) {
+            OeLog.w(e);
+            return null;
+        }
+    }
+
+    public static String decode(String id) {
+
+        if (id == null) return null;
+
+        try {
+            return URLDecoder.decode(id, "UTF8");
+        } catch (UnsupportedEncodingException e) {
+            OeLog.w(e);
+            return null;
+        }
     }
 }
 
