@@ -202,16 +202,18 @@ public class OeMapPresenceService extends Service {
 
             _lastBCastLocation = l;
 
-            for (String s : _spaceHelper.getAllSpaceNames()) {
+            OeLog.d("ejs broadcast");
+            for (String id : _spaceHelper.getAllSpaceIds()) {
+                OeLog.d("ejs broadcast " + id);
 
-                Date lease = _spaceHelper.getLease(s);
+                Date lease = _spaceHelper.getLease(id);
                 if (lease != null && lease.getTime() < System.currentTimeMillis()) {
 
-                    quitSpace(s);
+                    quitSpace(id);
 
                 } else {
 
-                    updatePresenceEverywhere(s, l);
+                    updatePresenceEverywhere(id, l);
                 }
             }
         }
@@ -432,10 +434,11 @@ public class OeMapPresenceService extends Service {
         }
     }
 
-    private void processPollJson(String space, String json, Set<String> oldUids) throws JSONException, PresenceException {
+    private void processPollJson(String space, String json, Set<String> oldUids)
+            throws JSONException, PresenceException
+    {
 
         OeLog.d("processPollJson space: " + space);
-        //_presenceHelper.deletePresencesWithSpaceNameNotMine(space); //todo: too expensive and insanely clumsy
         JSONArray array = new JSONArray(json);
         for (int i = 0; i < array.length(); i++) {
 
@@ -573,6 +576,13 @@ public class OeMapPresenceService extends Service {
 
             try {
 
+                List<String> space_ids = _spaceHelper.getAllSpaceIds();
+                for (String id : space_ids) {
+
+                    pollSpace(id);
+                }
+                /*
+
                 Cursor c = getContentResolver().query(SpaceProvider.CONTENT_URI,
                         SpaceProvider.Spaces.PROJECTION_ALL, null, null,
                         SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
@@ -583,6 +593,7 @@ public class OeMapPresenceService extends Service {
                     pollSpace(s);
                 }
                 c.close();
+                 */
                 return null;
             } catch (Throwable err) {
                 OeLog.w(err);

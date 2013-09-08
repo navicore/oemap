@@ -7,9 +7,11 @@ package com.onextent.android.activity;
 import android.app.Activity;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 
+import com.onextent.android.util.OeLog;
 import com.onextent.oemap.R;
 import com.onextent.oemap.provider.KvHelper;
 
@@ -76,31 +78,34 @@ public class OeBaseActivity extends Activity {
         boolean alreadyInit = _kvHelper.getBoolean(getString(R.string.state_init), false);
         if (alreadyInit) return;
 
-        String uname = getUserName();
+        String uname = getProfileDisplayName();
 
         _kvHelper.replace(getString(R.string.pref_username), uname);
         _kvHelper.replaceBoolean(getString(R.string.state_init), true);
     }
 
-    private String getUserName() {
+    private String getProfileDisplayName() {
 
-        Cursor c = getContentResolver().query(ContactsContract.Profile.CONTENT_URI, null, null, null, null);
-        int count = c.getCount();
-        //String[] columnNames = c.getColumnNames();
-        boolean b = c.moveToFirst();
-        int position = c.getPosition();
-        String uname = "nobody";
-        if (count == 1 && position == 0) {
+        String name;
 
-            int display_name_idx = c.getColumnIndex(ContactsContract.Profile.DISPLAY_NAME);
-            if (display_name_idx >= 0) {
-                String n = c.getString(display_name_idx);
-                if (n != null && !n.equals(""))
-                    uname = n;
+        Uri uri = ContactsContract.Profile.CONTENT_URI;
+        String[] projection = new String[] {ContactsContract.Profile.DISPLAY_NAME};
+
+        Cursor people = getContentResolver().query(uri, projection, null, null, null);
+
+        int indexName = people.getColumnIndex(ContactsContract.Profile.DISPLAY_NAME);
+
+        people.moveToFirst();
+        do {
+            name = people.getString(indexName);
+            if (name != null && !name.equals("#BAL")) {
+                OeLog.d("found profile name: " + name);
+                break;
             }
-        }
-        c.close();
-        return uname;
+        } while (people.moveToNext());
+
+        OeLog.d("using profile name: " + name);
+        return name;
     }
 }
 

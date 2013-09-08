@@ -12,11 +12,11 @@ import com.onextent.oemap.R;
 
 public class PresenceDbHelper extends SQLiteOpenHelper {
 
-    private static int DATABASE_VERSION = 6;
-    public static final String PRESENCE_TABLE = "presence";
-    public static final String PRESENCE_UID = "uid";
-    public static final String PRESENCE_SPACE = "space";
-    public static final String PRESENCE_DATA = "data";
+    private static int DATABASE_VERSION = 7;
+    public static final String PRESENCE_TABLE   = "presence";
+    public static final String PRESENCE_UID     = "uid";
+    public static final String PRESENCE_SPACE   = "space";
+    public static final String PRESENCE_DATA    = "data";
 
     private static final String SQL_CREATE =
             "CREATE TABLE " + PRESENCE_TABLE +

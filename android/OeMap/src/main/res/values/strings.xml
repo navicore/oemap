@@ -100,6 +100,7 @@
     <string name="msg_format_nearest_people">the %d nearest people</string>
     <string name="msg_max_lease_time">until I quit</string>
     <string name="msg_service_is_broadcasting">%s is Broadcasting</string>
+    <string name="url_base_map_share">http://oemap.onextent.com/share?map=</string>
 
 </resources>
 

@@ -35,13 +35,20 @@ public class SpaceProvider extends ContentProvider {
     }
 
     public static interface Spaces extends BaseColumns {
+
+        static int PUBLIC           = 1;
+        static int PRIVATE          = 2;
+        static int PRIVATE_SHARABLE = 3;
+
         static String LEASE             = SpaceDbHelper.LEASE;
+        static String NAME              = SpaceDbHelper.NAME;
+        static String TYPE              = SpaceDbHelper.TYPE;
         static String SIZE_IN_METERS    = SpaceDbHelper.SIZE_IN_METERS;
         static String SIZE_IN_POINTS    = SpaceDbHelper.SIZE_IN_POINTS;
         static String CONTENT_PATH      = SpaceDbHelper.SPACE_TABLE;
         static String CONTENT_TYPE      = ContentResolver.CURSOR_DIR_BASE_TYPE + "/com.onextent.oemap.provider.spaces";
         static String CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/com.onextent.oemap.provider.spaces";
-        static String[] PROJECTION_ALL  = {_ID, LEASE, SIZE_IN_METERS, SIZE_IN_POINTS};
+        static String[] PROJECTION_ALL  = {_ID, LEASE, SIZE_IN_METERS, SIZE_IN_POINTS, NAME, TYPE};
         static String SORT_ORDER_DEFAULT = _ID + " ASC";
     }
 

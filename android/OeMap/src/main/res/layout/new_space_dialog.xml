@@ -86,11 +86,23 @@
         >
 
         <CheckBox
+            android:id="@+id/space_settings_public"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="8dp"
             android:layout_gravity="center|right"
-            android:text="Private"
-            android:id="@+id/space_settings_private" />
+            android:text="Public"
+            android:checked="false"
+            />
+        <CheckBox
+            android:id="@+id/space_settings_resharable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:layout_gravity="center|right"
+            android:text="Re-sharable"
+            android:checked="true"
+            />
 
     </LinearLayout>
 
@@ -119,7 +131,10 @@
 
     </LinearLayout>
 
-    <LinearLayout
+    <!-- TODO make thsi a fragment with mini overflow icons
+    LinearLayout
+        android:visibility="invisible"
+        android:id="@+id/max_presence_fld_ui"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
@@ -143,6 +158,7 @@
     </LinearLayout>
 
     <SeekBar
+        android:visibility="invisible"
         android:id="@+id/max_presence_SeekBar"
 
         android:layout_width="fill_parent"
@@ -154,7 +170,7 @@
         android:layout_marginTop="8dp"
 
         android:max="50"
-        android:progress="10" />
+        android:progress="10" / -->
 
 </LinearLayout>
 </ScrollView>

@@ -59,8 +59,8 @@ public class OeMapActivity extends OeBaseActivity {
     public static final int FIND_MAP_POS = 1;
     public static final int QUIT_MAP_POS = 2;
     public static final int SEPARATOR_POS = 3;
-    private static final String MAP_SHARE_URL_BASE = "http://oemap.onextent.com/share?map=";
-    private static final String OEMAP_INTENT_SUBJECT = "OeMap";
+    private String MAP_SHARE_URL_BASE = null;
+    private String OEMAP_INTENT_SUBJECT = null;
     private static final String MAP_FRAG_TAG = "oemap";
     private static final int MAX_HISTORY = 20;
     private ShareActionProvider _shareActionProvider;
@@ -392,6 +392,9 @@ public class OeMapActivity extends OeBaseActivity {
     public void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        OEMAP_INTENT_SUBJECT = getString(R.string.app_name);
+        MAP_SHARE_URL_BASE = getString(R.string.url_base_map_share);
 
         setContentView(R.layout.oe_map_activity);
 

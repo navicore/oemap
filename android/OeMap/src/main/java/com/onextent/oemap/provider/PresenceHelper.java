@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class PresenceHelper {
+public class PresenceHelper extends  BaseProviderHelper {
 
     private final Context _context;
 
@@ -31,9 +31,9 @@ public class PresenceHelper {
 
     public void insertPresence(Presence presence) {
         ContentValues values = new ContentValues();
-        values.put(PresenceProvider.IPresence._ID, presence.getPID());
+        values.put(PresenceProvider.IPresence._ID, encode(presence.getPID()));
         values.put(PresenceProvider.IPresence.UID, presence.getUID());
-        values.put(PresenceProvider.IPresence.SPACE, presence.getSpaceName());
+        values.put(PresenceProvider.IPresence.SPACE, encode(presence.getSpaceName()));
         values.put(PresenceProvider.IPresence.DATA, presence.toString());
         _context.getContentResolver().insert(PresenceProvider.CONTENT_URI, values);
     }
@@ -45,22 +45,12 @@ public class PresenceHelper {
 
     public void deletePresence(Presence presence) {
         _context.getContentResolver().delete(PresenceProvider.CONTENT_URI,
-                    PresenceProvider.IPresence._ID + "='" + presence.getPID() + "'", null);
+                    PresenceProvider.IPresence._ID + "='" + encode(presence.getPID()) + "'", null);
     }
-
-    /*
-
-    public void deletePresencesWithSpaceNameNotMine(String spacename) {
-        String me = OeMapActivity.id(_context);
-        _context.getContentResolver().delete(PresenceProvider.CONTENT_URI,
-                PresenceProvider.IPresence.SPACE + "='" + spacename +
-                        "' AND " + PresenceProvider.IPresence.UID + " != '" + me + "'", null);
-    }
-     */
 
     public void deletePresencesWithSpaceName(String spacename) {
         _context.getContentResolver().delete(PresenceProvider.CONTENT_URI,
-                PresenceProvider.IPresence.SPACE + "='" + spacename + "'", null);
+                PresenceProvider.IPresence.SPACE + "='" + encode(spacename) + "'", null);
     }
 
     public Presence getPresence(String uid, String space) throws JSONException, PresenceException {
@@ -74,7 +64,7 @@ public class PresenceHelper {
 
         c = _context.getContentResolver().query(PresenceProvider.CONTENT_URI,
                 PresenceProvider.IPresence.PROJECTION_ALL,
-                PresenceProvider.IPresence._ID + "='" + pid + "'", null, null);
+                PresenceProvider.IPresence._ID + "='" + encode(pid) + "'", null, null);
 
             if (c.getCount() > 0) {
                 int col = c.getColumnIndex(PresenceProvider.IPresence.DATA);
@@ -88,31 +78,6 @@ public class PresenceHelper {
         return p;
     }
 
-    public List<Presence> getAllPrecenses() throws JSONException, PresenceException {
-        Cursor c = null;
-        List<Presence> l = null;
-        try {
-
-            c = _context.getContentResolver().query(PresenceProvider.CONTENT_URI,
-                    PresenceProvider.IPresence.PROJECTION_ALL,
-                    null, null, null);
-            if (c.getCount() > 0) {
-                int col = c.getColumnIndex(PresenceProvider.IPresence.DATA);
-                while (c.moveToNext()) {
-
-                    if (l == null)
-                        l = new ArrayList<Presence>();
-                    String json = c.getString(col);
-                    Presence p = PresenceFactory.createPresence(json);
-                    l.add(p);
-                }
-            }
-        } finally {
-            if (c != null) c.close();
-        }
-        return l;
-    }
-
     public List<Presence> getAllPrecenses(String spacename) throws JSONException, PresenceException {
         Cursor c = null;
         List<Presence> l = null;
@@ -120,7 +85,7 @@ public class PresenceHelper {
 
             c = _context.getContentResolver().query(PresenceProvider.CONTENT_URI,
                     PresenceProvider.IPresence.PROJECTION_ALL,
-                    PresenceProvider.IPresence.SPACE + "='" + spacename + "'", null, null);
+                    PresenceProvider.IPresence.SPACE + "='" + encode(spacename) + "'", null, null);
             if (c.getCount() > 0) {
                 int col = c.getColumnIndex(PresenceProvider.IPresence.DATA);
                 while (c.moveToNext()) {

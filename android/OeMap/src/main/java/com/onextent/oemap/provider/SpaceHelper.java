@@ -7,23 +7,16 @@ package com.onextent.oemap.provider;
 
 import android.content.ContentValues;
 import android.content.Context;
-import android.database.ContentObserver;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.net.Uri;
-import android.os.Handler;
 
 import com.onextent.android.util.OeLog;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class SpaceHelper {
+public class SpaceHelper extends BaseProviderHelper {
 
     public static final int PRESENCE_PARAM_DEFAULT_MAX_COUNT = 30;
     public static final int PRESENCE_PARAM_DEFAULT_DIST = 1609 * 120;
@@ -38,7 +31,8 @@ public class SpaceHelper {
     public void insert(Space space) {
 
         ContentValues values = new ContentValues();
-        values.put(SpaceProvider.Spaces._ID, space.getName());
+        values.put(SpaceProvider.Spaces._ID, space._id);  //use encoded inner value
+        values.put(SpaceProvider.Spaces.NAME, space._name); //use encoded inner value
         values.put(SpaceProvider.Spaces.SIZE_IN_METERS, space.getNMeters());
         values.put(SpaceProvider.Spaces.SIZE_IN_POINTS, space.getMaxPoints());
         if (space.getLease() != null) {
@@ -48,45 +42,47 @@ public class SpaceHelper {
         }
         Uri r = _context.getContentResolver().insert(SpaceProvider.CONTENT_URI, values);
     }
-    public void insert(String space, Date lease) throws UnsupportedEncodingException {
 
-        Space s = new Space(lease, space, PRESENCE_PARAM_DEFAULT_DIST, PRESENCE_PARAM_DEFAULT_MAX_COUNT);
-        insert(s);
-    }
-    public void insert(String space) throws UnsupportedEncodingException {
+    public List<String> getAllSpaceIds() {
 
-        Space s = new Space(null, space, PRESENCE_PARAM_DEFAULT_DIST, PRESENCE_PARAM_DEFAULT_MAX_COUNT);
-        insert(s);
-    }
-
-    public List<String> getAllSpaceNames() {
-
+        String[] proj = {SpaceProvider.Spaces._ID};
         List<String> l = new ArrayList<String>();
         Cursor c = _context.getContentResolver().query(SpaceProvider.CONTENT_URI,
-                SpaceProvider.Spaces.PROJECTION_ALL, null, null,
+                proj, null, null,
                 SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
         int pos = c.getColumnIndex(SpaceProvider.Spaces._ID);
         while (c.moveToNext()) {
             String n = c.getString(pos);
-            l.add(n);
+            l.add(decode(n));
         }
         c.close();
         return l;
     }
 
-    public void setLease(String n, Date d) throws UnsupportedEncodingException {
+    public List<String> getAllSpaceNames() {
 
-        deleteSpacename(n);
-        insert(n, d);
+        String[] proj = {SpaceProvider.Spaces.NAME};
+        List<String> l = new ArrayList<String>();
+        Cursor c = _context.getContentResolver().query(SpaceProvider.CONTENT_URI,
+                proj, null, null,
+                SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
+        int pos = c.getColumnIndex(SpaceProvider.Spaces.NAME);
+        while (c.moveToNext()) {
+            String n = c.getString(pos);
+            l.add(decode(n));
+        }
+        c.close();
+        return l;
     }
 
     public Date getLease(String n) {
 
+        String safe_id = encode(n);
         Cursor c = null;
         try {
 
             c = _context.getContentResolver().query(SpaceProvider.CONTENT_URI,SpaceProvider.Spaces.PROJECTION_ALL,
-                    SpaceProvider.Spaces._ID + "='" + n + "'", null, SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
+                    SpaceProvider.Spaces._ID + "='" + safe_id + "'", null, SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
             if (c.getCount() <= 0) return null;
             c.moveToFirst();
             int pos = c.getColumnIndex(SpaceProvider.Spaces.LEASE);
@@ -103,17 +99,25 @@ public class SpaceHelper {
         }
     }
     public static class Space {
-        private Date _lease;
-        private final String _name;
-        private int _nmeters, _max;
-        public Space(Date l, String n, int dist, int max) throws UnsupportedEncodingException {
-            setLease(l);
-            _name = URLEncoder.encode(n, "UTF8");
+        Date _lease;
+        String _name, _id;
+        int _nmeters, _max, _type;
+
+        public Space(Date l, String id, String n, int dist, int max, int type) {
+            if (n == null) throw new NullPointerException("name is null");
+            _name = encode(n);
+            if (id == null) {
+                _id = _name;
+            } else {
+                _id = encode(id);
+            }
+            _type = type;
             _nmeters = dist;
             if (max <= 0)
                 _max = PRESENCE_PARAM_DEFAULT_MAX_COUNT;
             else
                 _max = max;
+            setLease(l);
         }
 
         public Date getLease() {
@@ -125,13 +129,20 @@ public class SpaceHelper {
             else
                 _lease = new Date(Long.MAX_VALUE);
         }
+
+        public void setType(int t) {
+            _type = t;
+        }
+
+        public int getType() {
+            return _type;
+        }
+
+        public String getId() {
+            return decode(_id);
+        }
         public String getName() {
-            try {
-                return URLDecoder.decode(_name, "UTF8");
-            } catch (UnsupportedEncodingException e) {
-                OeLog.e(_name);
-                return _name;
-            }
+            return decode(_name);
         }
         public int getNMeters() {
             return _nmeters;
@@ -147,15 +158,19 @@ public class SpaceHelper {
         }
     }
 
-    public Space getSpace(String n) {
+    public Space getSpace(String id) {
 
+        String safe_id = encode(id);
         Cursor c = null;
         try {
 
             c = _context.getContentResolver().query(SpaceProvider.CONTENT_URI,SpaceProvider.Spaces.PROJECTION_ALL,
-                    SpaceProvider.Spaces._ID + "='" + n + "'", null, SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
+                    SpaceProvider.Spaces._ID + "='" + safe_id + "'", null, SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
             if (c.getCount() <= 0) return null;
             c.moveToFirst();
+
+            int namepos = c.getColumnIndex(SpaceProvider.Spaces.NAME);
+            String name = decode(c.getString(namepos));
 
             int lpos = c.getColumnIndex(SpaceProvider.Spaces.LEASE);
             long l = c.getLong(lpos);
@@ -167,7 +182,10 @@ public class SpaceHelper {
             int maxpos = c.getColumnIndex(SpaceProvider.Spaces.SIZE_IN_POINTS);
             int max = c.getInt(maxpos);
 
-            Space space = new Space(d, n, met, max);
+            int tpos = c.getColumnIndex(SpaceProvider.Spaces.TYPE);
+            int type = c.getInt(tpos);
+
+            Space space = new Space(d, id, name, met, max, type);
 
             return space;
 
@@ -198,11 +216,12 @@ public class SpaceHelper {
 
     public boolean deleteSpacename(String n) {
 
+        String safe_id = encode(n);
         Cursor c = null;
         try {
 
             _context.getContentResolver().delete(SpaceProvider.CONTENT_URI,
-                    SpaceProvider.Spaces._ID + "='" + n + "'", null);
+                    SpaceProvider.Spaces._ID + "='" + safe_id + "'", null);
 
         } catch (Exception ex) {
             OeLog.w(ex.toString(), ex);

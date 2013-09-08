@@ -6,6 +6,7 @@ package com.onextent.oemap.settings;
 
 import android.app.DialogFragment;
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.widget.EditText;
 import android.widget.SeekBar;
 
@@ -22,7 +23,7 @@ public class BaseSpaceSettingsDialog extends DialogFragment {
     protected static final int MAX_PROGRESS = 100;
     protected static final int DEFAULT_MAX_PRESENCE_PROGRESS = SpaceHelper.PRESENCE_PARAM_DEFAULT_MAX_COUNT;
 
-    protected static final SimpleDateFormat _sdf = new SimpleDateFormat("MMMMM dd, hh:mm aaa");
+    //protected static final SimpleDateFormat _sdf = new SimpleDateFormat("MMMMM dd, hh:mm aaa");
 
     protected Date _quitDate = null;
     protected String _progressMsg = null;
@@ -90,9 +91,11 @@ public class BaseSpaceSettingsDialog extends DialogFragment {
         } else if (l.getTime() == Long.MAX_VALUE) {
             time.setText( getString(R.string.msg_max_lease_time) );
         } else {
-            OeLog.d("found lease: " + _sdf.format(l));
+            OeLog.d("found lease: " + l);
             //setQuitDate(MAX_PROGRESS);
-            time.setText(_sdf.format(l));
+            //time.setText(_sdf.format(l));
+            time.setText(DateUtils.getRelativeDateTimeString(getActivity(),
+                    l.getTime(), DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0));
         }
     }
 

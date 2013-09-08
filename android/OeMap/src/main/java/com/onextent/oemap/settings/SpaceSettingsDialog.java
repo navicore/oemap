@@ -111,22 +111,20 @@ public class SpaceSettingsDialog extends BaseSpaceSettingsDialog {
             public void onStopTrackingTouch(SeekBar seekBar) {
 
                 SpaceHelper h = new SpaceHelper(getActivity());
+                SpaceHelper.Space s = h.getSpace(_space);
+                if (h == null) throw new NullPointerException("no space to update");
                 h.deleteSpacename(_space);
-                try {
-                    if (_quitDate != null) {
+                if (_quitDate != null) {
 
-                        //time.setText(_sdf.format(_quitDate));
-                        time.setText(DateUtils.getRelativeDateTimeString(getActivity(),
-                                _quitDate.getTime(), DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0));
-                        h.insert(_space, _quitDate);
+                    time.setText(DateUtils.getRelativeDateTimeString(getActivity(),
+                            _quitDate.getTime(), DateUtils.MINUTE_IN_MILLIS, DateUtils.WEEK_IN_MILLIS, 0));
+                    s.setLease(_quitDate);
+                    h.insert(s);
 
-                    } else {
+                } else {
 
-                        time.setText("Until I manually quit");
-                        h.insert(_space, null);
-                    }
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    time.setText("Until I manually quit");
+                    h.insert(s);
                 }
                 OeMapActivity a = (OeMapActivity) getActivity();
                 a.wakePresenceService();
