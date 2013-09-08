@@ -10,8 +10,8 @@ NAMES_FILE = MY_DIR + '/../tmp/names.txt'
 POINTS_FILE = MY_DIR + '/../tmp/points.txt'
 
 
-SNIPPIT = 'good afternoon'
-SPACE = 'big test'
+SNIPPIT = 'Photowalking'
+SPACE = "America's Cup"
 TTL = 2
 
 def utc_now():

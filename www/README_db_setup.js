@@ -1,6 +1,6 @@
 //
 // make sure to run these on every db init
-//
+// mongo oemap_test < ./README_db_setup.js
 //
 //
 
@@ -18,22 +18,22 @@
 // 5 minutes
 db.presences.ensureIndex(
   {"short_ttl_start_time": 1}, {"expireAfterSeconds" : 5 * 60} 
-)
+);
 
 // 1 hour
 db.presences.ensureIndex(
   {"medium_ttl_start_time": 1}, {"expireAfterSeconds" : 60 * 60}
-)
+);
 
 // 1 day
 db.presences.ensureIndex(
   {"long_ttl_start_time": 1}, {"expireAfterSeconds" : 24* 60 * 60} 
-)
+);
 
 //support query 'get the nearest n items in map'
 //db.presences.ensureIndex({"space": 1, "location": "2dsphere"})
 
 //support query 'get the nearest n unique maps'
-db.presences.ensureIndex({"location": "2dsphere"})
-db.presences.ensureIndex({"space": 1})
+db.presences.ensureIndex({"location": "2dsphere"});
+db.presences.ensureIndex({"space": 1});
 

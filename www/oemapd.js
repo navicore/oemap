@@ -178,6 +178,6 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', 
     });
 
     app.listen(8080);
-    Syslog.log(Syslog.LOG_INFO, 'server started on port 8080');
+    Syslog.log(Syslog.LOG_INFO, 'server started on port 80');
 });
 
