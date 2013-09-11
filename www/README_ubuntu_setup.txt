@@ -42,3 +42,5 @@ apt-get install redis-server
 
 echo 1 > /proc/sys/vm/overcommit_memory
 
+a2enmod proxy
+a2enmod proxy_http
