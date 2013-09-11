@@ -601,6 +601,7 @@ public class OeMapActivity extends OeBaseActivity {
         // Fetch and store ShareActionProvider
         _shareActionProvider = (ShareActionProvider) item.getActionProvider();
 
+        _refreshMenuItem = menu.findItem(R.id.action_refresh);
         return true;
     }
 
@@ -890,6 +891,18 @@ public class OeMapActivity extends OeBaseActivity {
 
         // show it
         d.show();
+    }
+
+    private MenuItem _refreshMenuItem = null;
+
+    public void beginRefreshAnimation() {
+
+        if (_refreshMenuItem != null)
+            _animHelper.refresh(_refreshMenuItem);
+    }
+    public void completeRefreshAnimation() {
+
+        _animHelper.completeRefresh();
     }
 
     private class DrawerAdapter extends ArrayAdapter {

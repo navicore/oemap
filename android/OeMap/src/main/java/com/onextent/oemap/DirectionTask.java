@@ -9,6 +9,7 @@ import android.app.FragmentManager;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -60,6 +61,8 @@ class DirectionTask extends AsyncTask<LatLng, Void, Document> {
         FragmentManager fm = oeMapFragment.getActivity().getFragmentManager();
         DirectionsDialog d = new DirectionsDialog();
         d.show(fm, "directions dialog");
+        OeMapActivity a = (OeMapActivity) oeMapFragment.getActivity();
+        a.completeRefreshAnimation();
     }
 
     @Override
@@ -77,6 +80,12 @@ class DirectionTask extends AsyncTask<LatLng, Void, Document> {
             return null;
         }
         return doc;
+    }
+
+    @Override
+    protected void onPreExecute() {
+        OeMapActivity a = (OeMapActivity) oeMapFragment.getActivity();
+        a.beginRefreshAnimation();
     }
 }
 
