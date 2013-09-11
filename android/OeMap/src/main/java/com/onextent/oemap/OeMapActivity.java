@@ -342,8 +342,10 @@ public class OeMapActivity extends OeBaseActivity {
         String suri = s.getUri();
         if (suri != null)
             uri = Uri.parse(suri);
-        Dialog d = new MapInfoDialog(this, uri);
-        d.show();
+
+        FragmentManager fm = getFragmentManager();
+        DialogFragment d = new MapInfoDialog(this, uri);
+        d.show(fm, "directions dialog");
     }
 
     public void clearMapNamesHistory() {

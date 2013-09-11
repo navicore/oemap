@@ -17,6 +17,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.presence.OeMapPresenceService;
 import com.onextent.oemap.presence.Presence;
@@ -26,19 +27,21 @@ import com.onextent.oemap.provider.KvHelper;
 import com.onextent.oemap.provider.PresenceHelper;
 
 import org.json.JSONException;
+import org.w3c.dom.Document;
 
 import java.util.List;
 
 public class OeMapFragment extends MapFragment {
 
-    private PresenceHelper _presenceHelper = null;
-    private KvHelper _prefs = null;
-    private LatLng _currLoc;
-    private boolean _mapIsInit = false;
-    private OeMapActivity _home;
-    private BroadcastReceiver _presenceReceiver = new PresenceReceiver();
-    private IntentFilter _presenceReceiverFilter = null;
-    private MarkerHelper _markerHelper;
+    private PresenceHelper      _presenceHelper = null;
+    private KvHelper            _prefs = null;
+    private LatLng              _currLoc;
+    private boolean _mapIsInit  = false;
+    private OeMapActivity       _home;
+    private BroadcastReceiver   _presenceReceiver = new PresenceReceiver();
+    private IntentFilter        _presenceReceiverFilter = null;
+    private MarkerHelper        _markerHelper;
+    private Document directionsDoc;
 
     @Override
     public void onAttach(Activity activity) {
@@ -133,14 +136,16 @@ public class OeMapFragment extends MapFragment {
     }
      */
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        init();
-        _markerHelper = new MarkerHelper(getMap());
-        setMapOptions();
-        loadMarkers();
-        getActivity().registerReceiver(_presenceReceiver, _presenceReceiverFilter);
+    private void initMapTouchListeners() {
+
+        getMap().setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+
+                getDirections(marker);
+            }
+        });
+
         getMap().setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
             @Override
             public void onMapLongClick(LatLng latLng) {
@@ -149,6 +154,61 @@ public class OeMapFragment extends MapFragment {
                 //setPointOfInterest(latLng);
             }
         });
+
+        /*
+        getMap().setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+
+                OeMapActivity a = (OeMapActivity) getActivity();
+                a.showMarkerDialog();
+            }
+        });
+        */
+
+        getMap().setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                MarkerHelper.InfoWindowHolder ih = _markerHelper.getInfoHolders().get(marker);
+                if (ih != null && ih.showingInfo) {
+                    //note: android bug, the marker won't know if it is showing info window
+                    // so we never end up here if we don't keep track of it ourselves
+                    marker.hideInfoWindow();
+                    ih.showingInfo = false;
+                } else {
+                    marker.showInfoWindow();
+                    ih.showingInfo = true;
+                }
+                return true;
+            }
+        });
+
+        getMap().setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
+            @Override
+            public boolean onMyLocationButtonClick() {
+                setLocation();
+                return true;
+            }
+        });
+    }
+
+
+    private void getDirections(Marker marker) {
+
+        new DirectionTask(this).execute(marker.getPosition(), _currLoc);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        init();
+        _markerHelper = new MarkerHelper(getMap());
+        setMapOptions();
+        loadMarkers();
+        getActivity().registerReceiver(_presenceReceiver, _presenceReceiverFilter);
+
+        initMapTouchListeners();
+
         OeMapActivity a = (OeMapActivity) getActivity();
         a.wakePresenceService();
         a.wakePresenceBroadcastService(); //temp ejs todo: make servcie smart about ttl and distance
@@ -298,6 +358,14 @@ public class OeMapFragment extends MapFragment {
 
     public MarkerHelper get_markerHelper() {
         return _markerHelper;
+    }
+
+    public Document getDirectionsDoc() {
+        return directionsDoc;
+    }
+
+    public void setDirectionsDoc(Document directionsDoc) {
+        this.directionsDoc = directionsDoc;
     }
 
     private class PresenceReceiver extends BroadcastReceiver {

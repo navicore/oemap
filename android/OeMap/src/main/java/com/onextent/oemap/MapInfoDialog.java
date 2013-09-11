@@ -5,6 +5,7 @@
 package com.onextent.oemap;
 
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -24,13 +25,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Date;
 
-public class MapInfoDialog extends Dialog {
+public class MapInfoDialog extends DialogFragment {
 
     private final Uri _uri;
     private final OeMapActivity _activity;
 
     public MapInfoDialog(OeMapActivity activity, Uri uri) {
-        super(activity);
+        super();
         _uri = uri;
         _activity = activity;
     }
@@ -53,9 +54,11 @@ public class MapInfoDialog extends Dialog {
     @Override
     public void onCreate(Bundle savedInstanceState) {
 
-        getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        Dialog d = getDialog();
 
-        setContentView(R.layout.map_info_dialog);
+        d.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+
+        d.setContentView(R.layout.map_info_dialog);
 
         if (_uri != null) {
             initByUri();
@@ -64,22 +67,22 @@ public class MapInfoDialog extends Dialog {
             SpaceHelper h = new SpaceHelper(_activity);
             KvHelper prefs = new KvHelper(_activity);
 
-            TextView typeEdit = (TextView) findViewById(R.id.map_info_map_type);
+            TextView typeEdit = (TextView) d.findViewById(R.id.map_info_map_type);
             String sid = _activity.getCurrentSpaceId();
             SpaceHelper.Space s = h.getSpace(sid);
             int type = s.getType();
             String typeTxt = getTypeText(type);
             typeEdit.setText(typeTxt);
 
-            TextView mapnameEdit = (TextView) findViewById(R.id.map_info_mapname);
+            TextView mapnameEdit = (TextView) d.findViewById(R.id.map_info_mapname);
             String name = _activity.getSpaceName(_activity.getCurrentSpaceId());
             mapnameEdit.setText(name);
 
-            TextView sharedByEdit = (TextView) findViewById(R.id.map_info_shareby);
+            TextView sharedByEdit = (TextView) d.findViewById(R.id.map_info_shareby);
             String username = "You";
             sharedByEdit.setText(username);
 
-            TextView shareDateEdit = (TextView) findViewById(R.id.map_info_sharedate);
+            TextView shareDateEdit = (TextView) d.findViewById(R.id.map_info_sharedate);
             Date datetime = new Date();
             if (datetime != null)
                 shareDateEdit.setText(datetime.toString());
@@ -87,20 +90,22 @@ public class MapInfoDialog extends Dialog {
     }
     private void initByUri() {
 
-        TextView typeEdit = (TextView) findViewById(R.id.map_info_map_type);
+        Dialog d = getDialog();
+
+        TextView typeEdit = (TextView) d.findViewById(R.id.map_info_map_type);
         int type = Integer.valueOf(_uri.getQueryParameter(OeMapActivity.URI_PARAM_TYPE));
         String typeTxt = getTypeText(type);
         typeEdit.setText(typeTxt);
 
-        TextView mapnameEdit = (TextView) findViewById(R.id.map_info_mapname);
+        TextView mapnameEdit = (TextView) d.findViewById(R.id.map_info_mapname);
         String name = decode(_uri.getQueryParameter(OeMapActivity.URI_PARAM_NAME));
         mapnameEdit.setText(name);
 
-        TextView sharedByEdit = (TextView) findViewById(R.id.map_info_shareby);
+        TextView sharedByEdit = (TextView) d.findViewById(R.id.map_info_shareby);
         String username = decode(_uri.getQueryParameter(OeMapActivity.URI_PARAM_USERNAME));
         sharedByEdit.setText(username);
 
-        TextView shareDateEdit = (TextView) findViewById(R.id.map_info_sharedate);
+        TextView shareDateEdit = (TextView) d.findViewById(R.id.map_info_sharedate);
         String datetime = decode(_uri.getQueryParameter(OeMapActivity.URI_PARAM_DATETIME));
         if (datetime != null)
             shareDateEdit.setText(datetime);

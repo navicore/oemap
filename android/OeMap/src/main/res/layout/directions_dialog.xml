@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Copyright (c) 2013. Ed Sweeney, All Rights Reserved
+  -->
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    >
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight=".2"
+        android:layout_gravity="left|center_vertical"
+        >
+
+        <TextView
+            android:layout_margin="8dp"
+            android:layout_width="0dp"
+            android:layout_weight=".5"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Distance"
+            android:layout_gravity="left|center_vertical" />
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight=".5"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Medium Text"
+            android:id="@+id/distance_text"
+            android:layout_gravity="left|center_vertical" />
+
+        </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight=".2"
+        android:layout_gravity="left|center_vertical"
+        >
+
+        <TextView
+            android:layout_margin="8dp"
+            android:layout_width="0dp"
+            android:layout_weight=".5"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Duration"
+            android:layout_gravity="left|center_vertical" />
+        <TextView
+            android:layout_margin="8dp"
+            android:layout_width="0dp"
+            android:layout_weight=".5"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Medium Text"
+            android:id="@+id/duration_text"
+            android:layout_gravity="left|center_vertical" />
+
+    </LinearLayout>
+
+    <ListView
+        android:layout_margin="8dp"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight=".6"
+        android:id="@+id/step_by_step_text"
+        >
+
+    </ListView>
+
+</LinearLayout>
