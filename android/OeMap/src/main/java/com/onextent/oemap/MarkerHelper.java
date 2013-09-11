@@ -22,12 +22,14 @@ public class MarkerHelper {
     private Marker _myMarker;
 
     private final Map<String, Holder> _markers;
+    private final Map<Marker, InfoWindowHolder> _info;
 
     private final GoogleMap _map;
 
     public MarkerHelper(GoogleMap map) {
         _map = map;
         _markers = new HashMap<String, Holder>();
+        _info = new HashMap<Marker, InfoWindowHolder>();
     }
 
     public void setMyMarker(LatLng l) {
@@ -42,19 +44,36 @@ public class MarkerHelper {
     public Map<String, Holder> getMarkers() {
          return _markers;
     }
+    public Map<Marker, InfoWindowHolder> getInfoHolders() {
+        return _info;
+    }
 
     public void clearMarkers() {
         for (Holder h : _markers.values()) {
             h.marker.remove();
         }
         _markers.clear();
+        _info.clear();
+    }
+
+    public static class InfoWindowHolder {
+
+        public boolean showingInfo = false;
+        //todo: add sound and image helpers
+
+        InfoWindowHolder() {
+        }
     }
 
     public static class Holder {
         public final long time;
         public final Marker marker;
+        public final String pid;
 
-        Holder(Marker m) {
+        public boolean showingInfo = false;
+
+        Holder(Marker m, String pid) {
+            this.pid = pid;
             marker = m;
             time = System.currentTimeMillis();
         }
@@ -62,8 +81,9 @@ public class MarkerHelper {
 
     public Marker removeMarker(Presence p, AnimationType animation) {
 
-        Holder h = _markers.remove(p.getUID());
+        Holder h = _markers.remove(p.getPID());
         if (h == null) return null;
+        _info.remove(h.marker);
 
         if (animation == AnimationType.MOVE) {
 
@@ -96,7 +116,7 @@ public class MarkerHelper {
         if (map == null) return null;
 
         Holder h = null;
-        h = _markers.get(p.getUID());
+        h = _markers.get(p.getPID());
 
         boolean isNew = false;
 
@@ -111,8 +131,9 @@ public class MarkerHelper {
                     .position(getEdgeOfMap(p))
                     .icon(BitmapDescriptorFactory.defaultMarker(color)
                     ));
-            h = new Holder(m);
-            _markers.put(p.getUID(), h);
+            h = new Holder(m, p.getPID());
+            _markers.put(p.getPID(), h);
+            _info.put(m, new InfoWindowHolder());
             isNew = true;
             if (isMine) {
                 _myMarker = m;

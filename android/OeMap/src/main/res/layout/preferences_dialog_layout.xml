@@ -4,16 +4,10 @@
   ~ Copyright (c) 2013. Ed Sweeney.  All Rights Reserved.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_gravity="center"
-              >
-
     <ScrollView
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:id="@+id/scrollView"
             >
 
@@ -21,8 +15,8 @@
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:orientation="vertical"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 >
 
             <LinearLayout
@@ -36,6 +30,7 @@
 
                 <TextView
                         android:layout_width="0dp"
+                        android:layout_weight=".3"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:text="@string/pref_username_fld_title"
@@ -43,11 +38,11 @@
                         android:layout_gravity="left|center"
                         android:layout_marginLeft="8dp"
                         android:layout_marginRight="8dp"
-                        android:layout_weight="30"
                         />
 
                 <EditText
                         android:layout_width="0dp"
+                        android:layout_weight=".7"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:text=""
@@ -58,7 +53,6 @@
                         android:editable="true"
                         android:layout_marginLeft="8dp"
                         android:layout_marginRight="8dp"
-                        android:layout_weight="70"
                         />
             </LinearLayout>
 
@@ -73,6 +67,7 @@
 
                 <TextView
                         android:layout_width="0dp"
+                        android:layout_weight=".3"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:text="@string/pref_snippit_fld_title"
@@ -81,11 +76,11 @@
                         android:editable="false"
                         android:layout_marginLeft="8dp"
                         android:layout_marginRight="8dp"
-                        android:layout_weight="30"
                         />
 
                 <EditText
                         android:layout_width="0dp"
+                        android:layout_weight=".7"
                         android:layout_height="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:text=""
@@ -95,7 +90,6 @@
                         android:editable="true"
                         android:layout_marginLeft="8dp"
                         android:layout_marginRight="8dp"
-                        android:layout_weight="70"
                         />
             </LinearLayout>
 
@@ -111,4 +105,3 @@
         </LinearLayout>
 
     </ScrollView>
-</LinearLayout>

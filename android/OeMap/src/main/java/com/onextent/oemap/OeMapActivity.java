@@ -342,8 +342,10 @@ public class OeMapActivity extends OeBaseActivity {
         String suri = s.getUri();
         if (suri != null)
             uri = Uri.parse(suri);
-        Dialog d = new MapInfoDialog(this, uri);
-        d.show();
+
+        FragmentManager fm = getFragmentManager();
+        DialogFragment d = new MapInfoDialog(this, uri);
+        d.show(fm, "directions dialog");
     }
 
     public void clearMapNamesHistory() {
@@ -599,6 +601,7 @@ public class OeMapActivity extends OeBaseActivity {
         // Fetch and store ShareActionProvider
         _shareActionProvider = (ShareActionProvider) item.getActionProvider();
 
+        _refreshMenuItem = menu.findItem(R.id.action_refresh);
         return true;
     }
 
@@ -888,6 +891,18 @@ public class OeMapActivity extends OeBaseActivity {
 
         // show it
         d.show();
+    }
+
+    private MenuItem _refreshMenuItem = null;
+
+    public void beginRefreshAnimation() {
+
+        if (_refreshMenuItem != null)
+            _animHelper.refresh(_refreshMenuItem);
+    }
+    public void completeRefreshAnimation() {
+
+        _animHelper.completeRefresh();
     }
 
     private class DrawerAdapter extends ArrayAdapter {

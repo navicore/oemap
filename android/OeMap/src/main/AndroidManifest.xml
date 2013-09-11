@@ -4,8 +4,8 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.onextent.oemap"
-    android:versionCode="3"
-    android:versionName="0.2.2">
+    android:versionCode="6"
+    android:versionName="0.2.5">
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -69,7 +69,7 @@
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyAiGS00sV7JnClNAKk-1oO--maMsXO0ACE" />
+            android:value="AIzaSyAnSrCFWeKIywp6a09r_rIv_Vkcf6VPGpQ" />
 
         <receiver android:name=".OeMapAutostart">
             <intent-filter>
