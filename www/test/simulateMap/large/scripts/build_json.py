@@ -11,7 +11,7 @@ POINTS_FILE = MY_DIR + '/../tmp/points.txt'
 
 
 SNIPPIT = 'Photowalking'
-SPACE = "America's Cup"
+SPACE = "2e8e9773-973e-418f-bc16-6bc96ee75089"
 TTL = 2
 
 def utc_now():
