@@ -16,6 +16,8 @@ dependencies {
     compile files('libs/android-support-v4.jar', '../libraries/GooglePlay/libs/google-play-services.jar')
 }
 
+def buildName = file("/home/esweeney/git/oemap/android/OeMap/getVersionName.sh").toString().execute().text.trim()
+
 android {
     compileSdkVersion 18
     buildToolsVersion "18.0.1"
@@ -53,6 +55,23 @@ android {
         release {
             debuggable false
             signingConfig signingConfigs.release
+        }
+        android.applicationVariants.all { variant ->
+
+            apk = variant.outputFile;
+
+            if (variant.buildType.name == "release") {
+                newName = apk.name.replace(".apk", "-v" + buildName + "-RELEASE.apk");
+            } else {
+                newName = apk.name.replace(".apk", "-v" + buildName + "-SNAPSHOT.apk");
+            }
+
+            newName = newName.replace("-" + variant.buildType.name, "");
+
+            variant.outputFile = new File(apk.parentFile, newName);
+            if (variant.zipAlign) {
+                variant.zipAlign.outputFile = new File(apk.parentFile, newName.replace("-unaligned", ""));
+            }
         }
     }
 }
