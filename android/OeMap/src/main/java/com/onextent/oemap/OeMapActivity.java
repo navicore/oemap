@@ -338,13 +338,13 @@ public class OeMapActivity extends OeBaseActivity {
         String sid = getCurrentSpaceId();
         SpaceHelper h = new SpaceHelper(this);
         SpaceHelper.Space s = h.getSpace(sid);
-        Uri uri = null;
         String suri = s.getUri();
-        if (suri != null)
-            uri = Uri.parse(suri);
 
         FragmentManager fm = getFragmentManager();
-        DialogFragment d = new MapInfoDialog(this, uri);
+        DialogFragment d = new MapInfoDialog();
+        Bundle args = new Bundle();
+        args.putString("bundle_uri_string", suri);
+        d.setArguments(args);
         d.show(fm, "directions dialog");
     }
 

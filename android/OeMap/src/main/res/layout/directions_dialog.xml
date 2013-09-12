@@ -17,34 +17,32 @@
         android:layout_margin="4dp"
         android:layout_weight=".1"
         android:orientation="horizontal"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
         >
 
         <RadioButton
             android:id="@+id/rbutton_directions_walking"
             android:layout_width="0dp"
-            android:layout_height="fill_parent"
-            android:layout_margin="4dp"
             android:layout_weight=".33"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
             android:checked="true"
             android:text="Walking" />
 
         <RadioButton
             android:id="@+id/rbutton_directions_walking"
             android:layout_width="0dp"
-            android:layout_height="fill_parent"
-            android:layout_margin="4dp"
             android:layout_weight=".33"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
             android:enabled="false"
             android:text="Transit" />
 
         <RadioButton
             android:id="@+id/rbutton_directions_walking"
             android:layout_width="0dp"
-            android:layout_height="fill_parent"
-            android:layout_margin="4dp"
             android:layout_weight=".33"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
             android:enabled="false"
             android:text="Driving" />
     </RadioGroup>
@@ -54,15 +52,14 @@
         android:layout_height="0dp"
         android:layout_weight=".1"
         android:orientation="horizontal"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
+        android:layout_margin="4dp"
         >
 
         <TextView
             android:id="@+id/distance_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_gravity="center_horizontal"
             android:layout_margin="4dp"
             android:layout_weight=".5"
             android:text="Some Distance..."
@@ -72,7 +69,7 @@
             android:id="@+id/duration_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_gravity="center_horizontal"
             android:layout_margin="4dp"
             android:layout_weight=".5"
             android:text="Some Time..."
@@ -80,17 +77,13 @@
 
     </LinearLayout>
 
-    <View
-        android:layout_width="wrap_content"
-        android:layout_height="1dp"
-        android:background="@android:color/darker_gray" />
-
     <ListView
         android:id="@+id/step_by_step_text"
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_margin="8dp"
-        android:layout_weight=".8">
+        android:layout_weight=".8"
+        >
 
     </ListView>
 

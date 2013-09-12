@@ -64,8 +64,8 @@ public class OeMapFragment extends MapFragment {
 
         settings.setCompassEnabled(true);
 
-        //settings.setMyLocationButtonEnabled(false);
-        settings.setMyLocationButtonEnabled(true);
+        settings.setMyLocationButtonEnabled(false);
+        //settings.setMyLocationButtonEnabled(true);
 
         float zoom = _prefs.getFloat(getString(R.string.state_zoom_level), 15);
         double lat = (double) _prefs.getFloat(getString(R.string.state_lat), 0);
