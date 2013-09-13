@@ -45,6 +45,9 @@ public class JsonPresence implements Presence {
     private final String _spacename;
     private final Date _lease;
 
+    private int _remote_id_type = Presence.PUSH_TYPE_NONE;
+    private String _remote_id;
+
     JsonPresence(JSONObject jobj) throws PresenceException {
 
         try {
@@ -159,6 +162,26 @@ public class JsonPresence implements Presence {
     @Override
     public int getTimeToLive() {
         return _time_to_live;
+    }
+
+    @Override
+    public int getRemoteIdType() {
+        return _remote_id_type;
+    }
+
+    @Override
+    public int setRemoteIdType(int rid) {
+        return _remote_id_type = rid;
+    }
+
+    @Override
+    public String getRemoteId() {
+        return _remote_id;
+    }
+
+    @Override
+    public void setRemoteid(String rid) {
+        _remote_id = rid;
     }
 
     @Override

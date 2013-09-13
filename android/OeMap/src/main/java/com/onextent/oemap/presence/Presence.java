@@ -31,5 +31,12 @@ public interface Presence {
     public long getAgeInMillis();
 
     public int getTimeToLive();
+
+    public static int PUSH_TYPE_NONE   = 0;
+    public static int PUSH_TYPE_GCM   = 1; // gcm
+    public int getRemoteIdType();
+    public int setRemoteIdType(int rid);
+    public String getRemoteId();
+    public void setRemoteid(String rid);
 }
 

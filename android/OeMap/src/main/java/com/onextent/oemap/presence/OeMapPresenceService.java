@@ -145,6 +145,9 @@ public class OeMapPresenceService extends Service {
         Date lease = _spaceHelper.getLease(spacename);
         String uid = OeBaseActivity.id(this.getApplicationContext());
         Presence p = PresenceFactory.createPresence(uid, latLng, label, snippit, spacename, ttl, lease);
+        String rid = _kvHelper.get(getString(R.string.prefs_gcm_regid), "");
+        p.setRemoteIdType(Presence.PUSH_TYPE_GCM);
+        p.setRemoteid(rid);
 
         return p;
     }
