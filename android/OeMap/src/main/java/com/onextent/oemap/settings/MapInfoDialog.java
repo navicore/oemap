@@ -2,7 +2,7 @@
  * Copyright (c) 2013. Ed Sweeney, All Rights Reserved
  */
 
-package com.onextent.oemap;
+package com.onextent.oemap.settings;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -15,6 +15,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.TextView;
 
+import com.onextent.oemap.OeMapActivity;
+import com.onextent.oemap.R;
 import com.onextent.oemap.provider.KvHelper;
 import com.onextent.oemap.provider.SpaceHelper;
 import com.onextent.oemap.provider.SpaceProvider;

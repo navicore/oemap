@@ -5,17 +5,22 @@
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:layout_margin="8dp"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:weightSum="1"
+    >
 
-
+    <!--
+      WTF is with weight?  if i make the weight larger for the
+      top lines the space gets smaller and overrun by the listview
+      -->
     <RadioGroup
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_margin="4dp"
-        android:layout_weight=".1"
+        android:layout_weight=".05"
         android:orientation="horizontal"
         >
 
@@ -50,9 +55,10 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="0dp"
-        android:layout_weight=".1"
+        android:layout_weight=".05"
         android:orientation="horizontal"
         android:layout_margin="4dp"
+        android:weightSum="1"
         >
 
         <TextView
@@ -82,7 +88,7 @@
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:layout_margin="8dp"
-        android:layout_weight=".8"
+        android:layout_weight=".9"
         >
 
     </ListView>

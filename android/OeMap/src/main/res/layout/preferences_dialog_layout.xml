@@ -4,104 +4,89 @@
   ~ Copyright (c) 2013. Ed Sweeney.  All Rights Reserved.
   -->
 
-    <ScrollView
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="wrap_content"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+    <LinearLayout
+        android:layout_gravity="left|center"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_width="fill_parent"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/pref_username_fld_label"
+            android:layout_gravity="left|center"
             android:layout_height="wrap_content"
-            android:id="@+id/scrollView"
-            >
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight=".3"
+            android:layout_width="0dp"
+            android:text="@string/pref_username_fld_title"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <LinearLayout
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:orientation="vertical"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                >
+        <EditText
+            android:editable="true"
+            android:hint="@string/prefs_username_hint"
+            android:id="@+id/pref_username"
+            android:inputType="text"
+            android:layout_gravity="left|center"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight=".7"
+            android:layout_width="0dp"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </LinearLayout>
 
-            <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:layout_gravity="left|center"
-                    >
+    <LinearLayout
+        android:layout_gravity="left|center"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
 
-                <TextView
-                        android:layout_width="0dp"
-                        android:layout_weight=".3"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="@string/pref_username_fld_title"
-                        android:id="@+id/pref_username_fld_label"
-                        android:layout_gravity="left|center"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginRight="8dp"
-                        />
+        <TextView
+            android:editable="false"
+            android:id="@+id/pref_snippit_fld_label"
+            android:layout_gravity="left|center"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight=".3"
+            android:layout_width="0dp"
+            android:text="@string/pref_snippit_fld_title"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
-                <EditText
-                        android:layout_width="0dp"
-                        android:layout_weight=".7"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text=""
-                        android:inputType="text"
-                        android:hint="@string/prefs_username_hint"
-                        android:id="@+id/pref_username"
-                        android:layout_gravity="left|center"
-                        android:editable="true"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginRight="8dp"
-                        />
-            </LinearLayout>
+        <EditText
+            android:editable="true"
+            android:hint="@string/prefs_snippit_hint"
+            android:id="@+id/pref_snippit"
+            android:layout_gravity="left|center"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight=".7"
+            android:layout_width="0dp"
+            android:text=""
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </LinearLayout>
 
-            <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    android:layout_gravity="left|center"
-                    >
+    <LinearLayout
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_width="match_parent"
+        android:orientation="horizontal"></LinearLayout>
 
-                <TextView
-                        android:layout_width="0dp"
-                        android:layout_weight=".3"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text="@string/pref_snippit_fld_title"
-                        android:id="@+id/pref_snippit_fld_label"
-                        android:layout_gravity="left|center"
-                        android:editable="false"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginRight="8dp"
-                        />
+</LinearLayout>
 
-                <EditText
-                        android:layout_width="0dp"
-                        android:layout_weight=".7"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:text=""
-                        android:hint="@string/prefs_snippit_hint"
-                        android:id="@+id/pref_snippit"
-                        android:layout_gravity="left|center"
-                        android:editable="true"
-                        android:layout_marginLeft="8dp"
-                        android:layout_marginRight="8dp"
-                        />
-            </LinearLayout>
-
-            <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="8dp"
-                    >
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </ScrollView>

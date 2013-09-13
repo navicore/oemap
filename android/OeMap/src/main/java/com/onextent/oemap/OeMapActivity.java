@@ -44,24 +44,21 @@ import com.onextent.oemap.presence.OeMapPresenceService;
 import com.onextent.oemap.presence.SearchDialog;
 import com.onextent.oemap.provider.KvHelper;
 import com.onextent.oemap.provider.SpaceHelper;
-import com.onextent.oemap.provider.SpaceProvider;
+import com.onextent.oemap.settings.MapInfoDialog;
 import com.onextent.oemap.settings.OeMapPreferencesDialog;
 import com.onextent.oemap.settings.SpaceSettingsDialog;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class OeMapActivity extends OeBaseActivity {
 
-    static final String URI_PARAM_NAME = "name";
-    static final String URI_PARAM_DATETIME = "date";
+    public static final String URI_PARAM_NAME = "name";
+    public static final String URI_PARAM_DATETIME = "date";
     static final String URI_PARAM_SID = "sid";
-    static final String URI_PARAM_TYPE = "type";
-    static final String URI_PARAM_USERNAME = "user";
+    public static final String URI_PARAM_TYPE = "type";
+    public static final String URI_PARAM_USERNAME = "user";
     static final int NEW_PUBLIC_MAP = 0;
     static final int FIND_MAP_POS = 1;
     static final int QUIT_MAP_POS = 2;
