@@ -47,17 +47,18 @@ import java.util.Set;
 
 public class OeMapPresenceService extends Service {
 
+    private static final float BCAST_DIST = 30;
+
     public static final int DEFAULT_TTL = Presence.MEDIUM;
-    public static final String CMD_BCAST = "bcast";
-    public static final String CMD_POLL = "poll";
-    public static final String CMD_BOOT = "boot";
-    public static final String CMD_ADD_SPACE = "add_space";
-    public static final String CMD_ADD_INTEREST = "add_interest";
-    public static final String CMD_RM_INTEREST = "rm_interest";
-    public static final String CMD_RM_SPACE = "rm_space";
-    public static final String KEY_REASON = "reason";
-    public static final String KEY_SPACE_ID = "spacename";
-    public static final String KEY_UID = "uid";
+
+    public static final String CMD_BCAST        = "bcast";
+    public static final String CMD_POLL         = "poll";
+    public static final String CMD_BOOT         = "boot";
+    public static final String CMD_ADD_SPACE    = "add_space";
+    public static final String CMD_RM_SPACE     = "rm_space";
+    public static final String KEY_REASON       = "reason";
+    public static final String KEY_SPACE_ID     = "spacename";
+    public static final String KEY_UID          = "uid";
 
     private static final long DUR_15_MINUTES = 1000 * 60 * 60 * 15;
     private static final long DUR_1_HOUR = 4 * DUR_15_MINUTES;
@@ -66,23 +67,24 @@ public class OeMapPresenceService extends Service {
 
     //private static final String PRESENCE_URL =  "http://10.0.0.2:8080/presence";
     private static final String PRESENCE_URL = "http://oemap.onextent.com:8080/presence";
-    private static final String PRESENCE_PARAM_SPACE = "space";
+    private static final String PRESENCE_PARAM_SPACE    = "space";
     private static final String PRESENCE_PARAM_LATITUDE = "lat";
-    private static final String PRESENCE_PARAM_LONGITUDE = "lon";
+    private static final String PRESENCE_PARAM_LONGITUDE= "lon";
     private static final String PRESENCE_PARAM_MAX = "max";
-    private SpaceHelper _spaceHelper;
-    private LocationHelper _locHelper;
-    private PresenceHelper _presenceHelper = null;
-    private KvHelper _kvHelper = null;
-    private AsyncTask _currentTask = null;
-    private AsyncTask _currentPollTask = null;
-    private boolean _running = false;
-    private Notification _notification = null;
-    private Location _lastLocation = null;
-    private LatLng _interestPoint = null;
-    private Location _lastBCastLocation = null;
-    private long _lastPollTime = 0;
-    private long _lastPushTime = 0;
+
+    private SpaceHelper     _spaceHelper;
+    private LocationHelper  _locHelper;
+    private PresenceHelper  _presenceHelper     = null;
+    private KvHelper        _kvHelper           = null;
+    private AsyncTask       _currentPollTask    = null;
+    private AsyncTask       _currentSendTask    = null;
+    private boolean         _running            = false;
+    private Notification    _notification       = null;
+    private LatLng          _interestPoint      = null;
+    private Location        _lastLocation       = null;
+    private Location        _lastBCastLocation  = null;
+    private long            _lastPollTime       = 0;
+    private long            _lastPushTime       = 0;
 
     @Override
     public void onCreate() {
@@ -140,7 +142,7 @@ public class OeMapPresenceService extends Service {
 
             label = _kvHelper.get(getString(R.string.pref_username), "nobody");
 
-            snippit = _kvHelper.get(getString(R.string.pref_snippit), "sigh...");
+            snippit = _kvHelper.get(getString(R.string.pref_snippit), "");
         }
 
         Date lease = _spaceHelper.getLease(spacename);
@@ -193,15 +195,29 @@ public class OeMapPresenceService extends Service {
         }
     }
 
+    private float dist(Location l1, Location l2) {
+        return l1.distanceTo(l2);
+    }
+
+    private boolean shouldUpdate(Location l) {
+
+        if ( _lastPushTime < System.currentTimeMillis() - QUIET_TIME  ||
+            dist(l, _lastBCastLocation) > BCAST_DIST
+           ) {
+
+            _lastPushTime = System.currentTimeMillis();
+            _lastBCastLocation = l;
+
+            return true;
+        }
+        return false;
+    }
+
     private void broadcast(Location l) {
 
-        if (_lastPushTime < System.currentTimeMillis() - QUIET_TIME) {
-            _lastPushTime = System.currentTimeMillis();
+        if (shouldUpdate(l)) {
 
             OeLog.d("OeMapPresenceService.broadcast (location)");
-            //todo: test to see how old and far away the prev loc was
-
-            _lastBCastLocation = l;
 
             for (String id : _spaceHelper.getAllSpaceIds()) {
 
@@ -517,6 +533,20 @@ public class OeMapPresenceService extends Service {
         }
     }
 
+    //ejs todo: a GCM send class
+    //ejs todo: a GCM send class
+    //ejs todo: a GCM send class
+    //ejs todo: a GCM send class
+    //ejs todo: a GCM send class
+    //ejs todo: a GCM send class
+    //ejs todo: a GCM send class
+    //ejs todo: a GCM send class
+    //ejs todo: a GCM send class
+    //ejs todo: a GCM send class
+    //ejs todo: a GCM send class
+    //ejs todo: a GCM send class
+    //ejs todo: a GCM send class
+
     private class Send extends AsyncTask<Presence, Void, String> {
 
         @Override
@@ -558,14 +588,14 @@ public class OeMapPresenceService extends Service {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            _currentTask = this;
+            _currentSendTask = this;
         }
 
         @Override
         protected void onPostExecute(String r) {
 
             super.onPostExecute(r);
-            _currentTask = null;
+            _currentSendTask = null;
         }
     }
 
