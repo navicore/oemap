@@ -29,7 +29,6 @@ class PushWorker():
         self.rport = 6379
         
     def push_gcm(self, rec, rid_list):
-        self.log_debug( "ejs got sendable rid %s" % ( rec['rid']))
         payload = {
                   "registration_ids": rid_list,
                   "delay_while_idle": False,
