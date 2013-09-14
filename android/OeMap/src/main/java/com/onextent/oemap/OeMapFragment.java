@@ -376,6 +376,7 @@ public class OeMapFragment extends MapFragment {
         public void onReceive(Context context, Intent intent) {
 
             String mName = getName();
+            OeLog.d("OeMapFragment.onReceive intent: " + intent);
             String uid = intent.getExtras().getString(OeMapPresenceService.KEY_UID);
 
             if (uid != null) {

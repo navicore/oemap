@@ -4,6 +4,8 @@
 
 package com.onextent.oemap.presence;
 
+import android.os.Bundle;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.onextent.android.util.OeLog;
 
@@ -21,7 +23,7 @@ import java.util.TimeZone;
 public class JsonPresence implements Presence {
 
     private static final String KEY_UID = "uid";
-    private static final String KEY_PID = "pid";
+    private static final String KEY_PID = "_id";
     private static final String KEY_LOC = "location";
     private static final String KEY_CRD = "coordinates";
     private static final String KEY_LBL = "label";
@@ -30,6 +32,8 @@ public class JsonPresence implements Presence {
     private static final String KEY_TIM = "time";
     private static final String KEY_TTL = "ttl";
     private static final String KEY_EXP = "exp";
+    private static final String KEY_RTP = "rtp";
+    private static final String KEY_RID = "rid";
     private static final int LATITUDE_IDX = 1;
     private static final int LONGITUDE_IDX = 0;
     static final private SimpleDateFormat _dateFormatGmt = new SimpleDateFormat("dd:MM:yyyy HH:mm:ss");
@@ -44,9 +48,68 @@ public class JsonPresence implements Presence {
     private final int _time_to_live;
     private final String _spacename;
     private final Date _lease;
-
     private int _remote_id_type = Presence.PUSH_TYPE_NONE;
     private String _remote_id;
+
+    public JsonPresence(Bundle jobj) throws PresenceException {
+        try {
+            _uid = jobj.getString(KEY_UID);
+            if (_uid == null) throw new PresenceException("no uid");
+            _spacename = jobj.getString(KEY_SPC);
+            if (_spacename == null) throw new PresenceException("no spacename");
+
+            if (jobj.containsKey(KEY_PID)) { //legacy pids  //todo: remove before public beta
+                _pid = jobj.getString(KEY_PID);
+            } else {
+                _pid = makePid(_uid, _spacename);
+            }
+
+            if (jobj.containsKey(KEY_RTP)) {
+                _remote_id_type = Integer.valueOf(jobj.getString(KEY_RTP));
+            }
+
+            if (jobj.containsKey(KEY_RID)) {
+                _remote_id = jobj.getString(KEY_RID);
+            }
+
+            //see http://www.geojson.org for standard.  for some reason lon comes before lat
+            if (jobj.containsKey(KEY_LOC)) {
+
+                String locStr = jobj.getString(KEY_LOC);
+                JSONObject loc = new JSONObject(locStr);
+                JSONArray coords = loc.getJSONArray(KEY_CRD);
+                _location = new LatLng(coords.getDouble(LATITUDE_IDX), coords.getDouble(LONGITUDE_IDX));
+            } else {
+                _location = null;
+            }
+
+            _label = jobj.getString(KEY_LBL);
+            _snippet = jobj.getString(KEY_SNP);
+
+            long tmp_time = 0;
+            if (jobj.containsKey(KEY_TIM)) {
+                tmp_time = Long.valueOf(jobj.getString(KEY_TIM));
+            }
+
+            _create_time = tmp_time;
+            _time_to_live = Integer.valueOf(jobj.getString(KEY_TTL));
+            if (jobj.containsKey(KEY_EXP)) {
+
+                String gmt = jobj.getString(KEY_EXP);
+                Calendar gmtc = ISO8601.toCalendar(gmt);
+                _lease = gmtc.getTime();
+            } else {
+                _lease = null;
+            }
+        } catch (ParseException e) {
+            throw new PresenceException(e);
+        } catch (JSONException e) {
+            throw new PresenceException(e);
+        } catch (Throwable e) {
+            throw new PresenceException(e);
+        }
+
+    }
 
     JsonPresence(JSONObject jobj) throws PresenceException {
 
@@ -58,6 +121,14 @@ public class JsonPresence implements Presence {
                 _pid = jobj.getString(KEY_PID);
             } else {
                 _pid = makePid(_uid, _spacename);
+            }
+
+            if (jobj.has(KEY_RTP)) {
+                _remote_id_type = jobj.getInt(KEY_RTP);
+            }
+
+            if (jobj.has(KEY_RID)) {
+                _remote_id = jobj.getString(KEY_RID);
             }
 
             //see http://www.geojson.org for standard.  for some reason lon comes before lat
@@ -97,14 +168,6 @@ public class JsonPresence implements Presence {
         }
     }
 
-    public static String makePid(String uid, String space) {
-        StringBuffer b = new StringBuffer();
-        b.append(uid);
-        b.append('_');
-        b.append(space);
-        return b.toString();
-    }
-
     JsonPresence(String json) throws PresenceException, JSONException {
         this(new JSONObject(json));
     }
@@ -127,6 +190,14 @@ public class JsonPresence implements Presence {
 
     public JsonPresence(String uid, String spacename) {
         this(uid, null, null, null, spacename, Presence.NONE, null);
+    }
+
+    public static String makePid(String uid, String space) {
+        StringBuffer b = new StringBuffer();
+        b.append(uid);
+        b.append('_');
+        b.append(space);
+        return b.toString();
     }
 
     @Override
@@ -212,6 +283,8 @@ public class JsonPresence implements Presence {
             jobj.put(KEY_SPC, _spacename);
             jobj.put(KEY_TIM, _create_time);
             jobj.put(KEY_TTL, _time_to_live);
+            jobj.put(KEY_RTP, _remote_id_type);
+            jobj.put(KEY_RID, _remote_id);
             if (_lease != null) {
                 Calendar calendar = GregorianCalendar.getInstance();
                 calendar.setTime(_lease);

@@ -52,10 +52,15 @@ public class MapInfoDialog extends DialogFragment {
         View view = inflater.inflate(R.layout.map_info_dialog, container);
         getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
+        String uri_str = null;
         Bundle b = getArguments();
         if (b == null) throw new NullPointerException("no args");
-        String uri_str = b.getString("bundle_uri_string");
-        _uri = Uri.parse(uri_str);
+        if (b.containsKey("bundle_uri_string")) {
+
+            uri_str = b.getString("bundle_uri_string");
+            if (uri_str != null)
+                _uri = Uri.parse(uri_str);
+        }
 
         if (_uri != null) {
             initByUri(view);

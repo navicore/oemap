@@ -60,6 +60,7 @@ public class OeMapPresenceService extends Service {
     public static final String KEY_UID = "uid";
 
     private static final long DUR_15_MINUTES = 1000 * 60 * 60 * 15;
+    private static final long DUR_1_HOUR = 4 * DUR_15_MINUTES;
     private static final long DUR_15_SECONDS = 1000 * 15;
     private static final long QUIET_TIME = DUR_15_MINUTES;
 
@@ -103,7 +104,7 @@ public class OeMapPresenceService extends Service {
             public void updateLocation(Location l) {
                 _lastLocation = l;
                 broadcast(l);
-                poll();  //todo: put on timer?
+                //poll();  //getting these from push now
             }
         });
 
@@ -194,18 +195,15 @@ public class OeMapPresenceService extends Service {
 
     private void broadcast(Location l) {
 
-        OeLog.d("OeMapPresenceService.broadcast (location)");
-
         if (_lastPushTime < System.currentTimeMillis() - QUIET_TIME) {
             _lastPushTime = System.currentTimeMillis();
 
+            OeLog.d("OeMapPresenceService.broadcast (location)");
             //todo: test to see how old and far away the prev loc was
 
             _lastBCastLocation = l;
 
-            OeLog.d("ejs broadcast");
             for (String id : _spaceHelper.getAllSpaceIds()) {
-                OeLog.d("ejs broadcast " + id);
 
                 Date lease = _spaceHelper.getLease(id);
                 if (lease != null && lease.getTime() < System.currentTimeMillis()) {
@@ -582,19 +580,6 @@ public class OeMapPresenceService extends Service {
 
                     pollSpace(id);
                 }
-                /*
-
-                Cursor c = getContentResolver().query(SpaceProvider.CONTENT_URI,
-                        SpaceProvider.Spaces.PROJECTION_ALL, null, null,
-                        SpaceProvider.Spaces.SORT_ORDER_DEFAULT);
-                OeLog.d("doInBackground Poll cursor size: " + c.getCount());
-                int pos = c.getColumnIndex(SpaceProvider.Spaces._ID);
-                while (c.moveToNext()) {
-                    String s = c.getString(pos);
-                    pollSpace(s);
-                }
-                c.close();
-                 */
                 return null;
             } catch (Throwable err) {
                 OeLog.w(err);

@@ -17,6 +17,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.onextent.android.util.OeLog;
 import com.onextent.oemap.OeMapActivity;
 import com.onextent.oemap.R;
+import com.onextent.oemap.provider.PresenceHelper;
 
 /**
  * Created by esweeney on 9/13/13.
@@ -56,22 +57,24 @@ public class OeMapGcmIntentService extends IntentService {
             // If it's a regular GCM message, do some work.
             } else if (GoogleCloudMessaging.
                     MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                // This loop represents the service doing some work.
-                /*
+                try {
+                    Presence p = new JsonPresence(extras);
+                    PresenceHelper h = new PresenceHelper(this);
+                    h.replacePresence(p);
+                    OeLog.d("updated presences from gcm push");
+                    Intent i = new Intent(getString(R.string.presence_service_update_intent));
+                    i.putExtra(OeMapPresenceService.KEY_UID, p.getUID());
+                    i.putExtra(OeMapPresenceService.KEY_SPACE_ID, p.getSpaceName());
+                    sendBroadcast(i);
 
-                for (int i=0; i<5; i++) {
-                    OeLog.i("Working... " + (i+1)
-                            + "/5 @ " + SystemClock.elapsedRealtime());
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                    }
+                } catch (PresenceException e) {
+                    OeLog.e(e.toString(), e);
+                } catch (Throwable e) {
+                    OeLog.e(e.toString(), e);
                 }
-                 */
-                OeLog.i("Completed work @ " + SystemClock.elapsedRealtime());
                 // Post notification of received message.
-                sendNotification("Received: " + extras.toString());
-                OeLog.i("Received: " + extras.toString());
+                //sendNotification("Received: " + extras.toString());
+                //OeLog.i("Received: " + extras.toString());
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.

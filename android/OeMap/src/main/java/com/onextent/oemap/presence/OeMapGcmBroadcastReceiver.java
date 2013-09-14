@@ -19,19 +19,7 @@ public class OeMapGcmBroadcastReceiver extends WakefulBroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-        OeLog.d("ejs got one push **************************************");
-        OeLog.d("ejs got one push **************************************");
-        OeLog.d("ejs got one push **************************************");
-        OeLog.d("ejs got one push **************************************");
-        OeLog.d("ejs got one push **************************************");
-        OeLog.d("ejs got one push **************************************");
-        OeLog.d("ejs got one push **************************************");
-        OeLog.d("ejs got one push **************************************");
-        OeLog.d("ejs got one push **************************************");
-        OeLog.d("ejs got one push **************************************");
-        OeLog.d("ejs got one push **************************************");
-
-                // Explicitly specify that GcmIntentService will handle the intent.
+        // Explicitly specify that GcmIntentService will handle the intent.
         ComponentName comp = new ComponentName(context.getPackageName(),
                 OeMapGcmIntentService.class.getName());
         // Start the service, keeping the device awake while it is launching.
