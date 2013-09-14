@@ -3,20 +3,21 @@
 
 from pymongo import MongoClient
 import syslog
+import requests
 import redis
 import json
 import time
 import datetime
 from argparse import ArgumentParser
 
-#from riemann import RiemannClient, RiemannUDPTransport
+GCM_SERVER_URL = 'https://android.googleapis.com/gcm/send'
 
-#rmmonitor = RiemannClient(transport = RiemannUDPTransport,
-#host=config.riemann['host'])
+HEADERS = {'Content-Type': 'application/json',
+           'Authorization': 'key=AIzaSyDY9ur-b23xZFfpKIkmlJHbW_HEB84mA20'}
 
 INQNAME = "oemap_push_worker_in_queue"
 
-class DbWorker():
+class PushWorker():
     
     def __init__ (self):
 
@@ -27,6 +28,44 @@ class DbWorker():
         self.rhost = "127.0.0.1"
         self.rport = 6379
         
+    def push_gcm(self, rec, rid_list):
+        payload = {
+                  "registration_ids": rid_list,
+                  "delay_while_idle": False,
+                  "data": rec,
+                  "restricted_package_name": "com.onextent.oemap"
+        }
+
+        R = requests.post(GCM_SERVER_URL, data=json.dumps(payload), headers=HEADERS)
+        self.log_debug("%s %s" % (R.status_code, R.text))
+
+    def handle_gcm(self, rec):
+
+        rid_list = [] 
+        for p in self.db.presences.find(
+                { 'space': 'santa cruz photowalk',
+                    'rtp': 1 }):
+                    if p['rid'] == rec['rid']: # skip self
+                        continue
+                    else:
+                        rid_list.append(p['rid'])
+        if rid_list:
+            self.push_gcm(rec, rid_list)
+
+    def handle_apple(self, rec):
+        pass
+
+    def handle(self, rec):
+        spacename = rec['space']
+        if 'rtp' in rec:
+            remote_id_type = int(rec['rtp'])
+            if remote_id_type == 1:
+                self.handle_gcm(rec)
+            elif remote_id_type == 2:
+                self.handle_apple(rec)
+            else:
+                pass
+            
     def run (self):
 
         while True:
@@ -35,7 +74,7 @@ class DbWorker():
     
                 rdis = redis.Redis(host=self.rhost, port=self.rport)
                 client = MongoClient()
-                self.database = client.oemap_test
+                self.db = client.oemap_test
     
                 while True:
     
@@ -46,7 +85,7 @@ class DbWorker():
                     
                     rec = json.loads(msg)
 
-                    push(rec)
+                    self.handle(rec)
 
             except Exception:
                 self.handle_exception()
@@ -70,23 +109,6 @@ class DbWorker():
         for line in formatted_lines:
             self.log_error(line)
 
-    def push_gcm(self, rec):
-        print "ejs sending presence to gcm"
-        pass
-
-    def push_apple(self, rec):
-        pass
-
-    def push(self, rec):
-        spacename = rec['space']
-        remote_id_type = int(rec['rtp'])
-        if remote_id_type == 1:
-            push_gcm(rec)
-        elif remote_id_type == 2:
-            push_apple(rec)
-        else:
-            pass
-            
 
         # get all presence recs for spacename
         # if remote_id_type is gcm, gcm push
@@ -95,5 +117,5 @@ class DbWorker():
 
 if __name__ == "__main__":
 
-    DbWorker().run()
+    PushWorker().run()
 
