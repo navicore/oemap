@@ -108,20 +108,27 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', 
             return res.send('Error 400: No presence in put');
         }
 
-        var pid = req.body.uid + '_' + req.body.space,
+        var _id = req.body._id,
             ttl = req.body.ttl,
             label = req.body.label,
             now = new Date();
 
-        req.body._id = pid;
-
         if (ttl === 0) {
-            Syslog.log(Syslog.LOG_DEBUG, 'ttl expired for pid: ' + pid);
-            db.collection('presences').remove({_id: pid},
+            Syslog.log(Syslog.LOG_DEBUG, 'ttl expired for pid: ' + _id);
+            db.collection('presences').remove({_id: _id},
                 function (err, doc) {
                     if (err) {
                         throw err;
                     }
+                    //tell the world to remove this one
+                    var p_string = JSON.stringify(req.body);
+                    rclient.lpush('oemap_push_worker_in_queue', p_string,
+                        function (err) {
+                            if (err) {
+                                Syslog.log(Syslog.LOG_WARNING, 
+                                    "lpush error: %s", err);
+                            }
+                        });
                     //todo: handle err
                 }
             );
@@ -146,28 +153,19 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', 
             //
             //todo: exception.  what happens if redis is down?
             //
-            //rclient.lpush('oemap_db_worker_in_queue', JSON.stringify(req.body));
-            rclient.lpush('oemap_db_worker_in_queue', JSON.stringify(req.body),
+            var p_string = JSON.stringify(req.body);
+            rclient.lpush('oemap_db_worker_in_queue', p_string,
                 function (err) {
                     if (err) {
                         Syslog.log(Syslog.LOG_WARNING, "lpush error: %s", err);
                     }
                 });
-
-            //db.collection('presences').save(req.body,
-            //    function (err, doc) {
-            //        if (err) {
-            //            console.log('upsert error: ' + err);
-            //            //todo: handle err
-            //            throw err;
-            //        }
-            //        if (!doc) {
-            //            console.log('warning: no records modified ');
-            //        } else {
-            //            console.log('pid: "' + pid + '" for ' + label + ' updated');
-            //        }
-            //    }
-            //    );
+            rclient.lpush('oemap_push_worker_in_queue', p_string,
+                function (err) {
+                    if (err) {
+                        Syslog.log(Syslog.LOG_WARNING, "lpush error: %s", err);
+                    }
+                });
         }
         res.send(200);
     });
@@ -178,6 +176,6 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', 
     });
 
     app.listen(8080);
-    Syslog.log(Syslog.LOG_INFO, 'server started on port 80');
+    Syslog.log(Syslog.LOG_INFO, 'server started on port 8080');
 });
 
