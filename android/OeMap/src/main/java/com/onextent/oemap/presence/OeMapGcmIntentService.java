@@ -60,7 +60,11 @@ public class OeMapGcmIntentService extends IntentService {
                 try {
                     Presence p = new JsonPresence(extras);
                     PresenceHelper h = new PresenceHelper(this);
-                    h.replacePresence(p);
+                    if (p.getTimeToLive() == Presence.NONE) {
+                        h.deletePresence(p);
+                    } else {
+                        h.replacePresence(p);
+                    }
                     OeLog.d("updated presences from gcm push");
                     Intent i = new Intent(getString(R.string.presence_service_update_intent));
                     i.putExtra(OeMapPresenceService.KEY_UID, p.getUID());
