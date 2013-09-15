@@ -1,6 +1,13 @@
 /*jslint nomen: true, node: true */
 "use strict";
 
+var FIVE_MINUTES = 1000 * 60 * 5,
+    SHORT_IN_MILLIS = FIVE_MINUTES,
+    ONE_HOUR = 12 * FIVE_MINUTES,
+    MEDIUM_IN_MILLIS = ONE_HOUR,
+    ONE_DAY = 24 * ONE_HOUR,
+    LONG_IN_MILLIS = ONE_DAY;
+
 var redis = require('redis'),
     workerId = 'unknown',
     Syslog = require('node-syslog'),
@@ -46,8 +53,40 @@ process.argv.forEach(function (val, index, array) {
                 starttime = new Date();
             }
         }
+        
+        function setExpTime(doc) {
+
+            var now = Date.now();
+            var ttl = doc.ttl;
+
+            switch (ttl) {
+                case 0: //remove presence
+                    Syslog.log(Syslog.LOG_DEBUG, 'setting ttl to zero');
+                    break;
+                case 1:
+                    Syslog.log(Syslog.LOG_DEBUG, 'setting short ttl');
+                    doc.exp_time = new Date(now + SHORT_IN_MILLIS);
+                    break;
+                case 2:
+                    Syslog.log(Syslog.LOG_DEBUG, 'setting medium ttl');
+                    doc.exp_time = new Date(now + MEDIUM_IN_MILLIS);
+                    break;
+                case 3:
+                    Syslog.log(Syslog.LOG_DEBUG, 'setting medium ttl');
+                    doc.exp_time = new Date(now + LONG_IN_MILLIS);
+                    break;
+                default:
+                    Syslog.log(Syslog.LOG_WARNING, 
+                            'invalid ttl. setting ttl to zero');
+                    doc.exp_time = new Date();
+                    break;
+            }
+        }
 
         function save(doc) {
+
+            setExpTime(doc);
+
             db.collection('presences').save(doc,
                 function (err, count) {
                     if (err) {

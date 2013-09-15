@@ -1,6 +1,13 @@
 /*jslint nomen: true, node: true */
 "use strict";
 
+var FIVE_MINUTES = 1000 * 60 * 5,
+    SHORT_IN_MILLIS = FIVE_MINUTES,
+    ONE_HOUR = 12 * FIVE_MINUTES,
+    MEDIUM_IN_MILLIS = ONE_HOUR,
+    ONE_DAY = 24 * ONE_HOUR,
+    LONG_IN_MILLIS = ONE_DAY;
+
 var express = require('express'),
     app = express(),
     cons = require('consolidate'),
@@ -111,7 +118,7 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', 
         var _id = req.body._id,
             ttl = req.body.ttl,
             label = req.body.label,
-            now = new Date();
+            now = Date.now();
 
         if (ttl === 0) {
             Syslog.log(Syslog.LOG_DEBUG, 'ttl expired for pid: ' + _id);
@@ -133,22 +140,6 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', 
                 }
             );
         } else {
-            switch (ttl) {
-            case 0: //remove presence
-                break;
-            case 1:
-                req.body.short_ttl_start_time = now;
-                break;
-            case 2:
-                req.body.medium_ttl_start_time = now;
-                break;
-            case 3:
-                req.body.long_ttl_start_time = now;
-                break;
-            default:
-                req.body.medium_ttl_start_time = now;
-                break;
-            }
 
             //
             //todo: exception.  what happens if redis is down?

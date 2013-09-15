@@ -10,7 +10,7 @@ NAMES_FILE = MY_DIR + '/../tmp/names.txt'
 POINTS_FILE = MY_DIR + '/../tmp/points.txt'
 
 
-SNIPPIT = 'Photowalking'
+SNIPPIT = 'More Photowalking'
 SPACE = "2e8e9773-973e-418f-bc16-6bc96ee75089"
 TTL = 2
 

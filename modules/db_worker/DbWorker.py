@@ -49,7 +49,22 @@ class DbWorker():
                     (self.statc, rate))
             self.stati = 0
             self.starttime = now
-    
+   
+    FIVE_MIN_IN_SECS = 60 * 5
+    ONE_HOUR_IN_SECS = 60 * 60
+    ONE_DAY_IN_SECS = ONE_HOUR_IN_SECS * 24
+
+    def setExpireTime(self, rec):
+        now = datetime.datetime.now()
+        ttl = rec['ttl']
+        if ttl == 1:
+            rec['exp_time'] = now + datetime.timedelta(0, FIVE_MIN_IN_SECS)
+        elif ttl == 2:
+            rec['exp_time'] = now + datetime.timedelta(0, ONE_HOUR_IN_SECS)
+        elif ttl == 3:
+            rec['exp_time'] = now + datetime.timedelta(0, ONE_DAY_IN_SECS)
+        else:
+            rec['exp_time'] = now  # ready for sweeper
 
     def run (self):
 
@@ -63,24 +78,22 @@ class DbWorker():
     
                 while True:
     
-                    #response = ok_response;
-                   
                     (_, msg) = rdis.brpop(keys=[INQNAME], timeout=600)
     
                     if msg == None: 
                         continue
                     
                     rec = json.loads(msg)
-                    rec['_id'] = rec['uid'] + '_' + rec['space']
+                    
                     self.log_debug("updating %s for %s" % (rec['_id'], 
                         rec['label']))
+
+                    self.setExpireTime(rec)
                     
                     self.database.presences.save(rec)
+                    
                     self.stats()
                     
-                  # reply to client
-                  #rdis.lpush(self.replyTo, json.dumps(response));
-                
             except Exception:
                 self.handle_exception()
                 time.sleep(1)
