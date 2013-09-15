@@ -113,7 +113,12 @@ public class OeMapFragment extends MapFragment {
             List<Presence> presences = _presenceHelper.getAllPrecenses(spacename);
             if (presences != null) {
                 for (Presence p : presences) {
-                    _markerHelper.setMarker(p, MarkerHelper.AnimationType.NONE, isMyPresence(p));
+                    if (p.isValid())
+                        _markerHelper.setMarker(p, MarkerHelper.AnimationType.NONE, isMyPresence(p));
+                    else {
+                        _markerHelper.removeMarker(p, MarkerHelper.AnimationType.MOVE);
+                        _presenceHelper.deletePresence(p);
+                    }
                 }
             }
         } catch (JSONException e) {
@@ -122,19 +127,6 @@ public class OeMapFragment extends MapFragment {
             OeLog.e("loadMarkers error: " + e, e);
         }
     }
-
-    /*
-    private void unsetPointOfInterest() {
-        _prefs.delete("pref_poi_lat");
-        _prefs.delete("pref_poi_lon");
-    }
-    private void setPointOfInterest(LatLng l) {
-
-        _prefs.replaceDouble("pref_poi_lat", l.latitude);
-        _prefs.replaceDouble("pref_poi_lon", l.longitude);
-        getMap().animateCamera(CameraUpdateFactory.newLatLng(l));
-    }
-     */
 
     private void initMapTouchListeners() {
 
@@ -145,26 +137,6 @@ public class OeMapFragment extends MapFragment {
                 getDirections(marker);
             }
         });
-
-        getMap().setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(LatLng latLng) {
-
-                OeLog.d("set point of interest to: " + latLng);
-                //setPointOfInterest(latLng);
-            }
-        });
-
-        /*
-        getMap().setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-
-                OeMapActivity a = (OeMapActivity) getActivity();
-                a.showMarkerDialog();
-            }
-        });
-        */
 
         getMap().setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
@@ -376,7 +348,6 @@ public class OeMapFragment extends MapFragment {
         public void onReceive(Context context, Intent intent) {
 
             String mName = getName();
-            OeLog.d("OeMapFragment.onReceive intent: " + intent);
             String uid = intent.getExtras().getString(OeMapPresenceService.KEY_UID);
 
             if (uid != null) {
@@ -388,7 +359,12 @@ public class OeMapFragment extends MapFragment {
                         Presence p = _presenceHelper.getPresence(uid, spacename);
                         if (p == null) {
                             _markerHelper.removeMarker(PresenceFactory.createPresence(uid, spacename), MarkerHelper.AnimationType.MOVE);
+                        } else if (!p.isValid()) {
+                            OeLog.d("PresenceReceiver.onReceive removing expired presence: " + p.getLabel());
+                            _markerHelper.removeMarker(PresenceFactory.createPresence(uid, spacename), MarkerHelper.AnimationType.NONE);
+                            _presenceHelper.deletePresence(p);
                         } else {
+
                             if (isMyPresence(p)) {
                                 _currLoc = p.getLocation();
                                 if (!_loc_is_init) {

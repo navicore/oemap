@@ -663,7 +663,7 @@ public class OeMapActivity extends OeBaseActivity {
                 startSettingsDialog();
                 handled = true;
                 break;
-            case R.id.action_map_features:
+            case R.id.action_global_settings:
                 showMapFeaturesDialog();
                 handled = true;
                 break;
@@ -682,7 +682,7 @@ public class OeMapActivity extends OeBaseActivity {
 
     private void showMapFeaturesDialog() {
 
-        Dialog d = new MapFeaturesDialog(this);
+        Dialog d = new GlobalSettingsDialog(this);
         d.show();
     }
 

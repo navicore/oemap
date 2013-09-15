@@ -59,6 +59,7 @@ public class OeMapGcmIntentService extends IntentService {
                     MESSAGE_TYPE_MESSAGE.equals(messageType)) {
                 try {
                     Presence p = new JsonPresence(extras);
+                    p.resetCreateTime();
                     PresenceHelper h = new PresenceHelper(this);
                     if (p.getTimeToLive() == Presence.NONE) {
                         h.deletePresence(p);

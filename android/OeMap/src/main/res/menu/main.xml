@@ -30,9 +30,9 @@
         android:title="@string/action_map_settings_title" />
 
     <item
-        android:id="@+id/action_map_features"
+        android:id="@+id/action_global_settings"
         android:showAsAction="never|withText"
-        android:title="@string/pref_map_features_title" />
+        android:title="@string/pref_global_settings_title" />
 
     <item
         android:id="@+id/action_settings"

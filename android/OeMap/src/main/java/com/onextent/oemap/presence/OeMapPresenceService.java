@@ -47,9 +47,11 @@ import java.util.Set;
 
 public class OeMapPresenceService extends Service {
 
-    private static final float BCAST_DIST = 30;
+    private static final float BCAST_DIST = 30; //minimum number of meters that will
+                                                // trigger an update to the server
 
     public static final int DEFAULT_TTL = Presence.MEDIUM;
+    //public static final int DEFAULT_TTL = Presence.SHORT;
 
     public static final String CMD_BCAST        = "bcast";
     public static final String CMD_POLL         = "poll";
@@ -60,10 +62,12 @@ public class OeMapPresenceService extends Service {
     public static final String KEY_SPACE_ID     = "spacename";
     public static final String KEY_UID          = "uid";
 
+    private static final long DUR_THREE_MINUTES = 1000 * 60 * 3;
     private static final long DUR_15_MINUTES = 1000 * 60 * 60 * 15;
     private static final long DUR_1_HOUR = 4 * DUR_15_MINUTES;
     private static final long DUR_15_SECONDS = 1000 * 15;
     private static final long QUIET_TIME = DUR_15_MINUTES;
+    //private static final long QUIET_TIME = DUR_THREE_MINUTES;
 
     //private static final String PRESENCE_URL =  "http://10.0.0.2:8080/presence";
     private static final String PRESENCE_URL = "http://oemap.onextent.com:8080/presence";
@@ -458,6 +462,7 @@ public class OeMapPresenceService extends Service {
         for (int i = 0; i < array.length(); i++) {
 
             Presence p = PresenceFactory.createPresence(array.getJSONObject(i));
+            p.resetCreateTime();
 
             if (oldUids != null) {
                 oldUids.remove(p.getUID());

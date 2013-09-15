@@ -10,20 +10,18 @@ import android.os.Bundle;
 import android.view.Window;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.google.android.gms.maps.GoogleMap;
-import com.onextent.android.util.OeLog;
 import com.onextent.oemap.provider.KvHelper;
 
-public class MapFeaturesDialog extends Dialog {
+public class GlobalSettingsDialog extends Dialog {
 
     private static OeMapActivity _activity = null;
 
     private KvHelper _prefs;
 
-    public MapFeaturesDialog(Context context) {
+    public GlobalSettingsDialog(Context context) {
         super(context);
         _activity = (OeMapActivity) context;
         _prefs = new KvHelper(context);
@@ -37,7 +35,7 @@ public class MapFeaturesDialog extends Dialog {
 
         getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 
-        setContentView(R.layout.map_features_dialog);
+        setContentView(R.layout.global_settings_dialog);
 
         initTrafficCheckBox();
         initShowIndoorsCheckBox();
@@ -92,7 +90,7 @@ public class MapFeaturesDialog extends Dialog {
 
         CheckBox cb = (CheckBox) findViewById(R.id.pref_show_zoom_controls);
 
-        cb.setChecked(_prefs.getBoolean(_activity.getString(R.string.pref_show_zoom_ctl), false));
+        cb.setChecked(_prefs.getBoolean(_activity.getString(R.string.pref_show_zoom_ctl), true));
 
         cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -115,7 +113,7 @@ public class MapFeaturesDialog extends Dialog {
 
         CheckBox cb = (CheckBox) findViewById(R.id.pref_autozoom);
 
-        cb.setChecked(_prefs.getBoolean(_activity.getString(R.string.pref_autozoom), false));
+        cb.setChecked(_prefs.getBoolean(_activity.getString(R.string.pref_autozoom), true));
 
         cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override

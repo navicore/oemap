@@ -44,7 +44,7 @@ public class JsonPresence implements Presence {
 
     private final String _uid, _label, _snippet, _pid;
     private final LatLng _location;
-    private final long _create_time;
+    private long _create_time;
     private final int _time_to_live;
     private final String _spacename;
     private final Date _lease;
@@ -168,6 +168,7 @@ public class JsonPresence implements Presence {
         }
     }
 
+
     JsonPresence(String json) throws PresenceException, JSONException {
         this(new JSONObject(json));
     }
@@ -253,6 +254,31 @@ public class JsonPresence implements Presence {
     @Override
     public void setRemoteid(String rid) {
         _remote_id = rid;
+    }
+
+    @Override
+    public boolean isValid() {
+
+        long now = System.currentTimeMillis();
+        switch (_time_to_live) {
+            case SHORT:
+                if (_create_time + SHORT_IN_MILLIS > now) return true;
+                break;
+            case MEDIUM:
+                if (_create_time + MEDIUM_IN_MILLIS > now) return true;
+                break;
+            case LONG:
+                if (_create_time + LONG_IN_MILLIS > now) return true;
+                break;
+            default:
+        }
+        return false;
+    }
+
+    @Override
+    public void resetCreateTime() {
+
+        _create_time = System.currentTimeMillis();
     }
 
     @Override
