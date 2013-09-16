@@ -317,7 +317,7 @@ public class OeMapActivity extends OeBaseActivity {
             default:
                 String m = _drawerNamesList.get(position);
                 SpaceHelper h = new SpaceHelper(this);
-                SpaceHelper.Space space = h.getSpace(m);
+                SpaceHelper.Space space = h.getSpace(m.toLowerCase()); //i18n
                 if (space == null) {
                     showNewSpaceDialogWithName(m);
                 } else {
