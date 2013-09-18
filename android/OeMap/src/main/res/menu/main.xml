@@ -4,7 +4,9 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- hiding refresh button, trying not to use one -->
     <item
+        android:visible="false"
         android:id="@+id/action_refresh"
         android:icon="@android:drawable/ic_menu_compass"
         android:showAsAction="always"

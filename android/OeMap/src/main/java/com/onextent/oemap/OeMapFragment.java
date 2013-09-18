@@ -64,8 +64,9 @@ public class OeMapFragment extends MapFragment {
 
         settings.setCompassEnabled(true);
 
-        settings.setMyLocationButtonEnabled(false);
-        //settings.setMyLocationButtonEnabled(true);
+        //settings.setMyLocationButtonEnabled(false);
+        settings.setMyLocationButtonEnabled(true);  // use like refresh button but don't go to server
+        map.setMyLocationEnabled(true);
 
         float zoom = _prefs.getFloat(getString(R.string.state_zoom_level), 15);
         double lat = (double) _prefs.getFloat(getString(R.string.state_lat), 0);
@@ -316,8 +317,7 @@ public class OeMapFragment extends MapFragment {
         } else {
             map.animateCamera(CameraUpdateFactory.newLatLng(_currLoc));
         }
-
-        map.setMyLocationEnabled(true);
+        //map.setMyLocationEnabled(true);
 
         _markerHelper.setMyMarker(_currLoc);
 

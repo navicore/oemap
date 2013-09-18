@@ -649,8 +649,8 @@ public class OeMapActivity extends OeBaseActivity {
                             Toast.makeText(this, getString(R.string.msg_still_looking), Toast.LENGTH_SHORT).show();
                         }
                     }
-                    wakePresenceService();
-                    wakePresenceBroadcastService();
+                    //wakePresenceService();
+                    //wakePresenceBroadcastService();
                 }
                 handled = true;
                 break;
@@ -722,7 +722,7 @@ public class OeMapActivity extends OeBaseActivity {
 
         _spaceNamesAdapter.registerDataSetObserver(_mapSpinnerObserver);
         updateMapNamesFromHistory();
-        wakePresenceService();
+        //wakePresenceService();
         wakePresenceBroadcastService();
         registerReceiver(_presenceReceiver, _presenceReceiverFilter);
 
