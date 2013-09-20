@@ -10,6 +10,8 @@ import time
 import datetime
 from argparse import ArgumentParser
 
+DIST = 1609 * 120;
+
 GCM_SERVER_URL = 'https://android.googleapis.com/gcm/send'
 
 HEADERS = {'Content-Type': 'application/json',
@@ -41,14 +43,29 @@ class PushWorker():
 
     def handle_gcm(self, rec):
 
+        lon = rec['location']['coordinates'][0];
+        lat = rec['location']['coordinates'][1];
+
         rid_list = [] 
         for p in self.db.presences.find(
-                { 'space': 'santa cruz photowalk',
-                    'rtp': 1 }):
+                { 'space': rec['space'],
+                   'location': {
+                        '$near': {
+                            '$geometry': {
+                                'type': "Point",
+                                'coordinates': [lon, lat]
+                             },
+                            '$maxDistance': DIST
+                        },
+                    },
+                    'rtp': 1 
+                }
+                ).limit(50):
                     if p['rid'] == rec['rid']: # skip self
                         continue
                     else:
                         rid_list.append(p['rid'])
+
         if rid_list:
             self.push_gcm(rec, rid_list)
 
@@ -56,15 +73,8 @@ class PushWorker():
         pass
 
     def handle(self, rec):
-        spacename = rec['space']
-        if 'rtp' in rec:
-            remote_id_type = int(rec['rtp'])
-            if remote_id_type == 1:
-                self.handle_gcm(rec)
-            elif remote_id_type == 2:
-                self.handle_apple(rec)
-            else:
-                pass
+        self.handle_gcm(rec)
+        self.handle_apple(rec)
             
     def run (self):
 

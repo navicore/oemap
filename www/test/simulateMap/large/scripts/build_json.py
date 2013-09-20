@@ -11,13 +11,17 @@ POINTS_FILE = MY_DIR + '/../tmp/points.txt'
 
 
 SNIPPIT = 'More Photowalking'
-SPACE = "2e8e9773-973e-418f-bc16-6bc96ee75089"
-TTL = 2
+SPACES = ["2e8e9773-973e-418f-bc16-6bc96ee75089", "photowalking", "bored", "hungry", "frisbee"]
+TTL = 3
 
-def utc_now():
-    return datetime.datetime.now(
-            pytz.timezone('UTC')).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-
+NEXT_SP_POS = 0
+def nextSpace():
+    global NEXT_SP_POS
+    r = SPACES[NEXT_SP_POS]
+    NEXT_SP_POS = NEXT_SP_POS + 1
+    if NEXT_SP_POS == len(SPACES):
+        NEXT_SP_POS = 0
+    return r
 
 # pylint: disable=C0321
 with open(NAMES_FILE) as namefile, open(POINTS_FILE) as pointfile:
@@ -47,17 +51,7 @@ with open(NAMES_FILE) as namefile, open(POINTS_FILE) as pointfile:
         presence['snippit'] = SNIPPIT
         presence['ttl'] = TTL
         
-        now = utc_now()
-
-        presence['time'] = now
-        if TTL == 1:
-            ttl_idx = 'short_ttl_start_time'
-        elif TTL == 2:
-            ttl_idx = 'medium_ttl_start_time'
-        else:
-            ttl_idx = 'long_ttl_start_time'
-        presence[ttl_idx] = now
-        presence['space'] = SPACE
+        presence['space'] = nextSpace()
         presence['location'] = {}
         presence['location']['type'] = "Point"
         presence['location']['coordinates'] = [lon, lat]
