@@ -15,7 +15,7 @@ DIST = 1609 * 120;
 GCM_SERVER_URL = 'https://android.googleapis.com/gcm/send'
 
 HEADERS = {'Content-Type': 'application/json',
-           'Authorization': 'key=AIzaSyDY9ur-b23xZFfpKIkmlJHbW_HEB84mA20'}
+           'Authorization': 'key=XXXXXXXXXX'}
 
 INQNAME = "oemap_push_worker_in_queue"
 
