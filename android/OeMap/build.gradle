@@ -7,7 +7,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.5.+'
+        classpath 'com.android.tools.build:gradle:2.3.0'
     }
 }
 apply plugin: 'android'
@@ -16,17 +16,21 @@ dependencies {
     compile files('libs/android-support-v4.jar', '../libraries/GooglePlay/libs/google-play-services.jar')
 }
 
-def buildName = file("/home/esweeney/git/oemap/android/OeMap/getVersionName.sh").toString().execute().text.trim()
+def buildName = file("/Users/navicore/git/navicore/oemap/android/OeMap/getVersionName.sh").toString().execute().text.trim()
 
 android {
     compileSdkVersion 18
-    buildToolsVersion "18.0.1"
+    buildToolsVersion "25.0.2"
+
+    lintOptions {
+      abortOnError false
+    }
 
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 18
         
-        testPackageName "com.onextent.test.oemap"
+        testApplicationId "com.onextent.test.oemap"
         testInstrumentationRunner "android.test.InstrumentationTestRunner"
     }
 
@@ -58,33 +62,38 @@ android {
         }
         android.applicationVariants.all { variant ->
 
-            apk = variant.outputFile;
+/*
 
+            apk = variant.outputs[0].outputFile;
             if (variant.buildType.name == "release") {
                 newName = apk.name.replace(".apk", "-v" + buildName + "-RELEASE.apk");
             } else {
                 newName = apk.name.replace(".apk", "-v" + buildName + "-SNAPSHOT.apk");
             }
+*/
 
-            newName = newName.replace("-" + variant.buildType.name, "");
+            //newName = newName.replace("-" + variant.buildType.name, "");
 
-            variant.outputFile = new File(apk.parentFile, newName);
-            if (variant.zipAlign) {
-                variant.zipAlign.outputFile = new File(apk.parentFile, newName.replace("-unaligned", ""));
+            variant.outputs.each { output ->
+              output.outputFile = new File(output.outputFile.parent, name);
+              //variant.outputFile = new File(apk.parentFile, newName);
             }
+            //if (variant.zipAlign) {
+            //    variant.zipAlign.outputFile = new File(apk.parentFile, newName.replace("-unaligned", ""));
+            //}
         }
     }
 }
 
 task initVerInfo << {
     //ejs fix this @@4#$%#$$ing absolute path
-    def proc = "/home/esweeney/git/oemap/android/OeMap/init_verinfo.sh".execute()
+    def proc = "/Users/navicore/git/navicore/oemap/android/OeMap/init_verinfo.sh".execute()
     proc.in.eachLine {line -> println line} 
     proc.err.eachLine {line -> println 'ERROR: ' + line} 
     proc.waitFor() 
     tasks.build.execute();
 }
 
-assembleDebug.dependsOn initVerInfo
-assembleRelease.dependsOn initVerInfo
+//assembleDebug.dependsOn "initVerInfo"
+//assembleRelease.dependsOn "initVerInfo"
 

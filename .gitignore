@@ -1,4 +1,5 @@
 *.swp
+.idea/
 *.vtg
 *.vpw*
 .metadata/

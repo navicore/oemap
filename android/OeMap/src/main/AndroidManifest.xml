@@ -61,7 +61,7 @@
 
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyAnSrCFWeKIywp6a09r_rIv_Vkcf6VPGpQ" />
+            android:value="AIzaSyCG9mX3uU9dad95Xts9t1yNsBqULScWU0M"/>
 
         <receiver android:name=".OeMapAutostart">
             <intent-filter>
