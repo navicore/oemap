@@ -6,8 +6,7 @@
 
 db.presences.ensureIndex(
   {"exp_time": 1}, {"expireAfterSeconds" : 0,
-                    "background" : true,
-                    "safe" : true}
+                    "background" : true}
 );
 
 //support query 'get the nearest n items in map'

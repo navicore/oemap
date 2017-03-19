@@ -13,10 +13,7 @@ var express = require('express'),
     cons = require('consolidate'),
     crypto = require('crypto'),
     redis = require('redis'),
-    Syslog = require('node-syslog'),
     MongoClient = require('mongodb').MongoClient;
-
-Syslog.init("oemapd", Syslog.LOG_PID | Syslog.LOG_ODELAY, Syslog.LOG_LOCAL0);
 
 app.engine('html', cons.swig);
 app.set('view engine', 'html');
@@ -29,15 +26,15 @@ app.configure(function () {
 MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', function (err, db) {
 
     if (err) {
-        Syslog.log(Syslog.LOG_ERR, "mongodb error", err);
+        console.log("mongodb error", err);
         //throw err;
     }
 
-    Syslog.log(Syslog.LOG_INFO, "created mongodb connection");
+    console.log("created mongodb connection");
 
 
     var rclient = redis.createClient();
-    Syslog.log(Syslog.LOG_INFO, "created redis client");
+    console.log("created redis client");
 
     //return a list of presences for the space
     app.get('/presence', function (req, res) {
@@ -95,7 +92,7 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', 
                     res.statusCode = 404;
                     return res.send('Error 404: No presences found');
                 }
-                Syslog.log(Syslog.LOG_DEBUG, 'get got ' + doc.length +
+                console.log('get got ' + doc.length +
                     ' presences in ' + spc + ' near ' + lat + "/" +
                     lon + " within " + dist + " meters");
 
@@ -110,7 +107,7 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', 
     app.put('/presence', function (req, res) {
 
         if (!req.body) {
-            Syslog.log(Syslog.LOG_DEBUG, "put missing req.body");
+            console.log("put missing req.body");
             res.statusCode = 400;
             return res.send('Error 400: No presence in put');
         }
@@ -121,7 +118,7 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', 
             now = Date.now();
 
         if (ttl === 0) {
-            Syslog.log(Syslog.LOG_DEBUG, 'ttl expired for pid: ' + _id);
+            console.log('ttl expired for pid: ' + _id);
             db.collection('presences').remove({_id: _id},
                 function (err, doc) {
                     if (err) {
@@ -132,7 +129,7 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', 
                     rclient.lpush('oemap_push_worker_in_queue', p_string,
                         function (err) {
                             if (err) {
-                                Syslog.log(Syslog.LOG_WARNING, 
+                                console.log( 
                                     "lpush error: %s", err);
                             }
                         });
@@ -148,13 +145,13 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', 
             rclient.lpush('oemap_db_worker_in_queue', p_string,
                 function (err) {
                     if (err) {
-                        Syslog.log(Syslog.LOG_WARNING, "lpush error: %s", err);
+                        console.log( "lpush error: %s", err);
                     }
                 });
             rclient.lpush('oemap_push_worker_in_queue', p_string,
                 function (err) {
                     if (err) {
-                        Syslog.log(Syslog.LOG_WARNING, "lpush error: %s", err);
+                        console.log( "lpush error: %s", err);
                     }
                 });
         }
@@ -167,6 +164,6 @@ MongoClient.connect('mongodb://localhost:27017/oemap_test?auto_reconnect=true', 
     });
 
     app.listen(8080);
-    Syslog.log(Syslog.LOG_INFO, 'server started on port 8080');
+    console.log( 'server started on port 8080');
 });
 
